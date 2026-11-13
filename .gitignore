@@ -1,0 +1,11 @@
+third_party/
+assets/
+data/
+runs/
+motions/
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+wandb/
+.DS_Store
