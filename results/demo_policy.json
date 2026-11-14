@@ -1,0 +1,504 @@
+{
+  "metrics": {
+    "success_rate": 0.9404296875,
+    "mpkpe": 0.10805661231279373,
+    "r_mpkpe": 0.037677913904190063,
+    "joint_vel_error": 0.8736320734024048,
+    "ee_pos_error": 0.054827410727739334,
+    "ee_ori_error": 0.16100439429283142,
+    "max_mpkpe": 0.3273518681526184,
+    "max_r_mpkpe": 0.11695875972509384,
+    "success_rate_strict": 0.0
+  },
+  "failures": [
+    {
+      "episode": 557,
+      "step": 62,
+      "time_s": 1.24,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 1005,
+      "step": 102,
+      "time_s": 2.04,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 418,
+      "step": 136,
+      "time_s": 2.72,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 222,
+      "step": 1048,
+      "time_s": 20.96,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 731,
+      "step": 1048,
+      "time_s": 20.96,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 338,
+      "step": 1049,
+      "time_s": 20.98,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 9,
+      "step": 1050,
+      "time_s": 21.0,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 160,
+      "step": 1050,
+      "time_s": 21.0,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 171,
+      "step": 1050,
+      "time_s": 21.0,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 85,
+      "step": 1051,
+      "time_s": 21.02,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 789,
+      "step": 1051,
+      "time_s": 21.02,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 265,
+      "step": 1068,
+      "time_s": 21.36,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 163,
+      "step": 1578,
+      "time_s": 31.56,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 393,
+      "step": 1578,
+      "time_s": 31.56,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 412,
+      "step": 1581,
+      "time_s": 31.62,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 190,
+      "step": 1600,
+      "time_s": 32.0,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 351,
+      "step": 1600,
+      "time_s": 32.0,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 300,
+      "step": 1601,
+      "time_s": 32.02,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 872,
+      "step": 1609,
+      "time_s": 32.18,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 22,
+      "step": 1648,
+      "time_s": 32.96,
+      "rules": [
+        "anchor_pos"
+      ]
+    },
+    {
+      "episode": 458,
+      "step": 1657,
+      "time_s": 33.14,
+      "rules": [
+        "anchor_pos"
+      ]
+    },
+    {
+      "episode": 17,
+      "step": 1662,
+      "time_s": 33.24,
+      "rules": [
+        "anchor_pos"
+      ]
+    },
+    {
+      "episode": 165,
+      "step": 2586,
+      "time_s": 51.72,
+      "rules": [
+        "anchor_pos",
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 609,
+      "step": 3630,
+      "time_s": 72.6,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 429,
+      "step": 3631,
+      "time_s": 72.62,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 44,
+      "step": 3634,
+      "time_s": 72.68,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 735,
+      "step": 3634,
+      "time_s": 72.68,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 901,
+      "step": 3634,
+      "time_s": 72.68,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 1013,
+      "step": 3634,
+      "time_s": 72.68,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 270,
+      "step": 3635,
+      "time_s": 72.7,
+      "rules": [
+        "anchor_pos"
+      ]
+    },
+    {
+      "episode": 484,
+      "step": 3636,
+      "time_s": 72.72,
+      "rules": [
+        "anchor_pos"
+      ]
+    },
+    {
+      "episode": 900,
+      "step": 3704,
+      "time_s": 74.08,
+      "rules": [
+        "anchor_pos"
+      ]
+    },
+    {
+      "episode": 778,
+      "step": 3863,
+      "time_s": 77.26,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 525,
+      "step": 4113,
+      "time_s": 82.26,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 473,
+      "step": 4118,
+      "time_s": 82.36,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 414,
+      "step": 4388,
+      "time_s": 87.76,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 758,
+      "step": 4417,
+      "time_s": 88.34,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 56,
+      "step": 5078,
+      "time_s": 101.56,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 84,
+      "step": 5079,
+      "time_s": 101.58,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 620,
+      "step": 5079,
+      "time_s": 101.58,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 756,
+      "step": 5079,
+      "time_s": 101.58,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 864,
+      "step": 5079,
+      "time_s": 101.58,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 485,
+      "step": 5084,
+      "time_s": 101.68,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 494,
+      "step": 5086,
+      "time_s": 101.72,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 354,
+      "step": 5087,
+      "time_s": 101.74,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 588,
+      "step": 5090,
+      "time_s": 101.8,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 744,
+      "step": 5090,
+      "time_s": 101.8,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 499,
+      "step": 5091,
+      "time_s": 101.82,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 843,
+      "step": 5091,
+      "time_s": 101.82,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 527,
+      "step": 5106,
+      "time_s": 102.12,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 786,
+      "step": 5115,
+      "time_s": 102.3,
+      "rules": [
+        "anchor_pos"
+      ]
+    },
+    {
+      "episode": 57,
+      "step": 5138,
+      "time_s": 102.76,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 796,
+      "step": 5140,
+      "time_s": 102.8,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 60,
+      "step": 5141,
+      "time_s": 102.82,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 579,
+      "step": 5253,
+      "time_s": 105.06,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 771,
+      "step": 5356,
+      "time_s": 107.12,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 673,
+      "step": 5395,
+      "time_s": 107.9,
+      "rules": [
+        "anchor_pos"
+      ]
+    },
+    {
+      "episode": 1021,
+      "step": 5397,
+      "time_s": 107.94,
+      "rules": [
+        "anchor_pos"
+      ]
+    },
+    {
+      "episode": 460,
+      "step": 5859,
+      "time_s": 117.18,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 387,
+      "step": 5860,
+      "time_s": 117.2,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 682,
+      "step": 5860,
+      "time_s": 117.2,
+      "rules": [
+        "ee_body_pos"
+      ]
+    }
+  ]
+}

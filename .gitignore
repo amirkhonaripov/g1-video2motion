@@ -9,3 +9,4 @@ __pycache__/
 *.egg-info/
 wandb/
 .DS_Store
+ruff.toml
