@@ -41,6 +41,8 @@ class EvaluateConfig:
   """Device to run on. Defaults to CUDA if available."""
   output_file: str | None = None
   """Optional path to save metrics as JSON."""
+  record_file: str | None = None
+  """Optional .npz to save episode 0's robot pose at every step (for videos)."""
 
 
 def run_evaluate(task_id: str, cfg: EvaluateConfig) -> dict[str, float]:
@@ -96,7 +98,10 @@ def run_evaluate(task_id: str, cfg: EvaluateConfig) -> dict[str, float]:
   all_joint_vel_error: list[torch.Tensor] = []
   all_ee_pos_error: list[torch.Tensor] = []
   all_ee_ori_error: list[torch.Tensor] = []
+  all_joint_error: list[torch.Tensor] = []
+  all_drift: list[torch.Tensor] = []
   all_active: list[torch.Tensor] = []
+  record = {"time": [], "base_pos": [], "base_quat": [], "joint_pos": []}
 
   done_envs = torch.zeros(cfg.num_envs, dtype=torch.bool, device=device)
   success = torch.zeros(cfg.num_envs, dtype=torch.bool, device=device)
@@ -109,12 +114,7 @@ def run_evaluate(task_id: str, cfg: EvaluateConfig) -> dict[str, float]:
 
   step = 0
   while not done_envs.all():
-    # Snapshot the reference frame the upcoming step will be scored against.
-    # env.step computes the reward (against the current reference) and only
-    # afterwards advances the command's motion frame, so reading the
-    # reference after stepping would pair the robot with the *next* frame.
-    # We snapshot here and pair it with the post-step robot state below,
-    # matching how the reward is computed.
+    # reference for this step (env.step advances it after the reward)
     ref = SimpleNamespace(
       num_envs=command.num_envs,
       device=command.device,
@@ -123,6 +123,8 @@ def run_evaluate(task_id: str, cfg: EvaluateConfig) -> dict[str, float]:
       body_pos_relative_w=command.body_pos_relative_w.clone(),
       body_quat_relative_w=command.body_quat_relative_w.clone(),
       joint_vel=command.joint_vel.clone(),
+      joint_pos=command.joint_pos.clone(),
+      anchor_pos_w=command.anchor_pos_w.clone(),
     )
 
     with torch.no_grad():
@@ -135,8 +137,7 @@ def run_evaluate(task_id: str, cfg: EvaluateConfig) -> dict[str, float]:
     ref.robot_joint_vel = command.robot_joint_vel
     ref_command = cast(MotionCommand, ref)
 
-    # Envs that finished this step were auto-reset inside env.step, so their
-    # robot state is the new episode's; don't score it.
+    # envs reset inside env.step: skip their new episode
     active = ~done_envs & ~dones.bool()
     all_active.append(active.float())
     all_mpkpe.append(torch.where(active, compute_mpkpe(ref_command), 0.0))
@@ -152,6 +153,20 @@ def run_evaluate(task_id: str, cfg: EvaluateConfig) -> dict[str, float]:
     all_ee_ori_error.append(
       torch.where(active, compute_ee_orientation_error(ref_command, ee_body_names), 0.0)
     )
+    # same measures as analyze_ros2.py
+    joint_error = (ref.joint_pos - command.robot_joint_pos).abs().mean(dim=-1)
+    drift = torch.norm(
+      ref.anchor_pos_w[:, :2] - command.robot_anchor_pos_w[:, :2], dim=-1
+    )
+    all_joint_error.append(torch.where(active, joint_error, 0.0))
+    all_drift.append(torch.where(active, drift, 0.0))
+
+    if cfg.record_file and active[0]:
+      robot = command.robot.data
+      record["time"].append((step + 1) / 50)
+      record["base_pos"].append(robot.root_link_pos_w[0].cpu().numpy())
+      record["base_quat"].append(robot.root_link_quat_w[0].cpu().numpy())
+      record["joint_pos"].append(robot.joint_pos[0].cpu().numpy())
 
     # Track completions.
     terminated = env.unwrapped.termination_manager.terminated
@@ -201,6 +216,8 @@ def run_evaluate(task_id: str, cfg: EvaluateConfig) -> dict[str, float]:
     all_joint_vel_error,
     all_ee_pos_error,
     all_ee_ori_error,
+    all_joint_error,
+    all_drift,
   ]
   stacks = [torch.stack(s, dim=0) for s in stacks]
   active_steps = torch.stack(all_active, dim=0).sum(dim=0).clamp(min=1)
@@ -208,9 +225,11 @@ def run_evaluate(task_id: str, cfg: EvaluateConfig) -> dict[str, float]:
 
   max_mpkpe = stacks[0].max(dim=0).values
   max_r_mpkpe = stacks[1].max(dim=0).values
+  max_drift = stacks[6].max(dim=0).values
   success_strict = success & (max_mpkpe <= 0.15)
 
   metrics = {
+    "num_episodes": cfg.num_envs,
     "success_rate": success.float().mean().item(),
     "mpkpe": means[0].mean().item(),
     "r_mpkpe": means[1].mean().item(),
@@ -220,6 +239,9 @@ def run_evaluate(task_id: str, cfg: EvaluateConfig) -> dict[str, float]:
     "max_mpkpe": max_mpkpe.mean().item(),
     "max_r_mpkpe": max_r_mpkpe.mean().item(),
     "success_rate_strict": success_strict.float().mean().item(),
+    "joint_mae_rad": means[5].mean().item(),
+    "drift_mean_m": means[6].mean().item(),
+    "drift_max_m": max_drift.mean().item(),
   }
 
   print("\n" + "=" * 50)
@@ -234,7 +256,20 @@ def run_evaluate(task_id: str, cfg: EvaluateConfig) -> dict[str, float]:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w") as f:
       json.dump({"metrics": metrics, "failures": failures}, f, indent=2)
-    print(f"[INFO] Metrics and failures saved to {output_path}")
+    print(f"[INFO] Metrics saved to {output_path}")
+
+  if cfg.record_file:
+    np.savez_compressed(
+      cfg.record_file,
+      joint_names=np.array(command.robot.joint_names),
+      base_frame=np.array("pelvis"),
+      joint_time=np.array(record["time"]),
+      base_time=np.array(record["time"]),
+      base_pos=np.array(record["base_pos"]),
+      base_quat=np.array(record["base_quat"]),
+      joint_pos=np.array(record["joint_pos"]),
+    )
+    print(f"[INFO] Episode 0 pose saved to {cfg.record_file}")
 
   env.close()
   return metrics
