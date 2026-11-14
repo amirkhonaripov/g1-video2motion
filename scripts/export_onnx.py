@@ -2,16 +2,37 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-import torch
-import tyro
-
 import mjlab
 import mjlab.tasks
+import numpy as np
+import onnx
+import torch
+import tyro
 from mjlab.envs import ManagerBasedRlEnv
 from mjlab.rl import MjlabOnPolicyRunner, RslRlVecEnvWrapper
 from mjlab.rl.exporter_utils import attach_metadata_to_onnx
 from mjlab.tasks.registry import list_tasks, load_env_cfg, load_rl_cfg, load_runner_cls
 from mjlab.tasks.tracking.mdp import MotionCommandCfg
+from onnx import numpy_helper
+
+
+def save_reference(onnx_path: Path) -> Path:
+  """Save the motion baked into the ONNX file as reference.npz next to it."""
+  model = onnx.load(str(onnx_path))
+  meta = {p.key: p.value for p in model.metadata_props}
+  arrays = {
+    i.name.split(".")[0]: numpy_helper.to_array(i) for i in model.graph.initializer
+  }
+  out = onnx_path.with_name("reference.npz")
+  np.savez(
+    out,
+    joint_pos=arrays["joint_pos"],
+    body_pos_w=arrays["body_pos_w"],
+    body_quat_w=arrays["body_quat_w"],
+    joint_names=np.array(meta["joint_names"].split(",")),
+    body_names=np.array(meta["body_names"].split(",")),
+  )
+  return out
 
 
 @dataclass(frozen=True)
@@ -57,6 +78,7 @@ def run_export(task_id: str, cfg: ExportConfig) -> None:
   metadata = runner.get_export_metadata(cfg.run_name)
   attach_metadata_to_onnx(str(out), metadata)
   print(f"[INFO] Exported ONNX policy to {out}")
+  print(f"[INFO] Saved reference motion to {save_reference(out)}")
 
   env.close()
 
