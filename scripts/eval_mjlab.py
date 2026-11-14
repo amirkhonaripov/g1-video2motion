@@ -9,10 +9,9 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import cast
 
+import numpy as np
 import torch
 import tyro
-import numpy as np
-
 from mjlab.envs import ManagerBasedRlEnv
 from mjlab.rl import MjlabOnPolicyRunner, RslRlVecEnvWrapper
 from mjlab.tasks.registry import list_tasks, load_env_cfg, load_rl_cfg, load_runner_cls
@@ -242,7 +241,7 @@ def run_evaluate(task_id: str, cfg: EvaluateConfig) -> dict[str, float]:
 
 
 def main():
-  import mjlab.tasks  # noqa: F401
+  import mjlab.tasks
 
   tracking_tasks = [t for t in list_tasks() if "Tracking" in t]
   if not tracking_tasks:
