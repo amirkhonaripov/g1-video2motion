@@ -62,9 +62,8 @@ by [our fork](https://github.com/amirkhonaripov/g1-eval-harness) of an evaluatio
   changes. Details: [`docs/experiments.md`](docs/experiments.md).
 - **Time to make a motion** on one RTX PRO 5000: GVHMR + GMR 23–97 s, ViT-H 17–43 s per sample.
 
-Tables are on the robot model of the ROS 2 deployment stack (`ros2`); the harness's
-other model (`unitree_rl_gym`) gives the same outcomes except on the tennis serve and the cartwheel
-below.
+All results are on the harness's default robot model, `ros2`: the G1 of the ROS 2 stack that runs
+the real robot.
 
 ### BeyondMimic on the tennis serve
 
@@ -91,16 +90,12 @@ mjlab's demo motion (131 s of motion capture) and its pretrained BeyondMimic pol
 
 | | BeyondMimic | SONIC |
 |---|---|---|
-| Flat ground, `ros2` | finishes | fails at 106.7 s (cartwheel) |
-| Flat ground, `unitree_rl_gym` | fails at 106.9 s (cartwheel) | fails at 106.8 s |
-| Harder conditions, `ros2` | 40/50 | 0/50 |
+| Flat ground | finishes | fails at 106.7 s (cartwheel) |
+| Harder conditions | 40/50 | 0/50 |
 | Pose error / position error, mean (cm) | 3.5 / 7.6 | 4.2 / 185 |
 | Policy time per step (ms, one CPU thread) | 0.05 | 1.34 |
 | Policy's own evaluation | mjlab: finishes 93% of 1024; ROS 2 stack: 5/5 | `g1_tracker`: fails at 106.7 s |
 
-- **The robot model decides the cartwheel.** The two G1 models differ in contact shapes and motor
-  inertia; swapping them one at a time shows the contact shapes are what matter
-  ([`docs/experiments.md`](docs/experiments.md)).
 - **SONIC's position error is large by design:** it follows the motion relative to itself, not a
   fixed world position.
 
@@ -121,7 +116,7 @@ MuJoCo, 5 runs, mean (min–max)).
 The policy runs as trained. The larger position error in ROS 2 comes from its state estimator,
 which drifts up to ~1 m; measured in the estimator's frame, drift matches mjlab.
 
-All tables (per clip, per sample, both robot models): [`results/routes/harness_tables.md`](results/routes/harness_tables.md).
+All tables (per clip, per sample): [`results/routes/harness_tables.md`](results/routes/harness_tables.md).
 What we tested and why: [`docs/experiments.md`](docs/experiments.md).
 
 ## Run it on your own video

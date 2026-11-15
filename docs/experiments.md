@@ -60,31 +60,7 @@ Problems we hit, what we thought caused them, how we tested it, and what we conc
   Clipping doesn't help either tracker (BeyondMimic is slightly worse under the harder conditions),
   so results use the raw motions: the same reference for both trackers.
 
-## 3. The LAFAN1 cartwheel depends on the robot model
-
-- **Problem.** BeyondMimic's demo policy finishes the LAFAN1 dance in mjlab (93% of 1024) and in the
-  ROS 2 stack (5 of 5), but fails at the cartwheel (106.9 s) every time on the harness's original
-  robot model (`unitree_rl_gym`).
-- **Hypothesis.** Motor inertia: that model gives every joint the same armature (0.01, from Unitree's
-  12-joint walking model), while BeyondMimic trained with per-joint values from the motor specs
-  (0.0036–0.025).
-- **Test.** Swapped one thing at a time between the two models: the `unitree_rl_gym` model with the
-  per-joint armature, and the `ros2` model with 0.01 for every joint. BeyondMimic,
-  flat ground, 3 tries each (the unswapped models: 10 tries).
-- **Result.**
-
-  | Contact shapes | Motor inertia | Cartwheel |
-  |---|---|---|
-  | `unitree_rl_gym` (4 spheres per foot, mesh hands) | 0.01 for every joint | fails at 106.9 s, 10/10 |
-  | `unitree_rl_gym` | per joint | fails at 106.9 s, 3/3 |
-  | `ros2` (capsule soles and hands) | 0.01 for every joint | finishes, 3/3 |
-  | `ros2` | per joint | finishes, 10/10 |
-- **Conclusion.** Hypothesis rejected: contact shapes decide the cartwheel, not motor inertia. The
-  harness now defaults to the ROS 2 stack's model (`ros2`), the one BeyondMimic's
-  sim-to-sim and the real-robot stack use, and results are reported on both models. SONIC fails the
-  cartwheel on both, as it does in its own `g1_tracker`.
-
-## 4. Every tracker fails the jump and knee kick at 1.0 s
+## 3. Every tracker fails the jump and knee kick at 1.0 s
 
 - **Problem.** SONIC fails all 4 motions of the jump and knee kick at 1.0 s, raw or grounded.
 - **Finding.** The robot never takes off. At 0.96 s the reference pelvis is in the air (1.01–1.03 m)
@@ -93,7 +69,7 @@ Problems we hit, what we thought caused them, how we tested it, and what we conc
 - **Open question.** Is the jump beyond the robot, or only beyond SONIC? Next test: a BeyondMimic
   policy trained on this motion.
 
-## 5. The robots in the videos were seen from the wrong side
+## 4. The robots in the videos were seen from the wrong side
 
 - **Problem.** The harness films every run from one fixed world angle. GVHMR + GMR and ViT-H put the
   robot at headings 90° apart, so one robot was shown edge-on, and neither matched the video.

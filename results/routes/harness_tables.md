@@ -1,6 +1,6 @@
 ### At a glance
 
-| SONIC, ros2 robot model | GVHMR + GMR: flat ground | harder | pose error (cm) | ViT-H, 3 samples: flat ground | harder | pose error (cm) |
+| SONIC | GVHMR + GMR: flat ground | harder | pose error (cm) | ViT-H, 3 samples: flat ground | harder | pose error (cm) |
 |---|---|---|---|---|---|---|
 | Studio dance (Pexels) | finishes | 50/50 | 7.5 | 3/3 finish | 150/150 | 4.4 |
 | Hip-hop, filmed from behind (Pexels) | finishes | 49/50 | 11.9 | 3/3 finish | 150/150 | 3.1 |
@@ -11,7 +11,7 @@
 
 ### Studio dance (Pexels)
 
-| SONIC, ros2 robot model | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
+| SONIC | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
 |---|---|---|---|---|
 | Reference: frames past joint limits (%) | 0.0 | 10.7 | 10.2 | 13.2 |
 | Reference: fastest joint (rad/s) | 10 | 20 | 21 | 16 |
@@ -35,7 +35,7 @@
 
 ### Hip-hop, filmed from behind (Pexels)
 
-| SONIC, ros2 robot model | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
+| SONIC | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
 |---|---|---|---|---|
 | Reference: frames past joint limits (%) | 0.0 | 0.3 | 0.6 | 0.0 |
 | Reference: fastest joint (rad/s) | 5 | 13 | 24 | 19 |
@@ -59,7 +59,7 @@
 
 ### Jump and knee kick (Pexels)
 
-| SONIC, ros2 robot model | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
+| SONIC | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
 |---|---|---|---|---|
 | Reference: frames past joint limits (%) | 0.0 | 5.4 | 6.3 | 9.9 |
 | Reference: fastest joint (rad/s) | 16 | 24 | 27 | 25 |
@@ -83,7 +83,7 @@
 
 ### Tennis serve (GVHMR demo video)
 
-| SONIC, ros2 robot model | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
+| SONIC | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
 |---|---|---|---|---|
 | Reference: frames past joint limits (%) | 0.0 | 5.6 | 4.4 | 11.3 |
 | Reference: fastest joint (rad/s) | 20 | 25 | 44 | 50 |
@@ -107,7 +107,7 @@
 
 ### AIST++ Pop
 
-| SONIC, ros2 robot model | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
+| SONIC | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
 |---|---|---|---|---|
 | Reference: frames past joint limits (%) | 0.0 | 9.2 | 11.0 | 8.5 |
 | Reference: fastest joint (rad/s) | 5 | 12 | 10 | 84 |
@@ -131,7 +131,7 @@
 
 ### AIST++ Jazz
 
-| SONIC, ros2 robot model | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
+| SONIC | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
 |---|---|---|---|---|
 | Reference: frames past joint limits (%) | 0.0 | 0.0 | 0.0 | 0.0 |
 | Reference: fastest joint (rad/s) | 16 | 14 | 12 | 16 |
@@ -155,7 +155,7 @@
 
 ### Tennis serve: BeyondMimic vs SONIC
 
-| Tennis serve, ros2 robot model | GVHMR + GMR | GVHMR + GMR, clipped | ViT-H sample 1 | ViT-H sample 1, clipped |
+| Tennis serve | GVHMR + GMR | GVHMR + GMR, clipped | ViT-H sample 1 | ViT-H sample 1, clipped |
 |---|---|---|---|---|
 | BeyondMimic: mjlab (1024 tries) | finishes 97% | finishes 97% | finishes 100% | finishes 100% |
 | BeyondMimic: flat ground | finishes | finishes | finishes | finishes |
@@ -176,47 +176,14 @@
 | AIST++ Pop | 10/10 · 50/50 | 10/10 · 50/50 | 30/30 · 150/150 | 30/30 · 150/150 |
 | AIST++ Jazz | 10/10 · 50/50 | 10/10 · 50/50 | 30/30 · 150/150 | 30/30 · 150/150 |
 
-### Does the robot model matter?
-
-| SONIC | ros2: flat ground | ros2: harder (of 50) | unitree_rl_gym: flat ground | unitree_rl_gym: harder (of 50) |
-|---|---|---|---|---|
-| Studio dance (Pexels), GVHMR + GMR | finishes | 50/50 | finishes | 50/50 |
-| Studio dance (Pexels), ViT-H sample 1 | finishes | 50/50 | finishes | 50/50 |
-| Studio dance (Pexels), ViT-H sample 2 | finishes | 50/50 | finishes | 50/50 |
-| Studio dance (Pexels), ViT-H sample 3 | finishes | 50/50 | finishes | 50/50 |
-| Hip-hop, filmed from behind (Pexels), GVHMR + GMR | finishes | 49/50 | finishes | 50/50 |
-| Hip-hop, filmed from behind (Pexels), ViT-H sample 1 | finishes | 50/50 | finishes | 50/50 |
-| Hip-hop, filmed from behind (Pexels), ViT-H sample 2 | finishes | 50/50 | finishes | 50/50 |
-| Hip-hop, filmed from behind (Pexels), ViT-H sample 3 | finishes | 50/50 | finishes | 50/50 |
-| Jump and knee kick (Pexels), GVHMR + GMR | fails at 1.0 s (10/10) | 0/50 | fails at 1.0 s (10/10) | 0/50 |
-| Jump and knee kick (Pexels), ViT-H sample 1 | fails at 1.0 s (10/10) | 0/50 | fails at 1.0 s (10/10) | 0/50 |
-| Jump and knee kick (Pexels), ViT-H sample 2 | fails at 1.0 s (10/10) | 0/50 | fails at 1.0 s (10/10) | 0/50 |
-| Jump and knee kick (Pexels), ViT-H sample 3 | fails at 1.0 s (10/10) | 0/50 | fails at 1.0 s (10/10) | 0/50 |
-| Tennis serve (GVHMR demo video), GVHMR + GMR | fails at 4.5–7.8 s (10/10) | 0/50 | fails at 7.8 s (10/10) | 0/50 |
-| Tennis serve (GVHMR demo video), ViT-H sample 1 | finishes | 49/50 | finishes | 46/50 |
-| Tennis serve (GVHMR demo video), ViT-H sample 2 | fails at 8.0 s (4/10) | 28/50 | fails at 8.0 s (9/10) | 13/50 |
-| Tennis serve (GVHMR demo video), ViT-H sample 3 | finishes | 34/50 | fails at 8.0 s (2/10) | 13/50 |
-| AIST++ Pop, GVHMR + GMR | finishes | 50/50 | finishes | 50/50 |
-| AIST++ Pop, ViT-H sample 1 | finishes | 50/50 | finishes | 50/50 |
-| AIST++ Pop, ViT-H sample 2 | finishes | 50/50 | finishes | 50/50 |
-| AIST++ Pop, ViT-H sample 3 | finishes | 50/50 | finishes | 50/50 |
-| AIST++ Jazz, GVHMR + GMR | finishes | 50/50 | finishes | 50/50 |
-| AIST++ Jazz, ViT-H sample 1 | finishes | 50/50 | finishes | 50/50 |
-| AIST++ Jazz, ViT-H sample 2 | finishes | 50/50 | finishes | 50/50 |
-| AIST++ Jazz, ViT-H sample 3 | finishes | 50/50 | finishes | 50/50 |
-
 ### LAFAN1 dance: BeyondMimic vs SONIC
 
 | LAFAN1 dance (131 s, motion capture) | BeyondMimic | SONIC |
 |---|---|---|
-| ros2 robot model: flat ground | finishes | fails at 106.7 s (10/10) |
-| ros2 robot model: harder conditions | 40/50 | 0/50 |
-| ros2 robot model: pose error, mean (cm) | 3.5 | 4.2 |
-| ros2 robot model: position error, mean (cm) | 7.6 | 185.0 |
-| unitree_rl_gym robot model: flat ground | fails at 106.9 s (10/10) | fails at 106.8 s (10/10) |
-| unitree_rl_gym robot model: harder conditions | 0/50 | 0/50 |
-| unitree_rl_gym robot model: pose error, mean (cm) | 3.5 | 4.2 |
-| unitree_rl_gym robot model: position error, mean (cm) | 7.7 | 185.4 |
+| Flat ground | finishes | fails at 106.7 s (10/10) |
+| Harder conditions | 40/50 | 0/50 |
+| Pose error, mean (cm) | 3.5 | 4.2 |
+| Position error, mean (cm) | 7.6 | 185.0 |
 | Policy time per step (ms) | 0.05 | 1.34 |
 | mjlab (training simulator, 1024 tries) | finishes 93% | – |
 | ROS 2 deployment stack (5 tries) | finishes 5/5 | – |
@@ -234,6 +201,4 @@
   position, so its position error grows on long motions while its pose error stays low.
 - **ViT-H samples:** ViT-H generates a motion from random noise; samples 1-3 are three draws
   (seeds 42, 1, 2) from the same video.
-- **Robot models:** `ros2` (default) is the ROS 2 deployment stack's G1 (per-joint motor inertia,
-  capsule feet and hands); `unitree_rl_gym` is the walking-policy model (one inertia for all joints,
-  sphere feet, mesh hands). Same masses, kinematics, joint ranges and torque limits.
+- **Robot model:** the harness default, `ros2`: the G1 of the ROS 2 stack that runs the real robot.
