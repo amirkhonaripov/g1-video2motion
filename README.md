@@ -10,10 +10,30 @@ training per motion) are scored on the same motions for comparison.
 [Limitations and definitions](#limitations-and-definitions) · [Install](#install) · [Run](#run) ·
 [Credits and licenses](#credits-and-licenses)
 
-![Studio dance: BeyondMimic in the ROS 2 stack, replay of a ROS 2 recording](results/gifs/ros2_studio_dance.gif)
+![Jump kick: input video, then the GVHMR + GMR and ViT-H policies in the ROS 2 stack](results/gifs/ros2_jump_kick.gif)
 
-*Studio dance: BeyondMimic in the ROS 2 stack, replay of a ROS 2 recording. Input video, then the GVHMR + GMR
-and ViT-H sample 1 policies side by side.*
+*Jump kick, BeyondMimic in the ROS 2 stack (replay of a recording). Left: the input video. Middle: the policy
+trained on GVHMR + GMR's motion fails and falls, because that motion rises higher than its take-off speed
+allows ([why](#jump-kick)). Right: the policy trained on ViT-H's motion lands the kick.*
+
+<table>
+<tr>
+<td width="50%"><img src="results/gifs/ros2_tennis.gif" alt="Tennis serve: input video, GVHMR + GMR and ViT-H policies in the ROS 2 stack"><br><sub>Tennis serve</sub></td>
+<td width="50%"><img src="results/gifs/ros2_studio_dance.gif" alt="Studio dance: input video, GVHMR + GMR and ViT-H policies in the ROS 2 stack"><br><sub>Studio dance</sub></td>
+</tr>
+<tr>
+<td><img src="results/gifs/ros2_hiphop_back.gif" alt="Hip-hop: input video, GVHMR + GMR and ViT-H policies in the ROS 2 stack"><br><sub>Hip-hop</sub></td>
+<td><img src="results/gifs/ros2_pop.gif" alt="AIST++ Pop: GVHMR + GMR and ViT-H policies in the ROS 2 stack"><br><sub>AIST++ Pop (robots only: the AIST videos can't be shared)</sub></td>
+</tr>
+<tr>
+<td><img src="results/gifs/ros2_jazz.gif" alt="AIST++ Jazz: GVHMR + GMR and ViT-H policies in the ROS 2 stack"><br><sub>AIST++ Jazz (robots only)</sub></td>
+<td><img src="results/gifs/ros2_lafan1_dance.gif" alt="LAFAN1 dance: the pretrained policy in the ROS 2 stack, 25 s excerpt"><br><sub>LAFAN1 dance, pretrained policy: a 25 s excerpt of the 131 s dance. This GIF is under LAFAN1's CC BY-NC-ND 4.0, not this repo's CC BY 4.0.</sub></td>
+</tr>
+</table>
+
+*All replays of ROS 2 recordings. Each video clip shows the input video (where it can be shared), then the
+GVHMR + GMR and ViT-H sample 1 policies side by side.*
+
 
 ## How it works
 
@@ -48,16 +68,33 @@ scored with a small adapter.
 
 ## Recommendation
 
-- **Use BeyondMimic.** On these clips it is the most reliable tracker: 1228/1320 harness trials
-  succeed, against 995/1320 for SONIC v1.1 and 1096/1320 for SONIC (ViT-H). It is the only one
-  that does the jump kick and the only one that finishes the LAFAN1 dance (50/60; both SONIC 0/60).
-- **It runs in the ROS 2 stack.** 236/250 scored ROS 2 runs succeed. They took 389 launches: 139 were
-  relaunches after a [start-up drop](#start-up-drops-in-the-ros-2-sim) or a recording that started late.
-  All 14 failures are on the jump kick: 10 are the GVHMR + GMR jump kick, which fails everywhere, and 4 are
-  ViT-H jump kicks.
-- **Its price:** one policy per motion (24–33 min of training each on our GPU; see [Cost](#cost)). When it
-  fails, the robot can really fall: 45 of its 92 failed harness trials end in a real fall, all under pushes.
-  SONIC's failures on the video clips leave the robot standing.
+**Which tracker when:**
+
+- **A fixed set of motions to perform on our G1** (a dance, a demo), with the ROS 2 stack: **BeyondMimic.**
+  - One policy per motion (24–33 min of training each on our GPU; see [Cost](#cost)).
+  - On these clips it is the most reliable: 1228/1320 harness trials succeed, against 995/1320 for SONIC
+    v1.1 and 1096/1320 for SONIC (ViT-H). It is the only one that does the jump kick and finishes the LAFAN1
+    dance (50/60; both SONIC 0/60).
+  - It already runs in the robot's own software: 236/250 ROS 2 runs succeed, and all 14 failures are on the
+    jump kick (10 of them the GVHMR + GMR jump kick, which fails everywhere). The 250 runs took 389 launches:
+    139 were relaunches after a [start-up drop](#start-up-drops-in-the-ros-2-sim) or a recording that started
+    late.
+  - When it fails, the robot can really fall: 45 of its 92 failed harness trials end in a real fall, all
+    under pushes. So the safety procedure matters.
+- **Many or new motions without training, or live teleoperation: SONIC.**
+  - One network for any motion; no training per motion.
+  - It fails more gently: its failures on the video clips leave the robot standing. On several noisy
+    GVHMR + GMR dances under pushes it beats BeyondMimic (studio dance 60/60 vs 41/60, Pop 60/60 vs 50/60,
+    hip-hop 60/60 vs 52/60).
+  - But here it couldn't do the jump kick or finish the LAFAN1 dance.
+- **One caution on the comparison.** In the harness, the simulator tells BeyondMimic and SONIC (ViT-H)
+  exactly where the robot's body is and how fast it moves. A real robot doesn't know this; it has to estimate
+  it. SONIC v1.1 only gets what the robot's own sensors give (IMU and joint angles). So the harness
+  comparison helps the first two, and part of BeyondMimic's lead over SONIC v1.1 may come from it. In the
+  ROS 2 stack, BeyondMimic uses the stack's own estimate and still succeeds (see above).
+
+**About the motions:**
+
 - **Prefer ViT-H motions.** They track better than GVHMR + GMR motions with every tracker (BeyondMimic
   965/990 vs 263/330). One cause we could show: GVHMR + GMR's tennis serve floats above the floor, and
   grounding it lifts SONIC (ViT-H) from 0/60 to 55/60. ViT-H's 3 samples of one video can differ a lot, so
@@ -202,33 +239,8 @@ best time offset (at most 0.3 s).
 
 ### Videos
 
-**BeyondMimic in the ROS 2 stack.** Each GIF is a replay of ROS 2 recordings. For the video clips it shows
-the GVHMR + GMR and ViT-H sample 1 policies side by side. The studio dance is at the top.
-
-**Tennis serve** (GVHMR's example video)
-
-![Tennis serve: input video, then GVHMR + GMR and ViT-H sample 1 policies in the ROS 2 stack](results/gifs/ros2_tennis.gif)
-
-**Hip-hop** (Pexels)
-
-![Hip-hop: input video, then GVHMR + GMR and ViT-H sample 1 policies in the ROS 2 stack](results/gifs/ros2_hiphop_back.gif)
-
-**AIST++ Pop** (robots only: the AIST videos can't be shared)
-
-![AIST++ Pop: GVHMR + GMR and ViT-H sample 1 policies in the ROS 2 stack](results/gifs/ros2_pop.gif)
-
-**AIST++ Jazz** (robots only)
-
-![AIST++ Jazz: GVHMR + GMR and ViT-H sample 1 policies in the ROS 2 stack](results/gifs/ros2_jazz.gif)
-
-**Jump kick** (Pexels). The GVHMR + GMR robot fails and falls.
-
-![Jump kick: input video, then GVHMR + GMR and ViT-H sample 1 policies in the ROS 2 stack](results/gifs/ros2_jump_kick.gif)
-
-**LAFAN1 dance** (pretrained policy). A 25 s excerpt of the 131 s dance. This GIF is under LAFAN1's
-CC BY-NC-ND 4.0, not this repo's CC BY 4.0.
-
-![LAFAN1 dance: the pretrained policy in the ROS 2 stack, 25 s excerpt](results/gifs/ros2_lafan1_dance.gif)
+The BeyondMimic replays from the ROS 2 stack are at the [top](#g1-video2motion). Below: SONIC (ViT-H)
+and BeyondMimic in the harness.
 
 <details>
 <summary><b>In the harness:</b> SONIC (ViT-H) on both motions of each clip, and BeyondMimic on the tennis serve</summary>
