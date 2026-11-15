@@ -32,7 +32,7 @@ NOTES = """- **Flat ground:** 10 tries that differ only by tiny start noise (±0
   (BeyondMimic's rules). **Never more than 15 cm off:** PHUMA's strict success.
 - **Pose error (r-MPKPE):** body-part error after placing the reference on the robot: how well the
   pose is copied. **Position error (MPKPE):** the same without moving it: pose plus drift.
-- **SONIC's drift is partly by design:** it follows the reference relative to itself, not a world
+- **SONIC (ViT-H) drifts partly by design:** it follows the reference relative to itself, not a world
   position, so its position error grows on long motions while its pose error stays low.
 - **ViT-H samples:** ViT-H generates a motion from random noise; samples 1-3 are three draws
   (seeds 42, 1, 2) from the same video.
@@ -113,7 +113,7 @@ def clip_tables(runs, quality, timings, clip):
   ref = [quality[(clip, src, seed)] for _, src, seed in METHODS]
   time = [timings[clip]["gvhmr_gmr" if src == "gmr" else "vith"] for _, src, _ in METHODS]
   flat = [s["flat_nominal"] for s in scen]
-  main = table("SONIC", cols, [
+  main = table("SONIC (ViT-H)", cols, [
     ("Reference: frames past joint limits (%)", [f"{100 * r['frames_outside_joint_limits']:.1f}" for r in ref]),
     ("Reference: fastest joint (rad/s)", [f"{r['max_joint_speed_rad_s']:.0f}" for r in ref]),
     ("Reference: foot sliding (cm/s)", [f"{100 * r['foot_sliding_mean_m_s']:.0f}" for r in ref]),
@@ -150,7 +150,7 @@ def summary_table(runs):
     ]))
   cols = ["GVHMR + GMR: flat ground", "harder", "pose error (cm)",
           "ViT-H, 3 samples: flat ground", "harder", "pose error (cm)"]
-  return table("SONIC", cols, rows)
+  return table("SONIC (ViT-H)", cols, rows)
 
 
 def grounded_table(runs):
@@ -165,7 +165,7 @@ def grounded_table(runs):
         cells.append(f"{flat}/{10 * len(trials)} · {hard}/{50 * len(trials)}")
     rows.append((title, cells))
   cols = ["GVHMR + GMR, raw", "GVHMR + GMR, grounded", "ViT-H, raw", "ViT-H, grounded"]
-  return table("SONIC finishes: flat ground · harder", cols, rows)
+  return table("SONIC (ViT-H) finishes: flat ground · harder", cols, rows)
 
 
 def tracker_rows(runs, name):
@@ -190,7 +190,7 @@ def tennis_table(runs, mjlab_dir):
   labels = ["flat ground", "harder (of 50)", "pose error (cm)"]
   rows = [("BeyondMimic: mjlab (1024 tries)", [mjlab_success(f"{mjlab_dir}/{src}_tennis{c}_mjlab.json") for _, src, c in refs])]
   rows += [(f"BeyondMimic: {label}", [b[i] for b in bm]) for i, label in enumerate(labels)]
-  rows += [(f"SONIC: {label}", [x[i] for x in so]) for i, label in enumerate(labels)]
+  rows += [(f"SONIC (ViT-H): {label}", [x[i] for x in so]) for i, label in enumerate(labels)]
   return table("Tennis serve", [r[0] for r in refs], rows)
 
 
@@ -209,9 +209,9 @@ def demo_table(runs, latency, mjlab):
     ("Policy time per step (ms)", [lat["beyondmimic_demo_dance"], lat["sonic_demo_dance"]]),
     ("mjlab (training simulator, 1024 tries)", [f"finishes {mjlab:.0%}", "–"]),
     ("ROS 2 deployment stack (5 tries)", ["finishes 5/5", "–"]),
-    ("SONIC's own tracker (g1_tracker)", ["–", "fails at 106.7 s"]),
+    ("ViT-H's tracker script (g1_tracker)", ["–", "fails at 106.7 s"]),
   ]
-  return table("LAFAN1 dance (131 s, motion capture)", ["BeyondMimic", "SONIC"], rows)
+  return table("LAFAN1 dance (131 s, motion capture)", ["BeyondMimic", "SONIC (ViT-H)"], rows)
 
 
 def main():
@@ -224,9 +224,9 @@ def main():
   parts = ["### At a glance", summary_table(runs)]
   for clip, title in CLIPS.items():
     parts += [f"### {title}", *clip_tables(runs, quality, timings, clip)]
-  parts += ["### Tennis serve: BeyondMimic vs SONIC", tennis_table(runs, args.mjlab)]
+  parts += ["### Tennis serve: BeyondMimic vs SONIC (ViT-H)", tennis_table(runs, args.mjlab)]
   parts += ["### Feet put back on the floor (grounded)", grounded_table(runs)]
-  parts += ["### LAFAN1 dance: BeyondMimic vs SONIC", demo_table(runs, load_runs(args.latency), mjlab)]
+  parts += ["### LAFAN1 dance: BeyondMimic vs SONIC (ViT-H)", demo_table(runs, load_runs(args.latency), mjlab)]
   parts += ["### Notes", NOTES]
   text = "\n\n".join(parts)
   with open(args.output, "w") as f:

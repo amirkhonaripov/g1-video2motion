@@ -2,9 +2,9 @@
 
 Problems we hit, what we thought caused them, how we tested it, and what we concluded.
 
-## 1. GVHMR + GMR fails the tennis serve with SONIC
+## 1. GVHMR + GMR fails the tennis serve with SONIC (ViT-H)
 
-- **Problem.** SONIC falls on the GVHMR + GMR tennis motion in 10 of 10 tries (at 4.5 or 7.8 s), but
+- **Problem.** SONIC (ViT-H) falls on the GVHMR + GMR tennis motion in 10 of 10 tries (at 4.5 or 7.8 s), but
   finishes two of three ViT-H motions of the same video.
 - **Hypothesis.** The motion floats. After the serve jump (~4.3 s) its feet never come back down:
   the lowest foot stays 12–20 cm above the floor for the rest of the clip, against ~4 cm when
@@ -12,11 +12,11 @@ Problems we hit, what we thought caused them, how we tested it, and what we conc
   rule that fires in all 10 tries).
 - **Test.** Put the feet back on the floor (`scripts/ground_motion.py`): shift the whole motion
   down by a slowly varying floor estimate (lowest ankle over a 1 s window, smoothed), so jumps
-  shorter than 1 s stay. Same fix for every motion of both methods; SONIC rerun, 10 tries per
+  shorter than 1 s stay. Same fix for every motion of both methods; SONIC (ViT-H) rerun, 10 tries per
   condition.
 - **Result.**
 
-  | SONIC finishes: flat ground · harder | Raw | Grounded |
+  | SONIC (ViT-H) finishes: flat ground · harder | Raw | Grounded |
   |---|---|---|
   | GVHMR + GMR | 0/10 · 0/50 | 10/10 · 45/50 |
   | ViT-H, 3 samples | 26/30 · 111/150 | 30/30 · 133/150 |
@@ -46,14 +46,14 @@ Problems we hit, what we thought caused them, how we tested it, and what we conc
   **1**, so PPO trained on a single environment (24 steps per iteration). With 4096 environments,
   episode length went from 3 to 450+ steps in ~1500 iterations, on both raw and clipped motions.
 - **Follow-up test: does clipping still matter?** Trained raw and clipped side by side (4096
-  environments), and ran SONIC on both.
+  environments), and ran SONIC (ViT-H) on both.
 
   | Tennis serve | GVHMR + GMR, raw | clipped | ViT-H sample 1, raw | clipped |
   |---|---|---|---|---|
   | BeyondMimic, mjlab (1024 tries) | finishes 97% | 97% | 100% | 100% |
   | BeyondMimic, flat ground · harder | 10/10 · 50/50 | 10/10 · 42/50 | 10/10 · 49/50 | 10/10 · 45/50 |
   | BeyondMimic, pose error (cm) | 9.3 | 9.5 | 4.5 | 4.6 |
-  | SONIC, flat ground · harder | 0/10 · 0/50 | 0/10 · 0/50 | 10/10 · 49/50 | 10/10 · 50/50 |
+  | SONIC (ViT-H), flat ground · harder | 0/10 · 0/50 | 0/10 · 0/50 | 10/10 · 49/50 | 10/10 · 50/50 |
 
   (BeyondMimic at 3000 iterations.)
 
@@ -62,11 +62,11 @@ Problems we hit, what we thought caused them, how we tested it, and what we conc
 
 ## 3. Every tracker fails the jump and knee kick at 1.0 s
 
-- **Problem.** SONIC fails all 4 motions of the jump and knee kick at 1.0 s, raw or grounded.
+- **Problem.** SONIC (ViT-H) fails all 4 motions of the jump and knee kick at 1.0 s, raw or grounded.
 - **Finding.** The robot never takes off. At 0.96 s the reference pelvis is in the air (1.01–1.03 m)
   while the robot's stays at 0.78–0.86 m, so a foot or knee ends up 26 cm below the reference and
   the hand/foot height rule fires. Up to take-off it tracks within 3 cm.
-- **Open question.** Is the jump beyond the robot, or only beyond SONIC? Next test: a BeyondMimic
+- **Open question.** Is the jump beyond the robot, or only beyond SONIC (ViT-H)? Next test: a BeyondMimic
   policy trained on this motion.
 
 ## 4. The robots in the videos were seen from the wrong side

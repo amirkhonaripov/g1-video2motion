@@ -1,6 +1,6 @@
 ### At a glance
 
-| SONIC | GVHMR + GMR: flat ground | harder | pose error (cm) | ViT-H, 3 samples: flat ground | harder | pose error (cm) |
+| SONIC (ViT-H) | GVHMR + GMR: flat ground | harder | pose error (cm) | ViT-H, 3 samples: flat ground | harder | pose error (cm) |
 |---|---|---|---|---|---|---|
 | Studio dance (Pexels) | finishes | 50/50 | 7.5 | 3/3 finish | 150/150 | 4.4 |
 | Hip-hop, filmed from behind (Pexels) | finishes | 49/50 | 11.9 | 3/3 finish | 150/150 | 3.1 |
@@ -11,7 +11,7 @@
 
 ### Studio dance (Pexels)
 
-| SONIC | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
+| SONIC (ViT-H) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
 |---|---|---|---|---|
 | Reference: frames past joint limits (%) | 0.0 | 10.7 | 10.2 | 13.2 |
 | Reference: fastest joint (rad/s) | 10 | 20 | 21 | 16 |
@@ -35,7 +35,7 @@
 
 ### Hip-hop, filmed from behind (Pexels)
 
-| SONIC | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
+| SONIC (ViT-H) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
 |---|---|---|---|---|
 | Reference: frames past joint limits (%) | 0.0 | 0.3 | 0.6 | 0.0 |
 | Reference: fastest joint (rad/s) | 5 | 13 | 24 | 19 |
@@ -59,7 +59,7 @@
 
 ### Jump and knee kick (Pexels)
 
-| SONIC | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
+| SONIC (ViT-H) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
 |---|---|---|---|---|
 | Reference: frames past joint limits (%) | 0.0 | 5.4 | 6.3 | 9.9 |
 | Reference: fastest joint (rad/s) | 16 | 24 | 27 | 25 |
@@ -83,7 +83,7 @@
 
 ### Tennis serve (GVHMR demo video)
 
-| SONIC | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
+| SONIC (ViT-H) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
 |---|---|---|---|---|
 | Reference: frames past joint limits (%) | 0.0 | 5.6 | 4.4 | 11.3 |
 | Reference: fastest joint (rad/s) | 20 | 25 | 44 | 50 |
@@ -107,7 +107,7 @@
 
 ### AIST++ Pop
 
-| SONIC | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
+| SONIC (ViT-H) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
 |---|---|---|---|---|
 | Reference: frames past joint limits (%) | 0.0 | 9.2 | 11.0 | 8.5 |
 | Reference: fastest joint (rad/s) | 5 | 12 | 10 | 84 |
@@ -131,7 +131,7 @@
 
 ### AIST++ Jazz
 
-| SONIC | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
+| SONIC (ViT-H) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
 |---|---|---|---|---|
 | Reference: frames past joint limits (%) | 0.0 | 0.0 | 0.0 | 0.0 |
 | Reference: fastest joint (rad/s) | 16 | 14 | 12 | 16 |
@@ -153,7 +153,7 @@
 | Hard push from behind | 10/10 | 10/10 | 10/10 | 10/10 |
 | Push from the front | 10/10 | 10/10 | 10/10 | 10/10 |
 
-### Tennis serve: BeyondMimic vs SONIC
+### Tennis serve: BeyondMimic vs SONIC (ViT-H)
 
 | Tennis serve | GVHMR + GMR | GVHMR + GMR, clipped | ViT-H sample 1 | ViT-H sample 1, clipped |
 |---|---|---|---|---|
@@ -161,13 +161,13 @@
 | BeyondMimic: flat ground | finishes | finishes | finishes | finishes |
 | BeyondMimic: harder (of 50) | 50/50 | 42/50 | 49/50 | 45/50 |
 | BeyondMimic: pose error (cm) | 9.3 | 9.5 | 4.5 | 4.6 |
-| SONIC: flat ground | fails at 4.5–7.8 s (10/10) | fails at 4.5–7.8 s (10/10) | finishes | finishes |
-| SONIC: harder (of 50) | 0/50 | 0/50 | 49/50 | 50/50 |
-| SONIC: pose error (cm) | 6.9 | 5.1 | 4.5 | 4.5 |
+| SONIC (ViT-H): flat ground | fails at 4.5–7.8 s (10/10) | fails at 4.5–7.8 s (10/10) | finishes | finishes |
+| SONIC (ViT-H): harder (of 50) | 0/50 | 0/50 | 49/50 | 50/50 |
+| SONIC (ViT-H): pose error (cm) | 6.9 | 5.1 | 4.5 | 4.5 |
 
 ### Feet put back on the floor (grounded)
 
-| SONIC finishes: flat ground · harder | GVHMR + GMR, raw | GVHMR + GMR, grounded | ViT-H, raw | ViT-H, grounded |
+| SONIC (ViT-H) finishes: flat ground · harder | GVHMR + GMR, raw | GVHMR + GMR, grounded | ViT-H, raw | ViT-H, grounded |
 |---|---|---|---|---|
 | Studio dance (Pexels) | 10/10 · 50/50 | 10/10 · 50/50 | 30/30 · 150/150 | 30/30 · 150/150 |
 | Hip-hop, filmed from behind (Pexels) | 10/10 · 49/50 | 10/10 · 50/50 | 30/30 · 150/150 | 30/30 · 150/150 |
@@ -176,9 +176,9 @@
 | AIST++ Pop | 10/10 · 50/50 | 10/10 · 50/50 | 30/30 · 150/150 | 30/30 · 150/150 |
 | AIST++ Jazz | 10/10 · 50/50 | 10/10 · 50/50 | 30/30 · 150/150 | 30/30 · 150/150 |
 
-### LAFAN1 dance: BeyondMimic vs SONIC
+### LAFAN1 dance: BeyondMimic vs SONIC (ViT-H)
 
-| LAFAN1 dance (131 s, motion capture) | BeyondMimic | SONIC |
+| LAFAN1 dance (131 s, motion capture) | BeyondMimic | SONIC (ViT-H) |
 |---|---|---|
 | Flat ground | finishes | fails at 106.7 s (10/10) |
 | Harder conditions | 40/50 | 0/50 |
@@ -187,7 +187,7 @@
 | Policy time per step (ms) | 0.05 | 1.34 |
 | mjlab (training simulator, 1024 tries) | finishes 93% | – |
 | ROS 2 deployment stack (5 tries) | finishes 5/5 | – |
-| SONIC's own tracker (g1_tracker) | – | fails at 106.7 s |
+| ViT-H's tracker script (g1_tracker) | – | fails at 106.7 s |
 
 ### Notes
 
@@ -197,7 +197,7 @@
   (BeyondMimic's rules). **Never more than 15 cm off:** PHUMA's strict success.
 - **Pose error (r-MPKPE):** body-part error after placing the reference on the robot: how well the
   pose is copied. **Position error (MPKPE):** the same without moving it: pose plus drift.
-- **SONIC's drift is partly by design:** it follows the reference relative to itself, not a world
+- **SONIC (ViT-H) drifts partly by design:** it follows the reference relative to itself, not a world
   position, so its position error grows on long motions while its pose error stays low.
 - **ViT-H samples:** ViT-H generates a motion from random noise; samples 1-3 are three draws
   (seeds 42, 1, 2) from the same video.

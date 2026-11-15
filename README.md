@@ -2,27 +2,27 @@
 
 From a video of a person to a Unitree G1 humanoid doing the same motion in simulation. Two ways to
 get the motion from video, **GVHMR + GMR** and **ViT-H**, are compared, each tracked by two policies,
-**SONIC** and **BeyondMimic**.
+**SONIC (ViT-H)** and **BeyondMimic**.
 
 **Studio dance** ([Pexels](https://www.pexels.com/video/a-barefooted-man-dancing-in-a-studio-8377696/))
 
-![Studio dance: input, GVHMR + GMR on SONIC, ViT-H on SONIC](results/routes/studio_dance.gif)
+![Studio dance: input, GVHMR + GMR on SONIC (ViT-H), ViT-H on SONIC (ViT-H)](results/routes/studio_dance.gif)
 
 **Hip-hop** ([Pexels](https://www.pexels.com/video/a-man-dancing-hip-hop-7958174/), cottonbro studio)
 
-![Hip-hop: input, GVHMR + GMR on SONIC, ViT-H on SONIC](results/routes/hiphop_back.gif)
+![Hip-hop: input, GVHMR + GMR on SONIC (ViT-H), ViT-H on SONIC (ViT-H)](results/routes/hiphop_back.gif)
 
-**Jump and knee kick** ([Pexels](https://www.pexels.com/video/video-of-man-doing-knee-kick-4806533/)): SONIC doesn't take off for either motion
+**Jump and knee kick** ([Pexels](https://www.pexels.com/video/video-of-man-doing-knee-kick-4806533/)): SONIC (ViT-H) doesn't take off for either motion
 
-![Jump and knee kick: input, GVHMR + GMR on SONIC, ViT-H on SONIC](results/routes/jump_kick.gif)
+![Jump and knee kick: input, GVHMR + GMR on SONIC (ViT-H), ViT-H on SONIC (ViT-H)](results/routes/jump_kick.gif)
 
 **Tennis serve** ([GVHMR](https://github.com/zju3dv/GVHMR)'s example video): the GVHMR + GMR motion floats after the jump and fails, ViT-H's finishes
 
-![Tennis serve: input, GVHMR + GMR on SONIC, ViT-H on SONIC](results/routes/tennis.gif)
+![Tennis serve: input, GVHMR + GMR on SONIC (ViT-H), ViT-H on SONIC (ViT-H)](results/routes/tennis.gif)
 
 **AIST++ Pop** (robots only: the AIST videos can't be redistributed)
 
-![AIST++ Pop: GVHMR + GMR on SONIC, ViT-H on SONIC](results/routes/pop.gif)
+![AIST++ Pop: GVHMR + GMR on SONIC (ViT-H), ViT-H on SONIC (ViT-H)](results/routes/pop.gif)
 
 ## Results
 
@@ -30,16 +30,17 @@ get the motion from video, **GVHMR + GMR** and **ViT-H**, are compared, each tra
   to the G1 with IK ([GMR](https://github.com/YanjieZe/GMR)).
 - **ViT-H:** G1 motion generated straight from video ([ViT-H](https://github.com/mileret/ViT-H-release)).
   It starts from random noise, so each video gets three samples (seeds 42, 1, 2).
-- **SONIC:** one tracker for any motion (ViT-H's `g1_tracker`).
+- **SONIC (ViT-H):** one tracker for any motion: NVIDIA's [SONIC](https://huggingface.co/nvidia/GEAR-SONIC)
+  fine-tuned by ViT-H's authors on BONES-SEED (the data ViT-H learns from), shipped with ViT-H as `g1_tracker`.
 - **BeyondMimic:** one policy trained per motion ([mjlab](https://github.com/mujocolab/mjlab)).
 
 Motions are used as they come out: no cleaning, trimming or smoothing. Every run is scored in MuJoCo
 by [our fork](https://github.com/amirkhonaripov/g1-eval-harness) of an evaluation harness for the G1:
 10 tries on flat ground and 10 under each of 5 harder conditions (low friction, ice, three pushes).
 
-### Video to motion, tracked by SONIC
+### Video to motion, tracked by SONIC (ViT-H)
 
-| SONIC | GVHMR + GMR: flat ground | harder | pose error (cm) | ViT-H, 3 samples: flat ground | harder | pose error (cm) |
+| SONIC (ViT-H) | GVHMR + GMR: flat ground | harder | pose error (cm) | ViT-H, 3 samples: flat ground | harder | pose error (cm) |
 |---|---|---|---|---|---|---|
 | Studio dance (Pexels) | finishes | 50/50 | 7.5 | 3/3 finish | 150/150 | 4.4 |
 | Hip-hop (Pexels) | finishes | 49/50 | 11.9 | 3/3 finish | 150/150 | 3.1 |
@@ -49,7 +50,7 @@ by [our fork](https://github.com/amirkhonaripov/g1-eval-harness) of an evaluatio
 | AIST++ Jazz | finishes | 50/50 | 2.0 | 3/3 finish | 150/150 | 2.8 |
 
 - **Dances work with both methods,** on flat ground and under pushes and ice.
-- **SONIC doesn't jump.** At take-off the reference pelvis rises 23 cm; the robot's stays down, and
+- **SONIC (ViT-H) doesn't jump.** At take-off the reference pelvis rises 23 cm; the robot's stays down, and
   a foot ends up more than 25 cm below the reference ("fails": BeyondMimic's rule, used for every
   tracker).
 - **On the tennis serve, ViT-H does better,** but its samples differ: same video, 2 of 3 finish.
@@ -77,18 +78,18 @@ One policy trained per motion (3000 iterations, 4096 environments, ~1 h per poli
 | BeyondMimic, flat ground | finishes | finishes |
 | BeyondMimic, harder conditions | 50/50 | 49/50 |
 | BeyondMimic, pose error (cm) | 9.3 | 4.5 |
-| SONIC, flat ground | fails at 4.5–7.8 s | finishes |
-| SONIC, harder conditions | 0/50 | 49/50 |
+| SONIC (ViT-H), flat ground | fails at 4.5–7.8 s | finishes |
+| SONIC (ViT-H), harder conditions | 0/50 | 49/50 |
 
-- **A policy trained on the motion copes with GVHMR + GMR's floating feet,** where SONIC doesn't;
+- **A policy trained on the motion copes with GVHMR + GMR's floating feet,** where SONIC (ViT-H) doesn't;
   it copies the pose less closely (9.3 vs 4.5 cm on ViT-H's motion).
 - **ViT-H's motion is tracked equally well by both** trackers.
 
-### LAFAN1 dance: BeyondMimic vs SONIC
+### LAFAN1 dance: BeyondMimic vs SONIC (ViT-H)
 
 mjlab's demo motion (131 s of motion capture) and its pretrained BeyondMimic policy.
 
-| | BeyondMimic | SONIC |
+| | BeyondMimic | SONIC (ViT-H) |
 |---|---|---|
 | Flat ground | finishes | fails at 106.7 s (cartwheel) |
 | Harder conditions | 40/50 | 0/50 |
@@ -96,7 +97,7 @@ mjlab's demo motion (131 s of motion capture) and its pretrained BeyondMimic pol
 | Policy time per step (ms, one CPU thread) | 0.05 | 1.34 |
 | Policy's own evaluation | mjlab: finishes 93% of 1024; ROS 2 stack: 5/5 | `g1_tracker`: fails at 106.7 s |
 
-- **SONIC's position error is large by design:** it follows the motion relative to itself, not a
+- **SONIC (ViT-H) drifts by design:** it follows the motion relative to itself, not a
   fixed world position.
 
 ### Sim-to-sim: mjlab vs the ROS 2 deployment stack
@@ -149,7 +150,7 @@ $PY scripts/ground_motion.py data/motions/gmr/my_clip.npz --output-file data/mot
 $PY scripts/gmr_to_sonic.py data/motions/gmr/my_clip_grounded.npz --output-file runs/sonic/gmr_my_clip_grounded_in.npz
 ```
 
-**2. Track with SONIC** (no training):
+**2. Track with SONIC (ViT-H)** (no training):
 
 ```bash
 cd third_party/g1-eval-harness
@@ -185,7 +186,7 @@ cd third_party/g1-eval-harness && .venv/bin/python evaluate.py \
 ```bash
 $PY scripts/render_run.py runs/harness/sonic_gmr_my_clip/logs/flat_nominal_seed0.npz --follow \
   --gvhmr-file runs/videos2motion/my_clip/gvhmr/my_clip/hmr4d_results.pt --output-file my_clip_gmr.mp4
-scripts/make_gif.sh my_clip.gif data/videos/my_clip.mp4 "GVHMR + GMR -> SONIC" my_clip_gmr.mp4
+scripts/make_gif.sh my_clip.gif data/videos/my_clip.mp4 "GVHMR + GMR -> SONIC (ViT-H)" my_clip_gmr.mp4
 $PY scripts/motion_quality.py data/motions/*/my_clip*.npz   # joint limits, speed, foot sliding
 ```
 
