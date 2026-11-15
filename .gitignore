@@ -10,3 +10,9 @@ __pycache__/
 wandb/
 .DS_Store
 ruff.toml
+
+scripts/render_video.py
+scripts/make_table.py
+scripts/run_sim.sh
+MUJOCO_LOG.TXT
+
