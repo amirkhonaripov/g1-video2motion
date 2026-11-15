@@ -1,0 +1,327 @@
+[
+  {
+    "motion": "../data/motions/demo/lafan1_dance1_subject1.npz",
+    "seconds": 131.48,
+    "frames_outside_joint_limits": 0.0,
+    "max_joint_speed_rad_s": 25.36,
+    "mean_joint_accel_rad_s2": 21.5,
+    "foot_sliding_mean_m_s": 0.148,
+    "foot_below_start_floor_max_m": 0.017,
+    "pelvis_height_min_max_m": [
+      0.288,
+      0.842
+    ]
+  },
+  {
+    "motion": "../data/motions/gmr/hiphop_back.npz",
+    "seconds": 6.82,
+    "frames_outside_joint_limits": 0.0,
+    "max_joint_speed_rad_s": 4.59,
+    "mean_joint_accel_rad_s2": 5.8,
+    "foot_sliding_mean_m_s": 0.051,
+    "foot_below_start_floor_max_m": 0.235,
+    "pelvis_height_min_max_m": [
+      0.775,
+      0.993
+    ]
+  },
+  {
+    "motion": "../data/motions/gmr/jazz.npz",
+    "seconds": 11.94,
+    "frames_outside_joint_limits": 0.0,
+    "max_joint_speed_rad_s": 15.57,
+    "mean_joint_accel_rad_s2": 1.8,
+    "foot_sliding_mean_m_s": 0.011,
+    "foot_below_start_floor_max_m": 0.009,
+    "pelvis_height_min_max_m": [
+      0.772,
+      0.781
+    ]
+  },
+  {
+    "motion": "../data/motions/gmr/jump_kick.npz",
+    "seconds": 2.18,
+    "frames_outside_joint_limits": 0.0,
+    "max_joint_speed_rad_s": 16.09,
+    "mean_joint_accel_rad_s2": 28.2,
+    "foot_sliding_mean_m_s": 0.311,
+    "foot_below_start_floor_max_m": 0.042,
+    "pelvis_height_min_max_m": [
+      0.659,
+      1.08
+    ]
+  },
+  {
+    "motion": "../data/motions/gmr/pop.npz",
+    "seconds": 11.94,
+    "frames_outside_joint_limits": 0.0,
+    "max_joint_speed_rad_s": 5.03,
+    "mean_joint_accel_rad_s2": 3.3,
+    "foot_sliding_mean_m_s": 0.025,
+    "foot_below_start_floor_max_m": 0.058,
+    "pelvis_height_min_max_m": [
+      0.77,
+      0.836
+    ]
+  },
+  {
+    "motion": "../data/motions/gmr/studio_dance.npz",
+    "seconds": 15.72,
+    "frames_outside_joint_limits": 0.0,
+    "max_joint_speed_rad_s": 9.56,
+    "mean_joint_accel_rad_s2": 6.4,
+    "foot_sliding_mean_m_s": 0.101,
+    "foot_below_start_floor_max_m": 0.0,
+    "pelvis_height_min_max_m": [
+      0.808,
+      0.936
+    ]
+  },
+  {
+    "motion": "../data/motions/gmr/tennis.npz",
+    "seconds": 10.34,
+    "frames_outside_joint_limits": 0.0,
+    "max_joint_speed_rad_s": 20.11,
+    "mean_joint_accel_rad_s2": 14.2,
+    "foot_sliding_mean_m_s": 0.169,
+    "foot_below_start_floor_max_m": 0.0,
+    "pelvis_height_min_max_m": [
+      0.73,
+      1.013
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/hiphop_back.npz",
+    "seconds": 6.84,
+    "frames_outside_joint_limits": 0.003,
+    "max_joint_speed_rad_s": 12.69,
+    "mean_joint_accel_rad_s2": 5.5,
+    "foot_sliding_mean_m_s": 0.108,
+    "foot_below_start_floor_max_m": 0.042,
+    "pelvis_height_min_max_m": [
+      0.742,
+      0.827
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/hiphop_back_s1.npz",
+    "seconds": 6.84,
+    "frames_outside_joint_limits": 0.006,
+    "max_joint_speed_rad_s": 24.19,
+    "mean_joint_accel_rad_s2": 5.5,
+    "foot_sliding_mean_m_s": 0.11,
+    "foot_below_start_floor_max_m": 0.036,
+    "pelvis_height_min_max_m": [
+      0.754,
+      0.831
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/hiphop_back_s2.npz",
+    "seconds": 6.84,
+    "frames_outside_joint_limits": 0.0,
+    "max_joint_speed_rad_s": 18.75,
+    "mean_joint_accel_rad_s2": 5.9,
+    "foot_sliding_mean_m_s": 0.11,
+    "foot_below_start_floor_max_m": 0.039,
+    "pelvis_height_min_max_m": [
+      0.748,
+      0.822
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/jazz.npz",
+    "seconds": 12.02,
+    "frames_outside_joint_limits": 0.0,
+    "max_joint_speed_rad_s": 14.44,
+    "mean_joint_accel_rad_s2": 3.6,
+    "foot_sliding_mean_m_s": 0.035,
+    "foot_below_start_floor_max_m": 0.019,
+    "pelvis_height_min_max_m": [
+      0.776,
+      0.793
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/jazz_s1.npz",
+    "seconds": 12.02,
+    "frames_outside_joint_limits": 0.0,
+    "max_joint_speed_rad_s": 12.28,
+    "mean_joint_accel_rad_s2": 3.7,
+    "foot_sliding_mean_m_s": 0.039,
+    "foot_below_start_floor_max_m": 0.019,
+    "pelvis_height_min_max_m": [
+      0.779,
+      0.793
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/jazz_s2.npz",
+    "seconds": 12.02,
+    "frames_outside_joint_limits": 0.0,
+    "max_joint_speed_rad_s": 16.0,
+    "mean_joint_accel_rad_s2": 3.5,
+    "foot_sliding_mean_m_s": 0.034,
+    "foot_below_start_floor_max_m": 0.019,
+    "pelvis_height_min_max_m": [
+      0.777,
+      0.793
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/jump_kick.npz",
+    "seconds": 2.22,
+    "frames_outside_joint_limits": 0.054,
+    "max_joint_speed_rad_s": 23.94,
+    "mean_joint_accel_rad_s2": 24.1,
+    "foot_sliding_mean_m_s": 0.135,
+    "foot_below_start_floor_max_m": 0.059,
+    "pelvis_height_min_max_m": [
+      0.574,
+      1.027
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/jump_kick_s1.npz",
+    "seconds": 2.22,
+    "frames_outside_joint_limits": 0.063,
+    "max_joint_speed_rad_s": 26.71,
+    "mean_joint_accel_rad_s2": 24.3,
+    "foot_sliding_mean_m_s": 0.222,
+    "foot_below_start_floor_max_m": 0.092,
+    "pelvis_height_min_max_m": [
+      0.578,
+      1.005
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/jump_kick_s2.npz",
+    "seconds": 2.22,
+    "frames_outside_joint_limits": 0.099,
+    "max_joint_speed_rad_s": 25.22,
+    "mean_joint_accel_rad_s2": 24.6,
+    "foot_sliding_mean_m_s": 0.192,
+    "foot_below_start_floor_max_m": 0.082,
+    "pelvis_height_min_max_m": [
+      0.576,
+      1.026
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/pop.npz",
+    "seconds": 12.02,
+    "frames_outside_joint_limits": 0.092,
+    "max_joint_speed_rad_s": 12.1,
+    "mean_joint_accel_rad_s2": 5.9,
+    "foot_sliding_mean_m_s": 0.108,
+    "foot_below_start_floor_max_m": 0.013,
+    "pelvis_height_min_max_m": [
+      0.772,
+      0.793
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/pop_s1.npz",
+    "seconds": 12.02,
+    "frames_outside_joint_limits": 0.11,
+    "max_joint_speed_rad_s": 9.59,
+    "mean_joint_accel_rad_s2": 6.0,
+    "foot_sliding_mean_m_s": 0.1,
+    "foot_below_start_floor_max_m": 0.012,
+    "pelvis_height_min_max_m": [
+      0.77,
+      0.796
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/pop_s2.npz",
+    "seconds": 12.02,
+    "frames_outside_joint_limits": 0.085,
+    "max_joint_speed_rad_s": 83.85,
+    "mean_joint_accel_rad_s2": 11.2,
+    "foot_sliding_mean_m_s": 0.158,
+    "foot_below_start_floor_max_m": 0.037,
+    "pelvis_height_min_max_m": [
+      0.755,
+      0.793
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/studio_dance.npz",
+    "seconds": 15.74,
+    "frames_outside_joint_limits": 0.107,
+    "max_joint_speed_rad_s": 20.29,
+    "mean_joint_accel_rad_s2": 7.5,
+    "foot_sliding_mean_m_s": 0.14,
+    "foot_below_start_floor_max_m": 0.034,
+    "pelvis_height_min_max_m": [
+      0.783,
+      0.933
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/studio_dance_s1.npz",
+    "seconds": 15.74,
+    "frames_outside_joint_limits": 0.102,
+    "max_joint_speed_rad_s": 21.46,
+    "mean_joint_accel_rad_s2": 7.7,
+    "foot_sliding_mean_m_s": 0.145,
+    "foot_below_start_floor_max_m": 0.005,
+    "pelvis_height_min_max_m": [
+      0.793,
+      0.968
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/studio_dance_s2.npz",
+    "seconds": 15.74,
+    "frames_outside_joint_limits": 0.132,
+    "max_joint_speed_rad_s": 15.51,
+    "mean_joint_accel_rad_s2": 8.0,
+    "foot_sliding_mean_m_s": 0.142,
+    "foot_below_start_floor_max_m": 0.019,
+    "pelvis_height_min_max_m": [
+      0.771,
+      0.96
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/tennis.npz",
+    "seconds": 10.44,
+    "frames_outside_joint_limits": 0.056,
+    "max_joint_speed_rad_s": 24.67,
+    "mean_joint_accel_rad_s2": 13.9,
+    "foot_sliding_mean_m_s": 0.18,
+    "foot_below_start_floor_max_m": 0.051,
+    "pelvis_height_min_max_m": [
+      0.606,
+      0.913
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/tennis_s1.npz",
+    "seconds": 10.44,
+    "frames_outside_joint_limits": 0.044,
+    "max_joint_speed_rad_s": 44.42,
+    "mean_joint_accel_rad_s2": 13.9,
+    "foot_sliding_mean_m_s": 0.148,
+    "foot_below_start_floor_max_m": 0.017,
+    "pelvis_height_min_max_m": [
+      0.652,
+      0.957
+    ]
+  },
+  {
+    "motion": "../data/motions/vith/tennis_s2.npz",
+    "seconds": 10.44,
+    "frames_outside_joint_limits": 0.113,
+    "max_joint_speed_rad_s": 50.13,
+    "mean_joint_accel_rad_s2": 15.1,
+    "foot_sliding_mean_m_s": 0.201,
+    "foot_below_start_floor_max_m": 0.021,
+    "pelvis_height_min_max_m": [
+      0.657,
+      0.975
+    ]
+  }
+]
