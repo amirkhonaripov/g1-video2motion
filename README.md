@@ -38,9 +38,13 @@ and ViT-H sample 1 policies side by side.*
 4. **Report** (both routes): one script builds [`results/tables.md`](results/tables.md) from all three
    scorers. Videos and GIFs come from harness logs or ROS 2 recordings.
 
-**The harness** is a separate shared tool: our fork of a G1 evaluation harness, cloned into
+**The harness** is a separate shared tool: [our fork](https://github.com/amirkhonaripov/g1-eval-harness) of
+a [G1 evaluation harness](https://github.com/likealiens/g1-eval-harness), cloned into
 `third_party/g1-eval-harness`. It scores every tracker on the same robot body (the ROS 2 stack's G1
-model), the same physics, 6 conditions and 10 seeds.
+model), the same physics, 6 conditions and 10 seeds. The original scores walking policies (following a speed
+command); our fork adds motion trackers (following a reference motion), the ROS 2 stack's robot model and
+real-fall counting. It tells the two kinds apart by itself, so any G1 walking policy or motion tracker can be
+scored with a small adapter.
 
 ## Recommendation
 
@@ -406,10 +410,11 @@ For Ubuntu 24.04. Everything below is installed once.
 | Harness | scores every tracker the same way | both routes |
 | ROS 2 Jazzy and `motion_tracking_controller` | runs policies in the ROS 2 stack | BeyondMimic route only |
 
-**System tools.** `ffmpeg` converts videos and makes GIFs; `uv` installs mjlab.
+**System tools.** `ffmpeg` converts videos and makes GIFs; `uv` makes the Python environments; a C++ compiler
+(`build-essential`) builds pytorch3d.
 
 ```bash
-sudo apt install ffmpeg git curl
+sudo apt install ffmpeg git curl build-essential
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
@@ -419,50 +424,75 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv tool install huggingface_hub
 ```
 
-**Clone the repo and the tools:**
+**Clone the repo and run the install script:**
 
 ```bash
 git clone https://github.com/amirkhonaripov/g1-video2motion.git
 cd g1-video2motion
-mkdir third_party
-cd third_party
-git clone https://github.com/zju3dv/GVHMR.git
-git -C GVHMR checkout ee960bb
-git clone https://github.com/YanjieZe/GMR.git
-git -C GMR checkout 25f56db
-git clone https://github.com/mileret/ViT-H-release.git vit-h
-git -C vit-h checkout 2482c5c
-git clone https://github.com/mujocolab/mjlab.git
-git -C mjlab checkout 1b5c91c
-git clone https://github.com/NVlabs/GR00T-WholeBodyControl.git
-git -C GR00T-WholeBodyControl checkout 1e1ec4f
-git clone https://github.com/amirkhonaripov/g1-eval-harness.git
-git -C g1-eval-harness checkout 2b3f676
-cd ..
+bash install.sh
 ```
 
-### GVHMR, GMR and ViT-H
+It prints every command it runs, and at the end a checklist of the manual steps below that are still
+missing. Run it again at any time: what is already done is skipped. `bash install.sh --only <part>` runs one
+part (`tools`, `gvhmr`, `gmr`, `vith`, `mjlab`, `sonic`, `checks`); `bash install.sh --help` lists the options.
 
-Install each in its own environment, as its own README says: GVHMR's `docs/INSTALL.md` (conda), GMR's
-README (`uv sync`), ViT-H's README (conda, plus Fast-SAM-3D-Body in `third-party/`). They pin different
-PyTorch versions, so they can't share one environment.
+### What `install.sh` does
 
-Step 1a runs each tool with `third_party/<tool>/.venv/bin/python`. If you used conda, pass the environment's
-Python instead, for example `--gvhmr-python ~/miniconda3/envs/gvhmr/bin/python` (also `--gmr-python`,
-`--vith-python`).
+- **tools:** clones the tools into `third_party/` at these commits, then applies our small fixes in
+  `patches/` to GVHMR and ViT-H.
 
-**Local fixes.** Apply our small fixes to GVHMR and ViT-H:
+  | Folder | Repository | Commit |
+  |---|---|---|
+  | `GVHMR` | [zju3dv/GVHMR](https://github.com/zju3dv/GVHMR) | `ee960bb` |
+  | `GMR` | [YanjieZe/GMR](https://github.com/YanjieZe/GMR) | `25f56db` |
+  | `vit-h` | [mileret/ViT-H-release](https://github.com/mileret/ViT-H-release) | `2482c5c` |
+  | `vit-h/third-party/Fast-SAM-3D-Body` | [yangtiming/Fast-SAM-3D-Body](https://github.com/yangtiming/Fast-SAM-3D-Body) | `d72aa36` |
+  | `mjlab` | [mujocolab/mjlab](https://github.com/mujocolab/mjlab) | `1b5c91c` |
+  | `GR00T-WholeBodyControl` | [NVlabs/GR00T-WholeBodyControl](https://github.com/NVlabs/GR00T-WholeBodyControl) | `1e1ec4f` |
+  | `g1-eval-harness` | [amirkhonaripov/g1-eval-harness](https://github.com/amirkhonaripov/g1-eval-harness) | `2b3f676` |
+  | `pytorch3d` (built for GVHMR and ViT-H) | [facebookresearch/pytorch3d](https://github.com/facebookresearch/pytorch3d) | `3eac7c6` (0.7.9 plus CUDA 13 build fixes) |
 
-```bash
-git -C third_party/GVHMR apply ../../patches/gvhmr.patch
-git -C third_party/vit-h apply ../../patches/vith.patch
-```
+  The fixes load the camera track with `weights_only=False` (PyTorch 2.6 changed the default), handle newer
+  pycolmap (we used 4.2.1) returning no camera motion, and drop an unused `from turtle import forward` that
+  fails without Tk. The first two matter only for videos with a moving camera.
+- **gvhmr, vith:** GVHMR and ViT-H each get their own environment, `third_party/<tool>/.venv`: Python 3.12,
+  PyTorch 2.14 from PyTorch's CUDA index, the tool's `requirements.txt` without its old PyTorch, numpy,
+  pytorch3d and ultralytics pins, and pytorch3d built from source against that PyTorch (once, a few minutes;
+  the CUDA compiler comes from pip, so no system CUDA toolkit is needed). ViT-H's environment also gets the
+  packages Fast-SAM-3D-Body needs (`mhr` and a few small ones). `chumpy` gets two one-line fixes for
+  Python 3.12.
+- **gmr:** `uv sync` in `third_party/GMR`.
+- **mjlab:** `uv sync --extra <cu130|cu126>` in `third_party/mjlab`, then `rosbags`, `mcap` and the harness's
+  `requirements.txt`. This is the one environment for this repo's scripts and the harness.
+- **Checkpoints that need no sign-up:** GVHMR's own checkpoint from the Google Drive folder in its
+  `docs/INSTALL.md`; ViT-H's checkpoint, the `g1_tracker` checkpoint for SONIC (ViT-H), and the HMR2,
+  ViTPose, YOLO and DPVO weights (the same files for GVHMR and ViT-H) from
+  [eerrr1/ViT-H-checkpoints](https://huggingface.co/datasets/eerrr1/ViT-H-checkpoints).
+  Google Drive sometimes refuses downloads for a while ("too many users"); then run
+  `bash install.sh --only gvhmr` again later, or download `gvhmr/gvhmr_siga24_release.ckpt` from that folder
+  in a browser into `third_party/GVHMR/inputs/checkpoints/gvhmr/`.
+- **sonic:** SONIC v1.1, revision `6733128a` of `nvidia/GEAR-SONIC` on Hugging Face (the one our results
+  use), into `third_party/GR00T-WholeBodyControl/gear_sonic_deploy/policy/sonic_v1_1/`.
+  GR00T-WholeBodyControl's own `download_from_hf.py --sonic-v1-1` gets the latest files instead.
 
-They load the camera track with `weights_only=False` (PyTorch 2.6 changed the default), handle newer pycolmap (we used 4.2.1)
-returning no camera motion, and drop an unused `from turtle import forward` that fails without Tk. The first
-two matter only for videos with a moving camera.
+**PyTorch and CUDA.** The script picks the PyTorch build from `nvidia-smi`:
 
-**Models.** SMPL and SMPL-X are free after sign-up at [smpl.is.tue.mpg.de](https://smpl.is.tue.mpg.de/)
+- compute capability 10.0 or newer (Blackwell) needs CUDA 12.8 or newer, so it uses `cu130` (CUDA 13.0),
+  which needs driver 580 or newer;
+- older GPUs use `cu126` (CUDA 12.6), which needs driver 525 or newer.
+
+If the driver is too old, it says so and stops. `--cuda cu130` or `--cuda cu126` overrides the choice.
+The driver minimums are NVIDIA's for CUDA minor version compatibility (13.x: 580, 12.x: 525; see the
+[CUDA release notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html)).
+Tested on an RTX PRO 5000 Blackwell, driver 595, `cu130`; the `cu126` path for older GPUs is untested.
+
+Step 1a runs each tool with `third_party/<tool>/.venv/bin/python`. If you made a tool's environment
+yourself instead, for example with conda as the tools' own READMEs do, pass its Python:
+`--gvhmr-python ~/miniconda3/envs/gvhmr/bin/python` (also `--gmr-python`, `--vith-python`).
+
+### What you do by hand
+
+**SMPL and SMPL-X** are free after sign-up at [smpl.is.tue.mpg.de](https://smpl.is.tue.mpg.de/)
 and [smpl-x.is.tue.mpg.de](https://smpl-x.is.tue.mpg.de/) (non-commercial use). Put the files here:
 
 ```text
@@ -473,52 +503,27 @@ third_party/vit-h/inputs/checkpoints/body_models/smpl/SMPL_{NEUTRAL,MALE,FEMALE}
 third_party/vit-h/inputs/checkpoints/body_models/smplx/SMPLX_{NEUTRAL,MALE,FEMALE}.npz
 ```
 
-GVHMR's own checkpoints (`gvhmr`, `hmr2`, `vitpose`, `yolo`, `dpvo`) come from the Google Drive folder in
-its `docs/INSTALL.md` and go into `third_party/GVHMR/inputs/checkpoints/`.
-
-ViT-H's checkpoint, the `g1_tracker` checkpoint for SONIC (ViT-H), and SAM 3D Body. SAM 3D Body is gated:
-request access on [its Hugging Face page](https://huggingface.co/facebook/sam-3d-body-dinov3), and once it
-is approved, run `hf auth login` with an access token from your Hugging Face settings.
+**SAM 3D Body** (for ViT-H) is gated: request access on
+[its Hugging Face page](https://huggingface.co/facebook/sam-3d-body-dinov3), and once it is approved, run
+`hf auth login` with an access token from your Hugging Face settings, then:
 
 ```bash
-cd third_party/vit-h
-hf download eerrr1/ViT-H-checkpoints vith_offline_g1.ckpt \
-  inputs/checkpoints/hmr2/epoch=10-step=25000.ckpt \
-  inputs/checkpoints/vitpose/vitpose-h-multi-coco.pth \
-  inputs/checkpoints/yolo/yolov8x.pt \
-  --repo-type dataset --local-dir .
-hf download eerrr1/ViT-H-checkpoints model_step_020000_g1.onnx \
-  --repo-type dataset --local-dir inputs/checkpoints/g1_tracker
 hf download facebook/sam-3d-body-dinov3 \
-  --local-dir third-party/Fast-SAM-3D-Body/checkpoints/sam-3d-body-dinov3
-cd ../..
+  --local-dir third_party/vit-h/third-party/Fast-SAM-3D-Body/checkpoints/sam-3d-body-dinov3
 ```
+
+**ROS 2 Jazzy and the ROS 2 stack** (BeyondMimic route only): see the next section. **AIST++** (optional,
+the accuracy check for Pop and Jazz): see [step 1c](#1c-check-it-and-ground-it-if-it-floats).
+
+`bash install.sh --only checks` lists whichever of these are still missing.
 
 ### Our environment (mjlab's)
 
-All of this repo's scripts and the harness run in mjlab's environment:
-
-```bash
-cd third_party/mjlab && uv sync && cd ../..
-uv pip install --python third_party/mjlab/.venv/bin/python rosbags mcap -r third_party/g1-eval-harness/requirements.txt
-```
-
-Activate it once in each new terminal, from the repo root:
+All of this repo's scripts and the harness run in mjlab's environment. Activate it once in each new
+terminal, from the repo root:
 
 ```bash
 source third_party/mjlab/.venv/bin/activate
-```
-
-### SONIC v1.1
-
-Our results use revision `6733128a` of `nvidia/GEAR-SONIC` on Hugging Face. GR00T-WholeBodyControl's own
-script downloads the latest files (`python download_from_hf.py --sonic-v1-1 --no-planner`, run in
-`third_party/GR00T-WholeBodyControl`); to get exactly that revision:
-
-```bash
-hf download nvidia/GEAR-SONIC sonic_v1_1/model_encoder.onnx sonic_v1_1/model_decoder.onnx \
-  sonic_v1_1/observation_config.yaml --revision 6733128a \
-  --local-dir third_party/GR00T-WholeBodyControl/gear_sonic_deploy/policy
 ```
 
 ### ROS 2 Jazzy and the ROS 2 stack (BeyondMimic route only)
