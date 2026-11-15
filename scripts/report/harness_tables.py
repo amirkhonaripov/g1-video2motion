@@ -2,6 +2,7 @@
 
 import argparse
 import csv
+import fnmatch
 import glob
 import json
 import os
@@ -69,8 +70,17 @@ def parse_args():
   parser.add_argument("--ros2", default="results/ros2", help="analyze_ros2 results")
   parser.add_argument("--quality", default="results/motion_quality.json")
   parser.add_argument("--timings", default="results/timings.csv")
-  parser.add_argument("--output", default="results/tables.md")
-  return parser.parse_args()
+  parser.add_argument("--output", help="default: results/tables.md, or results/tables_<pattern>.md with --match")
+  parser.add_argument("--match", help="keep only stems matching this glob, e.g. 'my_clip*'")
+  args = parser.parse_args()
+  if args.output is None:
+    args.output = "results/tables.md" if args.match is None else f"results/tables_{safe_name(args.match)}.md"
+  return args
+
+
+def safe_name(pattern):
+  """A glob as a file name part: my_clip* -> my_clip."""
+  return re.sub(r"[^A-Za-z0-9_.-]+", "_", pattern).strip("_.") or "match"
 
 
 def load_runs(root):
@@ -85,6 +95,15 @@ def load_runs(root):
       starts = [p["start_s"] for seed in s["perturbations"][cond].values() for p in seed["pushes"]]
       runs.setdefault(name, {})[cond] = None if starts and min(starts) >= motion_s else trials
   return runs
+
+
+def keep(stem, match):
+  return match is None or fnmatch.fnmatch(stem, match)
+
+
+def only(runs, match):
+  """The runs whose stem (name without the tracker) matches."""
+  return {name: r for name, r in runs.items() if keep(name.split("_", 1)[1], match)}
 
 
 def load_quality(path):
@@ -146,6 +165,13 @@ def motions(clips, variants, vith_grounded=False):
   return out
 
 
+def rows_of(clips, variants, custom, match, vith_grounded=False):
+  """(clip, motion label, stem, shown only with a run) of every row; runs with other names last, labelled by name."""
+  out = [(clips[c], label, stem(c, src, seed, v), bool(v))
+         for c, label, src, seed, v in motions(clips, variants, vith_grounded)]
+  return [r for r in out if keep(r[2], match)] + [(s, "", s, True) for s in custom]
+
+
 def vals(trials, key):
   return np.array([t[key] for t in trials.values() if t.get(key) is not None], dtype=float)
 
@@ -154,7 +180,7 @@ def tally(runs, falls, name, conds):
   """Successes, real falls, trials and failed trials without a rerun, over these conditions."""
   ok = fell = n = unknown = 0
   for cond in conds:
-    trials = runs[name][cond]
+    trials = runs[name].get(cond)  # None: not run, or no push before the motion ends
     if trials is None:
       continue
     ok += sum(not t["fall"] for t in trials.values())
@@ -184,9 +210,12 @@ def summary_cells(runs, falls, name):
   """Success all / flat / slippery / pushes, flat error, real falls."""
   if name not in runs:
     return ["no run"] + ["–"] * 5
+  run = runs[name]
   every = tally(runs, falls, name, CONDITIONS)
-  parts = [success(tally(runs, falls, name, c)) for c in (["flat_nominal"], SLIPPERY, PUSHES)]
-  return [success(every), *parts, error(runs[name]["flat_nominal"]), real_falls(every)]
+  parts = [success(tally(runs, falls, name, c)) if any(x in run for x in c) else "–"
+           for c in (["flat_nominal"], SLIPPERY, PUSHES)]
+  flat = error(run["flat_nominal"]) if "flat_nominal" in run else "–"
+  return [success(every), *parts, flat, real_falls(every)]
 
 
 def mjlab(path):
@@ -213,50 +242,52 @@ def table(cols, rows):
   return "\n".join(lines + ["| " + " | ".join(r) + " |" for r in rows])
 
 
-def tracker_table(tracker, runs, falls, args, clips, variants):
+def tracker_table(tracker, runs, falls, args, clips, variants, custom):
   cols = ["Clip", "Motion", "Success: all", "flat", "slippery", "pushes", "MPKPE / r-MPKPE (cm), flat", "Real falls"]
   if tracker == "beyondmimic":
     cols += ["mjlab success", "ROS 2 success", "ROS 2 r-MPKPE (cm)", "ROS 2 falls"]
   rows = []
-  for clip, label, src, seed, v in motions(clips, variants):
-    name = f"{tracker}_{stem(clip, src, seed, v)}"
-    if v and name not in runs:
+  for clip, label, short, optional in rows_of(clips, variants, custom, args.match):
+    name = f"{tracker}_{short}"
+    if optional and name not in runs:
       continue
-    cells = [clips[clip], label, *summary_cells(runs, falls, name)]
+    cells = [clip, label, *summary_cells(runs, falls, name)]
     if tracker == "beyondmimic":
-      short = stem(clip, src, seed, v)
       cells += [mjlab(f"{args.mjlab}/{short}.json"), *ros2(f"{args.ros2}/{short}.json")]
     rows.append(cells)
   return table(cols, rows)
 
 
-def comparison_table(runs, falls, clips):
+def comparison_table(runs, falls, clips, custom, match):
   cols = ["Clip", "Motion"]
   cols += [f"{m}: {t}" for m in ("Success", "MPKPE / r-MPKPE (cm)", "Real falls") for t in TRACKERS.values()]
   rows = []
-  for clip, label, src, seed, v in motions(clips, ["", "_grounded"]):
-    names = [f"{t}_{stem(clip, src, seed, v)}" for t in TRACKERS]
-    if v and not any(n in runs for n in names):
+  for clip, label, short, optional in rows_of(clips, ["", "_grounded"], custom, match):
+    names = [f"{t}_{short}" for t in TRACKERS]
+    if optional and not any(n in runs for n in names):
       continue
     cells = [summary_cells(runs, falls, n) for n in names]
-    rows.append([clips[clip], label] + [c[i] for i in (0, 4, 5) for c in cells])
+    rows.append([clip, label] + [c[i] for i in (0, 4, 5) for c in cells])
   return table(cols, rows)
 
 
-def detail_table(tracker, runs, falls, clips, variants):
+def detail_table(tracker, runs, falls, clips, variants, custom):
   rows = []
-  for clip, label, src, seed, v in motions(clips, variants, vith_grounded=True):
-    name = f"{tracker}_{stem(clip, src, seed, v)}"
+  for clip, label, short, _ in rows_of(clips, variants, custom, None, vith_grounded=True):
+    name = f"{tracker}_{short}"
     if name not in runs:
       continue
     cells = []
     for cond in CONDITIONS:
+      if cond not in runs[name]:
+        cells.append("–")
+        continue
       if runs[name][cond] is None:
         cells.append("n/a")
         continue
       t = tally(runs, falls, name, [cond])
       cells.append(f"{success(t)} · {real_falls(t)} · {100 * vals(runs[name][cond], 'r_mpkpe_m').mean():.1f}")
-    rows.append([clips[clip], label, *cells])
+    rows.append([clip, label, *cells])
   return table(["Clip", "Motion", *CONDITIONS.values()], rows)
 
 
@@ -283,19 +314,22 @@ def sources_table(quality, timings, clips):
 
 def main():
   args = parse_args()
-  runs, falls = load_runs(args.runs), load_runs(args.falls)
-  latency, quality = load_runs(args.latency), load_quality(args.quality)
+  runs, falls = only(load_runs(args.runs), args.match), only(load_runs(args.falls), args.match)
+  latency = only(load_runs(args.latency), args.match)
+  quality = {k: q for k, q in load_quality(args.quality).items() if keep(f"{k[0]}_{k[1]}{k[2]}", args.match)}
   stems = [name.split("_", 1)[1] for name in [*runs, *falls]]
   results = glob.glob(f"{args.mjlab}/*.json") + glob.glob(f"{args.ros2}/*.json")
   stems += [os.path.basename(p).removesuffix(".json") for p in results]
   stems += [f"{clip}_{src}" for clip, src, _ in quality]
   clips, variants = find_names(stems)
+  regular = {short for _, _, short, _ in rows_of(clips, variants, [], None, vith_grounded=True)}
+  custom = sorted({name.split("_", 1)[1] for name in runs} - regular)
   parts = ["### Definitions", DEFINITIONS]
   for tracker, title in TRACKERS.items():
     if tracker == "beyondmimic" or runs:
-      parts += [f"### {title}", tracker_table(tracker, runs, falls, args, clips, variants)]
+      parts += [f"### {title}", tracker_table(tracker, runs, falls, args, clips, variants, custom)]
   if runs:
-    parts += ["### Trackers side by side", comparison_table(runs, falls, clips)]
+    parts += ["### Trackers side by side", comparison_table(runs, falls, clips, custom, args.match)]
   if latency:
     parts += ["### Policy time", latency_table(latency)]
   if quality:
@@ -303,11 +337,13 @@ def main():
   if runs:
     parts += ["### Every condition", "Each cell: success · real falls · r-MPKPE (cm)."]
     for tracker, title in TRACKERS.items():
-      parts += [f"#### {title}", detail_table(tracker, runs, falls, clips, variants)]
+      parts += [f"#### {title}", detail_table(tracker, runs, falls, clips, variants, custom)]
   text = "\n\n".join(parts)
   with open(args.output, "w") as f:
     f.write(text + "\n")
   print(text)
+  if args.match:
+    print(f"[done] wrote {args.output}")
 
 
 if __name__ == "__main__":

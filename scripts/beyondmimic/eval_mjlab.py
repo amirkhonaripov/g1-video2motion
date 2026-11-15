@@ -165,17 +165,17 @@ def summarize(errors, active, success, num_envs):
   }
 
 
-def main():
-  args, checkpoint_file, motion_file, name = parse_args()
+def evaluate_policy(task, motion_file, checkpoint_file, name, num_envs=1024):
+  """Score the checkpoint on its motion; metrics to results/mjlab/<name>.json."""
   configure_torch_backends()
   device = "cuda:0" if torch.cuda.is_available() else "cpu"
-  env, env_cfg, agent_cfg = make_env(args.task, motion_file, args.num_envs, device)
-  policy = load_policy(args.task, env, agent_cfg, checkpoint_file, device)
+  env, env_cfg, agent_cfg = make_env(task, motion_file, num_envs, device)
+  policy = load_policy(task, env, agent_cfg, checkpoint_file, device)
   ee_body_names = env_cfg.terminations["ee_body_pos"].params["body_names"]
   print(f"[INFO] End effector bodies: {ee_body_names}")
 
-  errors, active, success, failures = evaluate(env, policy, args.num_envs, ee_body_names, device)
-  metrics = summarize(errors, active, success, args.num_envs)
+  errors, active, success, failures = evaluate(env, policy, num_envs, ee_body_names, device)
+  metrics = summarize(errors, active, success, num_envs)
   print("\n" + "=" * 50 + "\nEvaluation Results\n" + "=" * 50)
   for key, value in metrics.items():
     print(f"  {key}: {value:.4f}")
@@ -187,6 +187,11 @@ def main():
     json.dump({"metrics": metrics, "failures": failures}, f, indent=2)
   print(f"[INFO] Metrics saved to {out}")
   env.close()
+
+
+def main():
+  args, checkpoint_file, motion_file, name = parse_args()
+  evaluate_policy(args.task, motion_file, checkpoint_file, name, args.num_envs)
 
 
 if __name__ == "__main__":

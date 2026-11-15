@@ -6,6 +6,10 @@ policies in HybridRobotics' ROS 2 deployment stack, the controller used on the r
 ("the ROS 2 stack" below). Two SONIC trackers (NVIDIA's motion tracker: one network for any motion, no
 training per motion) are scored on the same motions for comparison.
 
+**Contents:** [How it works](#how-it-works) · [Recommendation](#recommendation) · [Results](#results) ·
+[Limitations and definitions](#limitations-and-definitions) · [Install](#install) · [Run](#run) ·
+[Credits and licenses](#credits-and-licenses)
+
 ![Studio dance: BeyondMimic in the ROS 2 stack, replay of a ROS 2 recording](results/gifs/ros2_studio_dance.gif)
 
 *Studio dance: BeyondMimic in the ROS 2 stack, replay of a ROS 2 recording. Input video, then the GVHMR + GMR
@@ -47,9 +51,9 @@ model), the same physics, 6 conditions and 10 seeds.
   relaunches after a [start-up drop](#start-up-drops-in-the-ros-2-sim) or a recording that started late.
   All 14 failures are on the jump kick: 10 are the GVHMR + GMR jump kick, which fails everywhere, and 4 are
   ViT-H jump kicks.
-- **Its price:** one policy per motion (24–33 min of training on one GPU). When it fails, the robot can
-  really fall: 45 of its 92 failed harness trials end in a real fall, all under pushes. SONIC's failures on
-  the video clips leave the robot standing.
+- **Its price:** one policy per motion (24–33 min of training each on our GPU; see [Cost](#cost)). When it
+  fails, the robot can really fall: 45 of its 92 failed harness trials end in a real fall, all under pushes.
+  SONIC's failures on the video clips leave the robot standing.
 - **Prefer ViT-H motions.** They track better than GVHMR + GMR motions with every tracker (BeyondMimic
   965/990 vs 263/330). One cause we could show: GVHMR + GMR's tennis serve floats above the floor, and
   grounding it lifts SONIC (ViT-H) from 0/60 to 55/60. ViT-H's 3 samples of one video can differ a lot, so
@@ -246,7 +250,7 @@ means a tracking failure there.
 
 #### Floating feet
 
-After the tennis serve's jump, GVHMR + GMR's reconstruction leaves the person 12–20 cm above the floor.
+After the tennis serve's jump, GVHMR + GMR's reconstruction leaves the person's feet about 10–15 cm above the floor from about 5 s to the end.
 The feet never come back down in the data. A robot standing on the floor can't follow a pose that floats.
 Grounding (`scripts/check/ground_motion.py`) follows a slow floor estimate, so short jumps (under 1 s) stay.
 
@@ -309,8 +313,7 @@ the simulator start, not from the policy: the same policies, started from the sp
 never fail in the first 0.5 s. 139 of 389 launches (about one in three) had to be repeated, after such a
 drop or a recording that started late. That is why the ROS 2 column says "k/n (N launches)".
 
-Fix: if the robot is on the floor when the viewer opens, close it and launch again. The viewer has no
-keyboard reset; Space only pauses.
+`scripts.ros2.rollouts` detects these drops, launches again by itself and counts the launches.
 
 #### ROS 2 vs mjlab
 
@@ -381,7 +384,18 @@ training per motion.
 
 ## Install
 
-For Ubuntu 24.04 with an NVIDIA GPU. Everything below is installed once.
+For Ubuntu 24.04. Everything below is installed once.
+
+**What you need first:**
+
+- **Hardware:** an x86-64 PC with an NVIDIA GPU. The ROS 2 stack's packages are built for x86-64 only.
+  Training (step 2a) uses the most GPU memory; with less memory, lower `--num-envs`.
+- **SMPL and SMPL-X:** free registration at [smpl.is.tue.mpg.de](https://smpl.is.tue.mpg.de/) and
+  [smpl-x.is.tue.mpg.de](https://smpl-x.is.tue.mpg.de/), one for each, to download the body models
+  (non-commercial use).
+- **Hugging Face:** an account, approved access to the gated SAM 3D Body model (request it on
+  [its model page](https://huggingface.co/facebook/sam-3d-body-dinov3); the authors approve requests by
+  hand), and an access token for `hf auth login`.
 
 | Tool | What it does | Needed for |
 |---|---|---|
@@ -397,6 +411,12 @@ For Ubuntu 24.04 with an NVIDIA GPU. Everything below is installed once.
 ```bash
 sudo apt install ffmpeg git curl
 curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+`hf` is Hugging Face's command-line tool. Install it in a new terminal, once `uv` is on the path:
+
+```bash
+uv tool install huggingface_hub
 ```
 
 **Clone the repo and the tools:**
@@ -427,7 +447,7 @@ Install each in its own environment, as its own README says: GVHMR's `docs/INSTA
 README (`uv sync`), ViT-H's README (conda, plus Fast-SAM-3D-Body in `third-party/`). They pin different
 PyTorch versions, so they can't share one environment.
 
-Step 1 runs each tool with `third_party/<tool>/.venv/bin/python`. If you used conda, pass the environment's
+Step 1a runs each tool with `third_party/<tool>/.venv/bin/python`. If you used conda, pass the environment's
 Python instead, for example `--gvhmr-python ~/miniconda3/envs/gvhmr/bin/python` (also `--gmr-python`,
 `--vith-python`).
 
@@ -457,8 +477,8 @@ GVHMR's own checkpoints (`gvhmr`, `hmr2`, `vitpose`, `yolo`, `dpvo`) come from t
 its `docs/INSTALL.md` and go into `third_party/GVHMR/inputs/checkpoints/`.
 
 ViT-H's checkpoint, the `g1_tracker` checkpoint for SONIC (ViT-H), and SAM 3D Body. SAM 3D Body is gated:
-accept its terms on [its Hugging Face page](https://huggingface.co/facebook/sam-3d-body-dinov3) and run
-`hf auth login` first.
+request access on [its Hugging Face page](https://huggingface.co/facebook/sam-3d-body-dinov3), and once it
+is approved, run `hf auth login` with an access token from your Hugging Face settings.
 
 ```bash
 cd third_party/vit-h
@@ -534,6 +554,9 @@ cd ~/colcon_ws && rosdep install --from-paths src --ignore-src -r -y
 colcon build --symlink-install --packages-up-to motion_tracking_controller unitree_bringup
 ```
 
+These apt repositories aren't pinned the way the git commits above are: `apt install` gets whatever they
+hold at the time.
+
 Source ROS 2 and the workspace in every terminal:
 
 ```bash
@@ -543,49 +566,66 @@ echo "source ~/colcon_ws/install/setup.bash" >> ~/.bashrc
 
 ## Run
 
-All commands run from the repo root, in our environment (`source third_party/mjlab/.venv/bin/activate`).
-Our scripts run as `python -m scripts.<folder>.<name>` because they share `scripts/g1.py`.
+Run every command from the repo root. In each new terminal, activate our environment first:
+`source third_party/mjlab/.venv/bin/activate` (ROS 2 is sourced from `~/.bashrc`). Our scripts run as
+`python -m scripts.…` because they share `scripts/g1.py`.
 
-The examples use a video `my_clip.mp4`. A policy's name (its stem) is the clip plus the method:
-`my_clip_gmr`, `my_clip_vith`, `my_clip_vith_s2` (ViT-H sample 2), `my_clip_gmr_grounded`.
+The examples use a video `my_clip.mp4`. Every result is named after its motion: `my_clip_gmr` (GVHMR + GMR),
+`my_clip_vith_s2` (ViT-H sample 2), `my_clip_gmr_grounded` (a grounded motion). Each helper prints the
+commands it runs underneath (`[run] ...`), so you can see and rerun any of them by hand.
 
-| Start from | Steps |
+| You have | Do |
 |---|---|
-| BeyondMimic from a video (GVHMR + GMR or ViT-H) | 1 → 2 → 3a → 3b, 3c, 3d → 3e → 5 |
-| BeyondMimic from your own `.pt` checkpoint | 3a (export only) → 3b, 3c, 3d → 3e → 5 |
-| BeyondMimic from your own `.onnx` | 3c, 3d → 5 |
-| BeyondMimic from a motion file | 2 → 3a → 3b, 3c, 3d → 3e → 5 |
-| The pretrained LAFAN1 policy | 3a (pretrained) → 3b, 3c, 3d → 3e → 5 |
-| SONIC from a video | 1 → 2 → 4a → 4b, 4c → 5 |
-| SONIC from a motion file | 2 → 4a → 4b, 4c → 5 |
+| A video | 1a → 1c → 2 → 3 → 4 → 5 |
+| A motion file | 1b → 1c → 2 → 3 → 4 → 5 |
+| A BeyondMimic policy: your own `.pt` or `.onnx`, or the pretrained LAFAN1 policy | 2c → 3 → 4 → 5 |
 
-A motion file is a G1 motion in mjlab's format (`.npz`). Your own `.onnx` must come from mjlab's tracking
-task (`Mjlab-Tracking-Flat-Unitree-G1`); put it at `runs/onnx/<stem>/policy.onnx`. Scoring ROS 2 runs (3e)
-also needs the `reference.npz` that 3a writes next to it.
+Step 4 is for BeyondMimic only.
 
-### 1. Shared: make a motion from a video
+### 1. Get a motion (both trackers)
 
-Turns a video into G1 motions. It converts the video to 30 fps (`data/videos/my_clip.mp4`), runs the tools
-and prints every command it runs. Input: `my_clip.mp4`. Output: `data/motions/gmr/my_clip.npz`, or
-`data/motions/vith/my_clip.npz`, `my_clip_s2.npz` and `my_clip_s3.npz` (ViT-H samples 1–3; seeds 42, 1, 2).
-Intermediate files: `runs/videos2motion/my_clip/`. Add `--moving-camera` if the camera moves.
+#### 1a. From a video
+
+Turns a video into G1 motions with GVHMR + GMR or with ViT-H. Input: `my_clip.mp4`. Output:
+`data/motions/gmr/my_clip.npz`, or `data/motions/vith/my_clip.npz`, `my_clip_s2.npz` and `my_clip_s3.npz`
+(ViT-H samples 1–3; seeds 42, 1, 2). A video that isn't 30 fps is first converted to a 30 fps copy,
+`data/videos/my_clip.mp4`. Intermediate files: `runs/videos2motion/my_clip/`. Add `--moving-camera` if the
+camera moves, and `--name` for another name than the video's.
 
 ```bash
 python -m scripts.motion.from_video my_clip.mp4 --method gvhmr_gmr
 python -m scripts.motion.from_video my_clip.mp4 --method vith --samples 3
 ```
 
-### 2. Shared: check and ground the motion
+**Good input videos:**
 
-Checks motions for joint limits, joint speed and foot sliding. Input: motion files. Output: printed, and
-`results/motion_quality.json`.
+- one person;
+- the whole body, feet included, in frame all the time (clips where the feet leave the frame don't work well);
+- a still camera works best; if it moves, add `--moving-camera`;
+- ideally 30 fps or more (GVHMR, GMR and ViT-H work at 30 fps; other frame rates are converted);
+- a few seconds to a minute long.
+
+#### 1b. From a motion file
+
+Put a G1 motion in mjlab's format at `data/motions/<method>/<name>.npz`, for example
+`data/motions/gmr/my_clip.npz`. That is an `.npz` as written by mjlab's `csv_to_npz`, with `fps`,
+`joint_pos`, `joint_vel`, `body_pos_w`, `body_quat_w`, `body_lin_vel_w` and `body_ang_vel_w`. A GMR `.pkl`
+converts with `python -m scripts.motion.gmr_to_npz my_clip.pkl --output-file data/motions/gmr/my_clip.npz`.
+
+#### 1c. Check it, and ground it if it floats
+
+Checks motions for joint limits, joint speed, foot sliding and floating. Input: motion files. Output: one
+line per motion, ending in `floats: yes` or `floats: no`; add `--output results/motion_quality.json` to
+save the results. A motion floats when both feet stay at least 5 cm above the floor without moving up or down (standing in
+the air, not jumping) for 0.5 s or more; the line then gives the longest such stretch and its height.
 
 ```bash
 python -m scripts.check.motion_quality data/motions/gmr/my_clip.npz data/motions/vith/my_clip.npz
 ```
 
-If a motion floats or sinks, ground it. Input: `data/motions/gmr/my_clip.npz`. Output:
-`data/motions/gmr/my_clip_grounded.npz`.
+If a motion floats, ground it: this moves it down so the feet touch the floor (jumps shorter than 1 s stay).
+Input: `data/motions/gmr/my_clip.npz`. Output: `data/motions/gmr/my_clip_grounded.npz`, used like any other
+motion in the next steps.
 
 ```bash
 python -m scripts.check.ground_motion data/motions/gmr/my_clip.npz
@@ -613,32 +653,48 @@ python -m scripts.check.motion_accuracy
 
 Jazz is `gJS_sBM_cAll_d01_mJS0_ch01.pkl`.
 
-### 3. BeyondMimic route
+### 2. Get a tracker for the motion
 
-#### 3a. Train and export a policy, or use the pretrained one
+#### 2a. BeyondMimic: train a policy
 
-**Train.** Trains one policy on one motion, 3000 iterations. Input: `data/motions/gmr/my_clip.npz`.
-Output: the run folder `runs/train/g1_tracking/<date>_my_clip_gmr/`. `--env.scene.num-envs 4096` matters:
-mjlab's default is 1 environment, and training on 1 fails.
+Trains one policy on the motion in mjlab (3000 iterations by default), exports it to ONNX and scores it
+with mjlab's own evaluation (1024 episodes). Input: `data/motions/gmr/my_clip.npz`. Output:
 
-```bash
-python -m mjlab.scripts.train Mjlab-Tracking-Flat-Unitree-G1 \
-  --env.commands.motion.motion-file data/motions/gmr/my_clip.npz \
-  --env.scene.num-envs 4096 --agent.max-iterations 3000 \
-  --log-root runs/train --agent.run-name my_clip_gmr --agent.logger tensorboard
-```
-
-**Export.** Exports the run's last checkpoint with its motion. Input: the run folder. Output:
-`runs/onnx/my_clip_gmr/policy.onnx` and `reference.npz` (the motion inside the policy) next to it.
+- the training run: `runs/train/g1_tracking/<date>_my_clip_gmr/`;
+- the policy: `runs/onnx/my_clip_gmr/policy.onnx`, with `reference.npz` (the motion inside the policy)
+  next to it;
+- the mjlab score: `results/mjlab/my_clip_gmr.json`.
 
 ```bash
-python -m scripts.beyondmimic.export_onnx runs/train/g1_tracking/*_my_clip_gmr
+python -m scripts.beyondmimic.train data/motions/gmr/my_clip.npz
 ```
 
-For your own `.pt`: `python -m scripts.beyondmimic.export_onnx --checkpoint-file my.pt --motion-file
-data/motions/gmr/my_clip.npz --name my_clip_gmr`.
+`--num-envs` sets the parallel environments (default 4096); lower it if training runs out of GPU memory.
+`--iterations` sets the training length.
 
-**Or the pretrained LAFAN1 policy.** Downloads the checkpoint and its motion, then exports them. Output:
+#### 2b. SONIC: nothing to train
+
+Both SONIC versions were downloaded at [Install](#install). They take the motion directly in step 3.
+
+#### 2c. Bring a BeyondMimic policy
+
+**Your own `.pt`** from mjlab's tracking task (`Mjlab-Tracking-Flat-Unitree-G1`). Exports it with its
+motion to `runs/onnx/my_policy/policy.onnx` and `reference.npz`. For its mjlab score
+(`results/mjlab/my_policy.json`), run `eval_mjlab` with the same flags.
+
+```bash
+python -m scripts.beyondmimic.export_onnx --checkpoint-file my_policy.pt \
+  --motion-file data/motions/gmr/my_clip.npz --name my_policy
+python -m scripts.beyondmimic.eval_mjlab --checkpoint-file my_policy.pt \
+  --motion-file data/motions/gmr/my_clip.npz --name my_policy
+```
+
+**Your own `.onnx`** exported from mjlab's tracking task: copy it to `runs/onnx/<name>/policy.onnx`. Step 3
+works with it as it is. Step 4 doesn't: recording and scoring ROS 2 rollouts needs the motion's
+`reference.npz` next to the policy, and only `export_onnx` writes that file. If you have the `.pt`, export it
+as above instead.
+
+**The pretrained LAFAN1 policy.** Downloads the checkpoint and its motion, then exports them. Output:
 `runs/onnx/lafan1_dance/policy.onnx` and `reference.npz`.
 
 ```bash
@@ -650,119 +706,90 @@ python -m scripts.beyondmimic.export_onnx --checkpoint-file runs/checkpoints/laf
   --motion-file data/motions/demo/lafan1_dance1_subject1.npz --name lafan1_dance
 ```
 
-#### 3b. Score in mjlab
+### 3. Evaluate in the harness (all trackers)
 
-Runs mjlab's own evaluation, 1024 episodes. Input: the run folder. Output: `results/mjlab/my_clip_gmr.json`.
-
-```bash
-python -m scripts.beyondmimic.eval_mjlab runs/train/g1_tracking/*_my_clip_gmr
-```
-
-For a `.pt` without a run folder (such as the LAFAN1 policy), use the same `--checkpoint-file`,
-`--motion-file` and `--name` as in 3a.
-
-#### 3c. Score in the harness
-
-Runs the policy under 6 conditions × 10 seeds. Input: `runs/onnx/my_clip_gmr/policy.onnx`.
-Output: `runs/harness/beyondmimic_my_clip_gmr/` with `summary.md` (read this first), `summary.json`, logs
-and videos.
+The harness runs every tracker on the G1 model from the ROS 2 stack, the robot body the deployed policy
+meets, in plain MuJoCo, under 6 conditions × 10 seeds. Every tracker gets the same body and the same
+disturbances, which is what makes the comparison fair. It is our fork of a shared harness, cloned at
+[Install](#install).
 
 ```bash
-python third_party/g1-eval-harness/evaluate.py --adapter adapters.beyondmimic_adapter:BeyondMimicAdapter \
-  --checkpoint runs/onnx/my_clip_gmr/policy.onnx \
-  --seeds 0 1 2 3 4 5 6 7 8 9 --output-dir runs/harness/beyondmimic_my_clip_gmr
+python -m scripts.harness beyondmimic my_clip_gmr
+python -m scripts.harness sonicv11 data/motions/gmr/my_clip.npz
+python -m scripts.harness sonicvith data/motions/gmr/my_clip.npz
 ```
 
-For real falls, run the failed conditions again (`--scenarios <failed ones>`) with
-`--keep-running-after-tracking-failure` and `--output-dir runs/harness_falls/beyondmimic_my_clip_gmr`.
-The same applies to 4b and 4c.
+BeyondMimic takes a policy name (`runs/onnx/<name>/policy.onnx`) or a path to an `.onnx`. The SONIC trackers
+take a motion; it is converted to SONIC's format first, into `data/motions/sonic/my_clip_gmr.npz`.
 
-#### 3d. Run in the ROS 2 stack and record it
+Output, for example for `beyondmimic my_clip_gmr`:
 
-Opens the simulator with the policy and records the run. Input: `runs/onnx/my_clip_gmr/policy.onnx` (the
-motion is inside it). Output: a MuJoCo viewer and the recording `runs/bags/my_clip_gmr_r1/`. The policy
-starts with the simulator.
+- `runs/harness/beyondmimic_my_clip_gmr__all/summary.md`: the results table (read this first), with
+  `summary.json`, per-step logs in `logs/` and videos of the first seed of each condition in `videos/`;
+- `runs/harness_falls/beyondmimic_my_clip_gmr__all/`: the conditions with a tracking failure, run again
+  without stopping at the failure, to count real falls.
+
+`--seeds` sets the seeds (default `0 1 2 3 4 5 6 7 8 9`). `--no-falls` skips the real-fall reruns.
+
+Our SONIC results were converted from GMR's 30 fps output instead of the 50 fps motion file. Both give the
+same results: on Pop, the same outcomes and MPKPE within 1 cm.
+
+The harness can also be run directly with `third_party/g1-eval-harness/evaluate.py`; see
+[its README](https://github.com/amirkhonaripov/g1-eval-harness#2-evaluate-a-policy---one-command).
+
+### 4. BeyondMimic in the ROS 2 stack
+
+This runs the policy in HybridRobotics' own robot software, the same controller as on the real robot, with
+its own simulator. The harness can't drive that software, so the rollouts are recorded and scored
+afterwards with the same rules. It is BeyondMimic only, because that stack runs BeyondMimic policies
+(SONIC's equivalent is NVIDIA's separate C++ deploy).
 
 ```bash
-ros2 launch scripts/ros2/record.launch.py policy_path:=$PWD/runs/onnx/my_clip_gmr/policy.onnx \
-  bag:=runs/bags/my_clip_gmr_r1
+python -m scripts.ros2.rollouts my_clip_gmr --runs 10
 ```
 
-Press Ctrl+C a few seconds after the motion ends. Record more runs as `_r2`, `_r3`, and so on.
+- Each rollout opens the MuJoCo viewer, and each launch stops by itself after the motion ends.
+- If the robot drops before the policy starts, that launch is thrown away and relaunched automatically.
+  The relaunches are counted and show up as "(N launches)" in the tables.
+- The recordings go to `runs/bags/`. Run the command again to add more rollouts; they are numbered after
+  the existing ones, and the score covers all of them.
+- Output: one line per rollout, a summary line (successes, falls and launches) and
+  `results/ros2/my_clip_gmr.json`.
 
-If the robot is already on the floor when the viewer opens, press Ctrl+C, delete the recording
-(`rm -r runs/bags/my_clip_gmr_r1`) and launch again. To report launches, write how many launches the run
-took next to it, for example `echo 2 > runs/bags/my_clip_gmr_r1.tries`.
+`rollouts` uses `scripts/ros2/record.launch.py`, which starts the stack and records it.
 
-To only watch, without recording, run the stack's own launch file:
-`ros2 launch motion_tracking_controller mujoco.launch.py policy_path:=$PWD/runs/onnx/my_clip_gmr/policy.onnx`.
-
-#### 3e. Score ROS 2 runs
-
-Scores recorded runs with BeyondMimic's rules, like mjlab. It reads the recordings directly; ROS 2 is not
-needed. Input: the recordings `runs/bags/my_clip_gmr_r*/` and the policy's `reference.npz`. Output:
-one line per run, a summary such as `10/10 successes, 0/10 falls`, and `results/ros2/my_clip_gmr.json`.
+To just watch once, without recording, run the stack's own launch file:
 
 ```bash
-python -m scripts.ros2.analyze_ros2 runs/bags/my_clip_gmr_r*/ \
-  --reference runs/onnx/my_clip_gmr/reference.npz --output results/ros2/my_clip_gmr.json
+ros2 launch motion_tracking_controller mujoco.launch.py policy_path:=$PWD/runs/onnx/my_clip_gmr/policy.onnx
 ```
 
-The policy start comes from the recording. Launch counts come from the `.tries` files, if present.
-
-### 4. SONIC route
-
-#### 4a. Convert the motion to SONIC's format
-
-Input: a motion, for example `data/motions/gmr/my_clip.npz`. Output: `data/motions/sonic/my_clip_gmr.npz`
-(`data/motions/vith/my_clip_s2.npz` gives `data/motions/sonic/my_clip_vith_s2.npz`; a grounded motion
-gives `..._grounded.npz`).
+To score existing recordings again (no ROS 2 needed):
 
 ```bash
-python -m scripts.motion.gmr_to_sonic data/motions/gmr/my_clip.npz
-python -m scripts.motion.gmr_to_sonic data/motions/vith/my_clip.npz
+python -m scripts.ros2.analyze_ros2 runs/bags/my_clip_gmr_r*/
 ```
 
-Our SONIC results converted GMR's 30 fps output (`runs/videos2motion/<clip>/gmr.pkl`, with `--output-file`)
-instead of the 50 fps file above. Both give the same results: on Pop, the same outcomes and MPKPE within 1 cm.
+### 5. Results
 
-#### 4b. Score SONIC v1.1 in the harness
-
-Runs SONIC v1.1 on the motion under 6 conditions × 10 seeds. Input: `data/motions/sonic/my_clip_gmr.npz`.
-Output: `runs/harness/sonicv11_my_clip_gmr/`.
-
-```bash
-python third_party/g1-eval-harness/evaluate.py --adapter adapters.sonic_v1_1_adapter:SonicV11Adapter \
-  --checkpoint third_party/GR00T-WholeBodyControl/gear_sonic_deploy/policy/sonic_v1_1/model_decoder.onnx \
-  --set motion=data/motions/sonic/my_clip_gmr.npz \
-  --seeds 0 1 2 3 4 5 6 7 8 9 --output-dir runs/harness/sonicv11_my_clip_gmr
-```
-
-#### 4c. Score SONIC (ViT-H) in the harness
-
-Runs SONIC (ViT-H) on the motion under 6 conditions × 10 seeds. Input: `data/motions/sonic/my_clip_gmr.npz`.
-Output: `runs/harness/sonicvith_my_clip_gmr/`.
-
-```bash
-python third_party/g1-eval-harness/evaluate.py --adapter adapters.sonic_vith_adapter:SonicVitHAdapter \
-  --checkpoint third_party/vit-h/inputs/checkpoints/g1_tracker/model_step_020000_g1.onnx \
-  --set tracker_root=third_party/vit-h/g1_tracker --set motion=data/motions/sonic/my_clip_gmr.npz \
-  --seeds 0 1 2 3 4 5 6 7 8 9 --output-dir runs/harness/sonicvith_my_clip_gmr
-```
-
-### 5. Shared: tables and videos
-
-**Tables.** Builds the results tables. Input: `runs/harness/`, `runs/harness_falls/`, `results/mjlab/` and
-`results/ros2/`; all are optional, and a missing one only leaves out its part. Output:
-[`results/tables.md`](results/tables.md).
+**Tables.** Builds the results tables from everything under `runs/harness/`, `runs/harness_falls/`,
+`results/mjlab/` and `results/ros2/`. A missing folder only leaves out its part. Output:
+[`results/tables.md`](results/tables.md); `--output` writes another file.
 
 ```bash
 python -m scripts.report.harness_tables
+python -m scripts.report.harness_tables --match 'my_clip*'
 ```
+
+`--match` builds the tables for just the names that match, into `results/tables_<pattern>.md`
+(`results/tables_my_clip.md` here). Rerunning a step under the same name replaces
+the old result, so give a new experiment a new name with `--name`, for example
+`python -m scripts.beyondmimic.train data/motions/gmr/my_clip.npz --iterations 10000 --name my_clip_gmr_10000`.
 
 **Videos.** Renders a ROS 2 recording or a harness log, then puts it next to the input video. Input: a
 recording (`runs/bags/my_clip_gmr_r1/`) or a harness log (`runs/harness/<run>/logs/<scenario>_seed<n>.npz`).
-Output: `my_clip_gmr.mp4`, then `my_clip.gif`. Give `-` instead of the input video to leave it out.
+Output: `my_clip_gmr.mp4`, then `my_clip.gif`. The input video is the 30 fps copy from step 1a, or
+`my_clip.mp4` itself if it was already 30 fps. Give `-` instead of the input video to leave it out.
 
 ```bash
 python -m scripts.report.render_run runs/bags/my_clip_gmr_r1 --output-file my_clip_gmr.mp4

@@ -1,5 +1,8 @@
 """Score ROS 2 + MuJoCo runs (recording folders) against the reference motion with BeyondMimic's rules.
 
+python -m scripts.ros2.analyze_ros2 runs/bags/<stem>_r*/ [--reference runs/onnx/<stem>/reference.npz]
+  [--output results/ros2/<stem>.json]
+
 Policy start (`start_method`): `override` (--policy-start-s), else `recording`, when the controller manager
 announced the policy controller on /rosout (recorded with the run), else `sim_log`, the same line in `<run>.sim.log`
 next to the recording; both placed in sim time through the recorder's receive times of /joint_states. Else
@@ -50,8 +53,8 @@ MEAN_KEYS = ("mpkpe_m", "r_mpkpe_m", "pre_failure_r_mpkpe_m", "joint_mae_rad", "
 def parse_args():
   parser = argparse.ArgumentParser(description="Analyze ROS 2 sim-to-sim runs")
   parser.add_argument("runs", nargs="+", help="recording folders, runs/bags/<stem>_r<k>/")
-  parser.add_argument("--reference", required=True, help="runs/onnx/<stem>/reference.npz from export_onnx")
-  parser.add_argument("--output", help="write the results as JSON")
+  parser.add_argument("--reference", help="reference motion (default: runs/onnx/<stem>/reference.npz)")
+  parser.add_argument("--output", help="results JSON (default: results/ros2/<stem>.json)")
   parser.add_argument("--model-xml", default=G1_XML, help="G1 MuJoCo model with the mid360 lidar site")
   parser.add_argument(
     "--policy-start-s", type=float, nargs="+",
@@ -61,7 +64,18 @@ def parse_args():
   args = parser.parse_args()
   if args.policy_start_s and len(args.policy_start_s) not in (1, len(args.runs)):
     parser.error("--policy-start-s takes one value, or one per run")
+  names = {run_name(path) for path in args.runs}
+  if len(names) > 1 and not args.reference:
+    parser.error(f"recordings of different policies ({', '.join(sorted(names))}): give --reference")
+  name = names.pop() if len(names) == 1 else Path(args.reference).parent.name
+  args.reference = args.reference or f"runs/onnx/{name}/reference.npz"
+  args.output = args.output or f"results/ros2/{name}.json"
   return args
+
+
+def run_name(path):
+  """Recording folder's name without `_r<k>`."""
+  return re.sub(r"_r\d+$", "", Path(path).name)
 
 
 def resample(times, values, new_times):
@@ -312,19 +326,25 @@ def summarize(name, results, grace_s):
   after = [r["fell_after_motion_time_s"] - r["motion_s"] for r in kept if r["fell_after_motion"]]
   after_s = round(float(np.median(after)), 2) if after else None
   launched = sum(launches(r["run"]) for r in results)
+  drops, invalid = sum(r["startup_drop"] for r in results), sum(r["invalid_recording"] for r in results)
+  line = (
+    f"{wins}/{n} successes, {falls}/{n} falls, from {launched} launches; "
+    f"{len(after)}/{n} fell after the motion ended (median {after_s} s after the last frame)"
+  )
+  if drops or invalid:
+    line += f"; left out: {drops} start-up drops, {invalid} invalid recordings"
   summary = {
     "policy": name,
     "runs": len(results),
-    "startup_drops": sum(r["startup_drop"] for r in results),
-    "invalid_recordings": sum(r["invalid_recording"] for r in results),
+    "startup_drops": drops,
+    "invalid_recordings": invalid,
     "scored": n,
     "launches": launched,
     "successes": wins,
     "falls": falls,
     "falls_after_motion": len(after),
     "median_fall_after_motion_s": after_s,
-    "line": f"{wins}/{n} successes, {falls}/{n} falls, from {launched} launches; "
-    f"{len(after)}/{n} fell after the motion ended (median {after_s} s after the last frame)",
+    "line": line,
     "tracking_failure_times_s": [r["tracking_failure_time_s"] for r in kept],
     "start_methods": sorted({r["start_method"] for r in results}),
     "grace_s": grace_s,
@@ -332,6 +352,23 @@ def summarize(name, results, grace_s):
   for key in MEAN_KEYS:
     summary[f"mean_{key}"] = r4(np.mean([r[key] for r in kept])) if kept else None
   return summary
+
+
+def describe(r):
+  """One readable line per run."""
+  if r["startup_drop"]:
+    outcome = "start-up drop, left out"
+  elif r["invalid_recording"]:
+    outcome = "recording started late, left out"
+  elif r["success"]:
+    outcome = f"success, r-MPKPE {100 * r['r_mpkpe_m']:.1f} cm"
+  else:
+    outcome = f"tracking failure at {r['tracking_failure_time_s']} s ({r['tracking_failure_reason']})"
+  if r["fell"]:
+    outcome += f", fell at {r['fell_time_s']} s"
+  elif r["fell_after_motion"]:
+    outcome += ", fell after the motion ended"
+  return f"{r['run'].rstrip('/')}: {outcome}"
 
 
 def main():
@@ -342,11 +379,12 @@ def main():
   model = mujoco.MjModel.from_xml_path(args.model_xml)
   results = [analyze(path, ref, model, start, args.grace_s) for path, start in zip(args.runs, starts)]
   summary = summarize(Path(args.reference).parent.name, results, args.grace_s)
-  for line in [*results, summary]:
-    print(json.dumps(line))
-  if args.output:
-    with open(args.output, "w") as f:
-      json.dump({"summary": summary, "runs": results}, f, indent=2)
+  for r in results:
+    print(describe(r))
+  Path(args.output).parent.mkdir(parents=True, exist_ok=True)
+  with open(args.output, "w") as f:
+    json.dump({"summary": summary, "runs": results}, f, indent=2)
+  print(f"{summary['policy']}: {summary['line']} -> {args.output}")
 
 
 if __name__ == "__main__":
