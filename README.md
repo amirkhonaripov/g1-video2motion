@@ -557,17 +557,12 @@ colcon build --symlink-install --packages-up-to motion_tracking_controller unitr
 These apt repositories aren't pinned the way the git commits above are: `apt install` gets whatever they
 hold at the time.
 
-Source ROS 2 and the workspace in every terminal:
-
-```bash
-echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
-echo "source ~/colcon_ws/install/setup.bash" >> ~/.bashrc
-```
+Step 4 needs ROS 2 and this workspace sourced in its terminal (see [step 4](#4-beyondmimic-in-the-ros-2-stack)).
 
 ## Run
 
 Run every command from the repo root. In each new terminal, activate our environment first:
-`source third_party/mjlab/.venv/bin/activate` (ROS 2 is sourced from `~/.bashrc`). Our scripts run as
+`source third_party/mjlab/.venv/bin/activate`. Our scripts run as
 `python -m scripts.…` because they share `scripts/g1.py`.
 
 The examples use a video `my_clip.mp4`. Every result is named after its motion: `my_clip_gmr` (GVHMR + GMR),
@@ -623,7 +618,8 @@ the air, not jumping) for 0.5 s or more; the line then gives the longest such st
 python -m scripts.check.motion_quality data/motions/gmr/my_clip.npz data/motions/vith/my_clip.npz
 ```
 
-If a motion floats, ground it: this moves it down so the feet touch the floor (jumps shorter than 1 s stay).
+Only if it says `floats: yes`, ground it: this moves it down so the feet touch the floor (jumps shorter than
+1 s stay). A motion that doesn't float doesn't need it; grounding would still shift it by a few cm.
 Input: `data/motions/gmr/my_clip.npz`. Output: `data/motions/gmr/my_clip_grounded.npz`, used like any other
 motion in the next steps.
 
@@ -689,8 +685,13 @@ python -m scripts.beyondmimic.eval_mjlab --checkpoint-file my_policy.pt \
   --motion-file data/motions/gmr/my_clip.npz --name my_policy
 ```
 
-**Your own `.onnx`** exported from mjlab's tracking task: copy it to `runs/onnx/<name>/policy.onnx`. Step 3
-works with it as it is. Step 4 doesn't: recording and scoring ROS 2 rollouts needs the motion's
+**Your own `.onnx`** exported from mjlab's tracking task: copy it to `runs/onnx/<name>/policy.onnx`:
+
+```bash
+mkdir -p runs/onnx/my_policy && cp my_policy.onnx runs/onnx/my_policy/policy.onnx
+```
+
+Step 3 works with it as it is. Step 4 doesn't: recording and scoring ROS 2 rollouts needs the motion's
 `reference.npz` next to the policy, and only `export_onnx` writes that file. If you have the `.pt`, export it
 as above instead.
 
@@ -743,6 +744,15 @@ This runs the policy in HybridRobotics' own robot software, the same controller 
 its own simulator. The harness can't drive that software, so the rollouts are recorded and scored
 afterwards with the same rules. It is BeyondMimic only, because that stack runs BeyondMimic policies
 (SONIC's equivalent is NVIDIA's separate C++ deploy).
+
+In this terminal, also source ROS 2 and the workspace built at [Install](#install):
+
+```bash
+source /opt/ros/jazzy/setup.bash
+source ~/colcon_ws/install/setup.bash
+```
+
+(To avoid typing them in every terminal, you can add both lines to `~/.bashrc`.)
 
 ```bash
 python -m scripts.ros2.rollouts my_clip_gmr --runs 10
