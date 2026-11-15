@@ -25,7 +25,8 @@ SOURCES = [
   ("ViT-H sample 2", "vith", "_s1"),
   ("ViT-H sample 3", "vith", "_s2"),
 ]
-VARIANTS = {"": "", "_grounded": ", grounded", "_18500": ", 18500 iterations"}
+VARIANTS = {"": "", "_grounded": ", grounded", "_18500": ", 18500 iterations", "_22500": ", 22500 iterations",
+            "_23000": ", 23000 iterations"}
 CONDITIONS = {
   "flat_nominal": "Flat",
   "low_friction": "Low friction",
@@ -76,8 +77,6 @@ def load_runs(root):
   runs = {}
   for path in sorted(glob.glob(f"{root}/*/summary.json")):
     name = os.path.basename(os.path.dirname(path)).split("__")[0]
-    if "_clipped" in name:
-      continue
     with open(path) as f:
       s = json.load(f)
     motion_s = s["adapter"]["describe"]["motion_frames"] / 50
@@ -255,7 +254,9 @@ def latency_table(latency):
 def sources_table(quality, timings):
   rows = []
   for clip, label, src, seed, _ in motions([""])[:-1]:
-    q = quality[(clip, src, seed)]
+    q = quality.get((clip, src, seed))
+    if q is None or clip not in timings:
+      continue
     rows.append([CLIPS[clip], label, f"{timings[clip]['gvhmr_gmr' if src == 'gmr' else 'vith']:.0f}",
                  f"{100 * q['frames_outside_joint_limits']:.1f}", f"{q['max_joint_speed_rad_s']:.0f}",
                  f"{100 * q['foot_sliding_mean_m_s']:.0f}"])

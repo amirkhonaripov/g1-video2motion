@@ -1,7 +1,8 @@
 """Score ROS 2 + MuJoCo runs (.npz from bag_to_npz.py) against the reference motion with BeyondMimic's rules.
 
-Policy start (`start_method`): `override` (--policy-start-s), else `sim_log`, when the launch log activated the
-policy controller, placed in sim time through the recorder's receive times of /joint_states, else `alignment`, the
+Policy start (`start_method`): `override` (--policy-start-s), else `recording`, when the controller manager
+announced the policy controller on /rosout (recorded with the run), else `sim_log`, the same line in a saved launch
+log; both placed in sim time through the recorder's receive times of /joint_states. Else `alignment`, the
 lag in [0, 0.3] s after the first joint sample that best matches the reference's first 2 s. Times in the output are
 seconds after the policy start. `complete` only means that the recording covers the whole motion.
 
@@ -123,18 +124,21 @@ def load_run(path, joint_names):
   return run
 
 
+def wall_to_sim(run, t):
+  """Sim time of system-clock time t, through the recorder's receive times of /joint_states."""
+  wall, sim = run["joint_wall_time"], run["joint_time"]
+  if wall[0] <= t <= wall[-1]:
+    return float(np.interp(t, wall, sim))
+  near = slice(0, 500) if t < wall[0] else slice(-500, None)  # the recorder missed it: extrapolate
+  return float(np.polyfit(wall[near] - t, sim[near], 1)[1])
+
+
 def log_start(run, log):
   """Sim time when the launch log activated the policy controller (None if unknown)."""
   if "joint_wall_time" not in run or not log.exists():
     return None
   switches = POLICY_SWITCH.findall(log.read_text())
-  if not switches:
-    return None
-  wall, sim, t = run["joint_wall_time"], run["joint_time"], float(switches[-1])
-  if wall[0] <= t <= wall[-1]:
-    return float(np.interp(t, wall, sim))
-  near = slice(0, 500) if t < wall[0] else slice(-500, None)  # the recorder missed it: extrapolate
-  return float(np.polyfit(wall[near] - t, sim[near], 1)[1])
+  return wall_to_sim(run, float(switches[-1])) if switches else None
 
 
 def aligned_start(run, ref):
@@ -151,6 +155,8 @@ def policy_start(run, ref, override, log):
   """Sim time of the policy start, and how it was found."""
   if override is not None:
     return override, "override"
+  if "policy_start_wall_time" in run:
+    return wall_to_sim(run, float(run["policy_start_wall_time"])), "recording"
   start = log_start(run, log) if log else None
   if start is not None:
     return start, "sim_log"
