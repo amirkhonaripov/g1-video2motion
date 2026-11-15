@@ -6,15 +6,15 @@ policies in HybridRobotics' ROS 2 deployment stack, the controller used on the r
 ("the ROS 2 stack" below). Two SONIC trackers (NVIDIA's motion tracker: one network for any motion, no
 training per motion) are scored on the same motions for comparison.
 
-**Contents:** [How it works](#how-it-works) · [Recommendation](#recommendation) · [Results](#results) ·
-[Limitations and definitions](#limitations-and-definitions) · [Install](#install) · [Run](#run) ·
-[Credits and licenses](#credits-and-licenses)
+**Contents:** [1. How it works](#1-how-it-works) · [2. Recommendation](#2-recommendation) · [3. Results](#3-results) ·
+[4. Limitations and definitions](#4-limitations-and-definitions) · [5. Install](#5-install) · [6. Run](#6-run) ·
+[7. Credits and licenses](#7-credits-and-licenses)
 
 ![Jump kick: input video, then the GVHMR + GMR and ViT-H policies in the ROS 2 stack](results/gifs/ros2_jump_kick.gif)
 
 *Jump kick, BeyondMimic in the ROS 2 stack (replay of a recording). Left: the input video. Middle: the policy
 trained on GVHMR + GMR's motion fails and falls, because that motion rises higher than its take-off speed
-allows ([why](#jump-kick)). Right: the policy trained on ViT-H's motion lands the kick.*
+allows ([why](#372-jump-kick)). Right: the policy trained on ViT-H's motion lands the kick.*
 
 <table>
 <tr>
@@ -35,7 +35,7 @@ allows ([why](#jump-kick)). Right: the policy trained on ViT-H's motion lands th
 GVHMR + GMR and ViT-H sample 1 policies side by side.*
 
 
-## How it works
+## 1. How it works
 
 1. **Make a motion** (both routes): a video becomes a G1 robot motion, in one of two ways:
    - **GVHMR + GMR:** GVHMR rebuilds the person's 3D body motion from the video, as an SMPL-X body model;
@@ -66,18 +66,18 @@ command); our fork adds motion trackers (following a reference motion), the ROS 
 real-fall counting. It tells the two kinds apart by itself, so any G1 walking policy or motion tracker can be
 scored with a small adapter.
 
-## Recommendation
+## 2. Recommendation
 
 **Which tracker when:**
 
 - **A fixed set of motions to perform on our G1** (a dance, a demo), with the ROS 2 stack: **BeyondMimic.**
-  - One policy per motion (24–33 min of training each on our GPU; see [Cost](#cost)).
+  - One policy per motion (24–33 min of training each on our GPU; see [Cost](#38-cost)).
   - On these clips it is the most reliable: 1228/1320 harness trials succeed, against 995/1320 for SONIC
     v1.1 and 1096/1320 for SONIC (ViT-H). It is the only one that does the jump kick and finishes the LAFAN1
     dance (50/60; both SONIC 0/60).
   - It already runs in the robot's own software: 236/250 ROS 2 runs succeed, and all 14 failures are on the
     jump kick (10 of them the GVHMR + GMR jump kick, which fails everywhere). The 250 runs took 389 launches:
-    139 were relaunches after a [start-up drop](#start-up-drops-in-the-ros-2-sim) or a recording that started
+    139 were relaunches after a [start-up drop](#375-start-up-drops-in-the-ros-2-sim) or a recording that started
     late.
   - When it fails, the robot can really fall: 45 of its 92 failed harness trials end in a real fall, all
     under pushes. So the safety procedure matters.
@@ -103,7 +103,7 @@ scored with a small adapter.
 - **Neither method is closer to the real dance.** Against AIST++ motion capture, their body pose errors
   are within about 1 cm of each other.
 
-## Results
+## 3. Results
 
 The clips: a tennis serve, a studio dance, hip-hop (filmed from behind), Pop and Jazz from AIST++ (a dance
 dataset with motion capture), a jump kick, and the LAFAN1 dance.
@@ -112,7 +112,7 @@ Every motion runs in the harness under 6 conditions × 10 seeds = 60 trials: fla
 ice, and three pushes. The jump kick has 30 trials, because it ends before the pushes come.
 **Success** = the motion plays to its end without a tracking failure. **r-MPKPE** = pose error on flat
 ground. **Real falls** = trials where the robot really ends up on the floor. Exact definitions are in
-[Limitations and definitions](#limitations-and-definitions).
+[Limitations and definitions](#4-limitations-and-definitions).
 
 Each tracker's harness adapter was first checked against the tracker's own software, so a score
 reflects the tracker, not the adapter: BeyondMimic against mjlab and the ROS 2 stack, SONIC v1.1
@@ -123,12 +123,12 @@ against ViT-H's own tracker. Details: the harness's
 ViT-H rows show samples 1 · 2 · 3 of the same video. Full detail per condition, with MPKPE and the
 grounded motions: [`results/tables.md`](results/tables.md).
 
-### BeyondMimic
+### 3.1 BeyondMimic
 
 One policy per motion, 3000 iterations. The LAFAN1 dance uses the public pretrained policy.
 **mjlab:** mjlab's own evaluation, 1024 episodes. **ROS 2:** the ROS 2 stack, 10 scored runs per policy,
 shown as k/n. N in "(N launches)" counts every launch, including the relaunches after
-[start-up drops](#start-up-drops-in-the-ros-2-sim). **ROS 2 r-MPKPE:** up to the end or the tracking failure, mean of the
+[start-up drops](#375-start-up-drops-in-the-ros-2-sim). **ROS 2 r-MPKPE:** up to the end or the tracking failure, mean of the
 scored runs. **ROS 2 falls:** real falls in the scored runs.
 
 | Clip | Motion | Success | r-MPKPE (cm) | Real falls | mjlab | ROS 2 | ROS 2 r-MPKPE (cm) | ROS 2 falls |
@@ -147,7 +147,7 @@ scored runs. **ROS 2 falls:** real falls in the scored runs.
 |  | ViT-H 1 · 2 · 3 | 30/30 · 30/30 · 30/30 | 3.4 · 5.1 · 3.5 | 0/30 · 0/30 · 0/30 | 956/1024 · 1011/1024 · 1000/1024 | 9/10 · 8/10 · 9/10 (14 · 11 · 17 launches) | 6.2 · 7.9 · 5.7 | 1/10 · 2/10 · 0/10 |
 | LAFAN1 dance | motion capture | 50/60 | 3.5 | 0/60 | 953/1024 | 10/10 (18 launches) | 3.5 | 0/10 |
 
-### SONIC v1.1
+### 3.2 SONIC v1.1
 
 NVIDIA's release of SONIC: one tracker for any motion, no training per motion.
 
@@ -167,7 +167,7 @@ NVIDIA's release of SONIC: one tracker for any motion, no training per motion.
 |  | ViT-H 1 · 2 · 3 | 0/30 · 0/30 · 0/30 | 6.3 · 6.1 · 5.9 | 0/30 · 0/30 · 0/30 |
 | LAFAN1 dance | motion capture | 0/60 | 4.1 | 60/60 |
 
-### SONIC (ViT-H)
+### 3.3 SONIC (ViT-H)
 
 SONIC fine-tuned by ViT-H's authors on the data ViT-H learns from, shipped with ViT-H.
 
@@ -187,7 +187,7 @@ SONIC fine-tuned by ViT-H's authors on the data ViT-H learns from, shipped with 
 |  | ViT-H 1 · 2 · 3 | 0/30 · 0/30 · 0/30 | 6.1 · 6.0 · 6.2 | 0/30 · 0/30 · 0/30 |
 | LAFAN1 dance | motion capture | 0/60 | 4.2 | 60/60 |
 
-### Trackers side by side
+### 3.4 Trackers side by side
 
 Harness success. ViT-H columns add up samples 1–3.
 
@@ -213,7 +213,7 @@ Harness success. ViT-H columns add up samples 1–3.
 - ViT-H motions go past the G1's joint limits on 0–13% of frames. GVHMR + GMR motions never do
   ([`results/tables.md`](results/tables.md), "Motion sources").
 
-### How close the motions are to the real dance
+### 3.5 How close the motions are to the real dance
 
 The tables above say how well a robot follows each method's motion. They don't say whether the motion
 matches the video. AIST++ recorded the Pop and Jazz dances with motion capture, so there we can check.
@@ -237,7 +237,7 @@ best time offset (at most 0.3 s).
 - **Joint angles favour GVHMR + GMR by design:** the reference is retargeted by GMR too.
 - Two dances, filmed from the front by a fixed camera: a small, easy sample.
 
-### Videos
+### 3.6 Videos
 
 The BeyondMimic replays from the ROS 2 stack are at the [top](#g1-video2motion). Below: SONIC (ViT-H)
 and BeyondMimic in the harness.
@@ -262,9 +262,9 @@ means a tracking failure there.
 
 </details>
 
-### Findings
+### 3.7 Findings
 
-#### Floating feet
+#### 3.7.1 Floating feet
 
 After the tennis serve's jump, GVHMR + GMR's reconstruction leaves the person's feet about 10–15 cm above the floor from about 5 s to the end.
 The feet never come back down in the data. A robot standing on the floor can't follow a pose that floats.
@@ -284,7 +284,7 @@ Grounding (`scripts/check/ground_motion.py`) follows a slow floor estimate, so s
 - Grounding also lowers SONIC (ViT-H)'s pose error on three other GVHMR + GMR dances: studio dance
   7.5 → 3.5 cm, hip-hop 11.9 → 4.2 cm, Pop 3.7 → 2.5 cm. On Jazz it makes it slightly worse: 2.0 → 2.2 cm.
 
-#### Jump kick
+#### 3.7.2 Jump kick
 
 GVHMR + GMR's jump breaks gravity. Once the feet leave the floor, the body can only slow down at g.
 So the take-off speed sets how high it can go.
@@ -299,7 +299,7 @@ So the take-off speed sets how high it can go.
 - BeyondMimic learns ViT-H's jump: 30/30 for each sample in the harness. In the ROS 2 stack: 9/10, 8/10, 9/10.
 - Neither SONIC version jumps. Both fail every motion of this clip at about 1 s, at take-off.
 
-#### More training
+#### 3.7.3 More training
 
 Tennis was also trained to 23000 (GVHMR + GMR) and 22500 (ViT-H sample 1) iterations.
 3000 iterations is already enough to succeed (harness 60/60 and 59/60, the same as with longer
@@ -308,7 +308,7 @@ from 57.7 to 19.0 cm (GVHMR + GMR) and from 30.4 to 12.3 cm (ViT-H). In the ROS 
 training doesn't raise success: 9/10 at 23000 iterations against 10/10 at 3000 (GVHMR + GMR), and
 10/10 at both 22500 and 3000 (ViT-H).
 
-#### Falls after the motion ends
+#### 3.7.4 Falls after the motion ends
 
 In the ROS 2 stack the policy keeps running after the last frame of the motion. It has nothing left to
 follow, and the robot usually falls. Each recording goes on for about 22–26 s after the last frame.
@@ -322,7 +322,7 @@ follow, and the robot usually falls. Each recording goes on for about 22–26 s 
 
 The harness can't see this: its trials end with the motion.
 
-#### Start-up drops in the ROS 2 sim
+#### 3.7.5 Start-up drops in the ROS 2 sim
 
 Sometimes the simulated robot drops before the controllers are up, even in standby. This comes from
 the simulator start, not from the policy: the same policies, started from the spawn pose in the harness,
@@ -331,7 +331,7 @@ drop or a recording that started late. That is why the ROS 2 column says "k/n (N
 
 `scripts.ros2.rollouts` detects these drops, launches again by itself and counts the launches.
 
-#### ROS 2 vs mjlab
+#### 3.7.6 ROS 2 vs mjlab
 
 Outside the jump kick, every 3000-iteration policy and the LAFAN1 policy succeed in all 10 of their ROS 2
 runs, in line with mjlab. The one other failure is the tennis GVHMR + GMR policy trained to 23000
@@ -350,7 +350,7 @@ This short, fast start is where the ROS 2 stack costs a little: the robot starts
 not from the motion's first frame as in mjlab and the harness, and it reads its base state from a state
 estimator. Trained to 18500 iterations, ViT-H sample 1 succeeds in all 10 ROS 2 runs.
 
-### Cost
+### 3.8 Cost
 
 **Making a motion** (one NVIDIA RTX PRO 5000 Blackwell; [`results/timings.csv`](results/timings.csv)):
 
@@ -375,7 +375,7 @@ RTX PRO 5000 Blackwell). Measured from the first to the last checkpoint on the 1
 trained one per GPU; policies that shared a GPU with other jobs took longer. The SONIC trackers need no
 training per motion.
 
-## Limitations and definitions
+## 4. Limitations and definitions
 
 - **Success:** the motion plays to its end without a tracking failure.
 - **Tracking failure:** BeyondMimic's termination rule fires. The torso height or a hand or foot height
@@ -398,14 +398,14 @@ training per motion.
   robot moves from its standby stance onto the motion.
 - **Small sample:** 6 video clips, 2 of them with motion capture.
 
-## Install
+## 5. Install
 
 For Ubuntu 24.04. Everything below is installed once.
 
 **What you need first:**
 
 - **Hardware:** an x86-64 PC with an NVIDIA GPU. The ROS 2 stack's packages are built for x86-64 only.
-  Training (step 2a) uses the most GPU memory; with less memory, lower `--num-envs`.
+  Training (step 6.2a) uses the most GPU memory; with less memory, lower `--num-envs`.
 - **SMPL and SMPL-X:** free registration at [smpl.is.tue.mpg.de](https://smpl.is.tue.mpg.de/) and
   [smpl-x.is.tue.mpg.de](https://smpl-x.is.tue.mpg.de/), one for each, to download the body models
   (non-commercial use).
@@ -448,7 +448,7 @@ It prints every command it runs, and at the end a checklist of the manual steps 
 missing. Run it again at any time: what is already done is skipped. `bash install.sh --only <part>` runs one
 part (`tools`, `gvhmr`, `gmr`, `vith`, `mjlab`, `sonic`, `checks`); `bash install.sh --help` lists the options.
 
-### What `install.sh` does
+### 5.1 What `install.sh` does
 
 - **tools:** clones the tools into `third_party/` at these commits, then applies our small fixes in
   `patches/` to GVHMR and ViT-H.
@@ -498,11 +498,11 @@ The driver minimums are NVIDIA's for CUDA minor version compatibility (13.x: 580
 [CUDA release notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html)).
 Tested on an RTX PRO 5000 Blackwell, driver 595, `cu130`; the `cu126` path for older GPUs is untested.
 
-Step 1a runs each tool with `third_party/<tool>/.venv/bin/python`. If you made a tool's environment
+Step 6.1a runs each tool with `third_party/<tool>/.venv/bin/python`. If you made a tool's environment
 yourself instead, for example with conda as the tools' own READMEs do, pass its Python:
 `--gvhmr-python ~/miniconda3/envs/gvhmr/bin/python` (also `--gmr-python`, `--vith-python`).
 
-### What you do by hand
+### 5.2 What you do by hand
 
 **SMPL and SMPL-X** are free after sign-up at [smpl.is.tue.mpg.de](https://smpl.is.tue.mpg.de/)
 and [smpl-x.is.tue.mpg.de](https://smpl-x.is.tue.mpg.de/) (non-commercial use). Put the files here:
@@ -525,11 +525,11 @@ hf download facebook/sam-3d-body-dinov3 \
 ```
 
 **ROS 2 Jazzy and the ROS 2 stack** (BeyondMimic route only): see the next section. **AIST++** (optional,
-the accuracy check for Pop and Jazz): see [step 1c](#1c-check-it-and-ground-it-if-it-floats).
+the accuracy check for Pop and Jazz): see [step 6.1c](#61c-check-it-and-ground-it-if-it-floats).
 
 `bash install.sh --only checks` lists whichever of these are still missing.
 
-### Our environment (mjlab's)
+### 5.3 Our environment (mjlab's)
 
 All of this repo's scripts and the harness run in mjlab's environment. Activate it once in each new
 terminal, from the repo root:
@@ -538,7 +538,7 @@ terminal, from the repo root:
 source third_party/mjlab/.venv/bin/activate
 ```
 
-### ROS 2 Jazzy and the ROS 2 stack (BeyondMimic route only)
+### 5.4 ROS 2 Jazzy and the ROS 2 stack (BeyondMimic route only)
 
 Install ROS 2 Jazzy from the [official instructions](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html)
 (`ros-jazzy-desktop` and `ros-dev-tools`), then:
@@ -574,9 +574,9 @@ colcon build --symlink-install --packages-up-to motion_tracking_controller unitr
 These apt repositories aren't pinned the way the git commits above are: `apt install` gets whatever they
 hold at the time.
 
-Step 4 needs ROS 2 and this workspace sourced in its terminal (see [step 4](#4-beyondmimic-in-the-ros-2-stack)).
+Step 6.4 needs ROS 2 and this workspace sourced in its terminal (see [step 6.4](#64-beyondmimic-in-the-ros-2-stack)).
 
-## Run
+## 6. Run
 
 Run every command from the repo root. In each new terminal, activate our environment first:
 `source third_party/mjlab/.venv/bin/activate`. Our scripts run as
@@ -588,15 +588,15 @@ commands it runs underneath (`[run] ...`), so you can see and rerun any of them 
 
 | You have | Do |
 |---|---|
-| A video | 1a → 1c → 2 → 3 → 4 → 5 |
-| A motion file | 1b → 1c → 2 → 3 → 4 → 5 |
-| A BeyondMimic policy: your own `.pt` or `.onnx`, or the pretrained LAFAN1 policy | 2c → 3 → 4 → 5 |
+| A video | 6.1a → 6.1c → 6.2 → 6.3 → 6.4 → 6.5 |
+| A motion file | 6.1b → 6.1c → 6.2 → 6.3 → 6.4 → 6.5 |
+| A BeyondMimic policy: your own `.pt` or `.onnx`, or the pretrained LAFAN1 policy | 6.2c → 6.3 → 6.4 → 6.5 |
 
-Step 4 is for BeyondMimic only.
+Step 6.4 is for BeyondMimic only.
 
-### 1. Get a motion (both trackers)
+### 6.1 Get a motion (both trackers)
 
-#### 1a. From a video
+#### 6.1a From a video
 
 Turns a video into G1 motions with GVHMR + GMR or with ViT-H. Input: `my_clip.mp4`. Output:
 `data/motions/gmr/my_clip.npz`, or `data/motions/vith/my_clip.npz`, `my_clip_s2.npz` and `my_clip_s3.npz`
@@ -617,14 +617,14 @@ python -m scripts.motion.from_video my_clip.mp4 --method vith --samples 3
 - ideally 30 fps or more (GVHMR, GMR and ViT-H work at 30 fps; other frame rates are converted);
 - a few seconds to a minute long.
 
-#### 1b. From a motion file
+#### 6.1b From a motion file
 
 Put a G1 motion in mjlab's format at `data/motions/<method>/<name>.npz`, for example
 `data/motions/gmr/my_clip.npz`. That is an `.npz` as written by mjlab's `csv_to_npz`, with `fps`,
 `joint_pos`, `joint_vel`, `body_pos_w`, `body_quat_w`, `body_lin_vel_w` and `body_ang_vel_w`. A GMR `.pkl`
 converts with `python -m scripts.motion.gmr_to_npz my_clip.pkl --output-file data/motions/gmr/my_clip.npz`.
 
-#### 1c. Check it, and ground it if it floats
+#### 6.1c Check it, and ground it if it floats
 
 Checks motions for joint limits, joint speed, foot sliding and floating. Input: motion files. Output: one
 line per motion, ending in `floats: yes` or `floats: no`; add `--output results/motion_quality.json` to
@@ -666,9 +666,9 @@ python -m scripts.check.motion_accuracy
 
 Jazz is `gJS_sBM_cAll_d01_mJS0_ch01.pkl`.
 
-### 2. Get a tracker for the motion
+### 6.2 Get a tracker for the motion
 
-#### 2a. BeyondMimic: train a policy
+#### 6.2a BeyondMimic: train a policy
 
 Trains one policy on the motion in mjlab (3000 iterations by default), exports it to ONNX and scores it
 with mjlab's own evaluation (1024 episodes). Input: `data/motions/gmr/my_clip.npz`. Output:
@@ -685,11 +685,11 @@ python -m scripts.beyondmimic.train data/motions/gmr/my_clip.npz
 `--num-envs` sets the parallel environments (default 4096); lower it if training runs out of GPU memory.
 `--iterations` sets the training length.
 
-#### 2b. SONIC: nothing to train
+#### 6.2b SONIC: nothing to train
 
-Both SONIC versions were downloaded at [Install](#install). They take the motion directly in step 3.
+Both SONIC versions were downloaded at [Install](#5-install). They take the motion directly in step 6.3.
 
-#### 2c. Bring a BeyondMimic policy
+#### 6.2c Bring a BeyondMimic policy
 
 **Your own `.pt`** from mjlab's tracking task (`Mjlab-Tracking-Flat-Unitree-G1`). Exports it with its
 motion to `runs/onnx/my_policy/policy.onnx` and `reference.npz`. For its mjlab score
@@ -708,7 +708,7 @@ python -m scripts.beyondmimic.eval_mjlab --checkpoint-file my_policy.pt \
 mkdir -p runs/onnx/my_policy && cp my_policy.onnx runs/onnx/my_policy/policy.onnx
 ```
 
-Step 3 works with it as it is. Step 4 doesn't: recording and scoring ROS 2 rollouts needs the motion's
+Step 6.3 works with it as it is. Step 6.4 doesn't: recording and scoring ROS 2 rollouts needs the motion's
 `reference.npz` next to the policy, and only `export_onnx` writes that file. If you have the `.pt`, export it
 as above instead.
 
@@ -724,12 +724,12 @@ python -m scripts.beyondmimic.export_onnx --checkpoint-file runs/checkpoints/laf
   --motion-file data/motions/demo/lafan1_dance1_subject1.npz --name lafan1_dance
 ```
 
-### 3. Evaluate in the harness (all trackers)
+### 6.3 Evaluate in the harness (all trackers)
 
 The harness runs every tracker on the G1 model from the ROS 2 stack, the robot body the deployed policy
 meets, in plain MuJoCo, under 6 conditions × 10 seeds. Every tracker gets the same body and the same
 disturbances, which is what makes the comparison fair. It is our fork of a shared harness, cloned at
-[Install](#install).
+[Install](#5-install).
 
 ```bash
 python -m scripts.harness beyondmimic my_clip_gmr
@@ -755,14 +755,14 @@ same results: on Pop, the same outcomes and MPKPE within 1 cm.
 The harness can also be run directly with `third_party/g1-eval-harness/evaluate.py`; see
 [its README](https://github.com/amirkhonaripov/g1-eval-harness#2-evaluate-a-policy---one-command).
 
-### 4. BeyondMimic in the ROS 2 stack
+### 6.4 BeyondMimic in the ROS 2 stack
 
 This runs the policy in HybridRobotics' own robot software, the same controller as on the real robot, with
 its own simulator. The harness can't drive that software, so the rollouts are recorded and scored
 afterwards with the same rules. It is BeyondMimic only, because that stack runs BeyondMimic policies
 (SONIC's equivalent is NVIDIA's separate C++ deploy).
 
-In this terminal, also source ROS 2 and the workspace built at [Install](#install):
+In this terminal, also source ROS 2 and the workspace built at [Install](#5-install):
 
 ```bash
 source /opt/ros/jazzy/setup.bash
@@ -797,7 +797,7 @@ To score existing recordings again (no ROS 2 needed):
 python -m scripts.ros2.analyze_ros2 runs/bags/my_clip_gmr_r*/
 ```
 
-### 5. Results
+### 6.5 Results
 
 **Tables.** Builds the results tables from everything under `runs/harness/`, `runs/harness_falls/`,
 `results/mjlab/` and `results/ros2/`. A missing folder only leaves out its part. Output:
@@ -815,7 +815,7 @@ the old result, so give a new experiment a new name with `--name`, for example
 
 **Videos.** Renders a ROS 2 recording or a harness log, then puts it next to the input video. Input: a
 recording (`runs/bags/my_clip_gmr_r1/`) or a harness log (`runs/harness/<run>/logs/<scenario>_seed<n>.npz`).
-Output: `my_clip_gmr.mp4`, then `my_clip.gif`. The input video is the 30 fps copy from step 1a, or
+Output: `my_clip_gmr.mp4`, then `my_clip.gif`. The input video is the 30 fps copy from step 6.1a, or
 `my_clip.mp4` itself if it was already 30 fps. Give `-` instead of the input video to leave it out.
 
 ```bash
@@ -823,7 +823,7 @@ python -m scripts.report.render_run runs/bags/my_clip_gmr_r1 --output-file my_cl
 bash scripts/report/make_gif.sh my_clip.gif data/videos/my_clip.mp4 "BeyondMimic, ROS 2" my_clip_gmr.mp4
 ```
 
-## Credits and licenses
+## 7. Credits and licenses
 
 - **This repo:** code under the [MIT License](LICENSE); results, tables, GIFs and docs under
   [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), unless a source below sets other terms.
