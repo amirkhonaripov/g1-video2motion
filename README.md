@@ -438,7 +438,7 @@ git -C third_party/GVHMR apply ../../patches/gvhmr.patch
 git -C third_party/vit-h apply ../../patches/vith.patch
 ```
 
-They load the camera track with `weights_only=False` (PyTorch 2.6 changed the default), handle pycolmap 3.12
+They load the camera track with `weights_only=False` (PyTorch 2.6 changed the default), handle newer pycolmap (we used 4.2.1)
 returning no camera motion, and drop an unused `from turtle import forward` that fails without Tk. The first
 two matter only for videos with a moving camera.
 

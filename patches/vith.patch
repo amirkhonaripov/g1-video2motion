@@ -8,14 +8,14 @@ index cfc5476..5dd54da 100644
  
  import torch
 diff --git a/hmr4d/utils/preproc/relpose/solver_two_view.py b/hmr4d/utils/preproc/relpose/solver_two_view.py
-index 9da5679..8214a12 100644
+index 9da5679..f940b53 100644
 --- a/hmr4d/utils/preproc/relpose/solver_two_view.py
 +++ b/hmr4d/utils/preproc/relpose/solver_two_view.py
 @@ -102,6 +102,8 @@ class PycolmapRansacTwoViewGeometrySolver:
          )
  
          # cam2_from_cam1 means T_0_to_1 in our language
-+        if answer.cam2_from_cam1 is None:  # pycolmap>=3.12: no pose found -> no motion (old default)
++        if answer.cam2_from_cam1 is None:  # newer pycolmap (e.g. 4.2.1): no pose found -> no motion (old default)
 +            return np.eye(4)
          Rt = answer.cam2_from_cam1.matrix().astype(np.float32)  # shape (3, 4)
          T = np.eye(4)
