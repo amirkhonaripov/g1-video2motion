@@ -153,6 +153,23 @@
 | Hard push from behind | 10/10 | 10/10 | 10/10 | 10/10 |
 | Push from the front | 10/10 | 10/10 | 10/10 | 10/10 |
 
+### BeyondMimic vs SONIC (ViT-H), every clip
+
+| BeyondMimic (3000 iterations) vs SONIC (ViT-H) | BeyondMimic: mjlab | BeyondMimic: flat ground | BeyondMimic: harder (of 50) | BeyondMimic: pose error (cm) | SONIC (ViT-H): flat ground | SONIC (ViT-H): harder (of 50) | SONIC (ViT-H): pose error (cm) |
+|---|---|---|---|---|---|---|---|
+| Studio dance (Pexels), GVHMR + GMR | – | – | – | – | finishes | 50/50 | 7.5 |
+| Studio dance (Pexels), ViT-H sample 1 | – | – | – | – | finishes | 50/50 | 3.9 |
+| Hip-hop, filmed from behind (Pexels), GVHMR + GMR | – | – | – | – | finishes | 49/50 | 11.9 |
+| Hip-hop, filmed from behind (Pexels), ViT-H sample 1 | – | – | – | – | finishes | 50/50 | 3.2 |
+| Jump and knee kick (Pexels), GVHMR + GMR | finishes 0% | fails at 0.9 s (10/10) | 0/50 | 7.7 | fails at 1.0 s (10/10) | 0/50 | 6.4 |
+| Jump and knee kick (Pexels), ViT-H sample 1 | finishes 93% | finishes | 50/50 | 3.4 | fails at 1.0 s (10/10) | 0/50 | 6.1 |
+| Tennis serve (GVHMR demo video), GVHMR + GMR | finishes 97% | finishes | 50/50 | 9.3 | fails at 4.5–7.8 s (10/10) | 0/50 | 6.9 |
+| Tennis serve (GVHMR demo video), ViT-H sample 1 | finishes 100% | finishes | 49/50 | 4.5 | finishes | 49/50 | 4.5 |
+| AIST++ Pop, GVHMR + GMR | – | – | – | – | finishes | 50/50 | 3.7 |
+| AIST++ Pop, ViT-H sample 1 | – | – | – | – | finishes | 50/50 | 2.2 |
+| AIST++ Jazz, GVHMR + GMR | – | – | – | – | finishes | 50/50 | 2.0 |
+| AIST++ Jazz, ViT-H sample 1 | – | – | – | – | finishes | 50/50 | 2.9 |
+
 ### Tennis serve: BeyondMimic vs SONIC (ViT-H)
 
 | Tennis serve | GVHMR + GMR | GVHMR + GMR, clipped | ViT-H sample 1 | ViT-H sample 1, clipped |
@@ -164,6 +181,18 @@
 | SONIC (ViT-H): flat ground | fails at 4.5–7.8 s (10/10) | fails at 4.5–7.8 s (10/10) | finishes | finishes |
 | SONIC (ViT-H): harder (of 50) | 0/50 | 0/50 | 49/50 | 50/50 |
 | SONIC (ViT-H): pose error (cm) | 6.9 | 5.1 | 4.5 | 4.5 |
+
+### Jump and knee kick: BeyondMimic vs SONIC (ViT-H)
+
+| Jump and knee kick | GVHMR + GMR | GVHMR + GMR, grounded | ViT-H sample 1 | GVHMR + GMR, 18500 iterations |
+|---|---|---|---|---|
+| BeyondMimic: mjlab (1024 tries) | finishes 0% | finishes 0% | finishes 93% | finishes 0% |
+| BeyondMimic: flat ground | fails at 0.9 s (10/10) | fails at 0.9 s (10/10) | finishes | fails at 1.0 s (10/10) |
+| BeyondMimic: harder (of 50) | 0/50 | 0/50 | 50/50 | 0/50 |
+| BeyondMimic: pose error (cm) | 7.7 | 7.2 | 3.4 | 7.2 |
+| SONIC (ViT-H): flat ground | fails at 1.0 s (10/10) | fails at 1.0 s (10/10) | fails at 1.0 s (10/10) | – |
+| SONIC (ViT-H): harder (of 50) | 0/50 | 0/50 | 0/50 | – |
+| SONIC (ViT-H): pose error (cm) | 6.4 | 6.3 | 6.1 | – |
 
 ### Feet put back on the floor (grounded)
 

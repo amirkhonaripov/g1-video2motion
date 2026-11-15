@@ -60,14 +60,47 @@ Problems we hit, what we thought caused them, how we tested it, and what we conc
   Clipping doesn't help either tracker (BeyondMimic is slightly worse under the harder conditions),
   so results use the raw motions: the same reference for both trackers.
 
-## 3. Every tracker fails the jump and knee kick at 1.0 s
+## 3. The jump and knee kick
 
-- **Problem.** SONIC (ViT-H) fails all 4 motions of the jump and knee kick at 1.0 s, raw or grounded.
-- **Finding.** The robot never takes off. At 0.96 s the reference pelvis is in the air (1.01–1.03 m)
+- **Problem.** SONIC (ViT-H) fails all 4 motions of the jump and knee kick at 1.0 s, raw or
+  grounded. The robot never takes off: at 0.96 s the reference pelvis is in the air (1.01–1.03 m)
   while the robot's stays at 0.78–0.86 m, so a foot or knee ends up 26 cm below the reference and
   the hand/foot height rule fires. Up to take-off it tracks within 3 cm.
-- **Open question.** Is the jump beyond the robot, or only beyond SONIC (ViT-H)? Next test: a BeyondMimic
-  policy trained on this motion.
+- **Hypothesis 1.** The jump is beyond the robot, or our harness gets something wrong.
+- **Test.** The same 4 motions through ViT-H's own tracker script (`g1_tracker`), and a BeyondMimic
+  policy trained on each method's motion (3000 iterations, as for tennis).
+- **Result.** ViT-H's script fails the same way (0.92–0.98 s; the robot's pelvis peaks at
+  0.79 m for ViT-H's samples, against 1.00–1.03 m in the reference). BeyondMimic does ViT-H's jump:
+
+  | Jump and knee kick | GVHMR + GMR | GVHMR + GMR, grounded | ViT-H sample 1 |
+  |---|---|---|---|
+  | BeyondMimic, mjlab (1024 tries) | finishes 0% | 0% | 93% |
+  | BeyondMimic, flat ground · harder | fails at 0.9 s, 10/10 · 0/50 | fails at 0.9 s, 10/10 · 0/50 | finishes 10/10 · 50/50 |
+  | SONIC (ViT-H), flat ground | fails at 1.0 s, 10/10 | fails at 1.0 s, 10/10 | fails at 1.0 s, 10/10 |
+
+  GVHMR + GMR still fails after 18500 iterations.
+- **Conclusion.** Rejected: the robot can do the jump, and the harness agrees with ViT-H's own
+  script. SONIC (ViT-H) doesn't jump. GVHMR + GMR's motion fails for a different reason.
+- **Hypothesis 2.** GVHMR + GMR's motion floats, as on the tennis serve: after take-off its feet
+  never come back down (the lowest ankle stays at least 9 cm above flat-foot height).
+- **Test.** BeyondMimic on the grounded motion (`scripts/ground_motion.py`), 3000 iterations.
+- **Result.** Still 0% in mjlab, failing at 0.8–0.9 s on the hand/foot height rule.
+- **Conclusion.** Rejected: grounding makes it land, but it still fails at take-off.
+- **Hypothesis 3.** GVHMR + GMR's jump breaks physics. Once both feet are off the floor, the pelvis
+  can only slow down at g (9.8 m/s²), so the take-off speed sets how high it can go.
+- **Test.** Pelvis speed at take-off, the rise that speed allows (v²/2g), the rise in the motion,
+  and the pelvis's mean vertical acceleration in the air.
+- **Result.**
+
+  | | Take-off speed (m/s) | Rise it allows (m) | Rise in the motion (m) | Acceleration in the air (m/s²) |
+  |---|---|---|---|---|
+  | GVHMR + GMR | 1.60 | 0.13 | 0.23 | −1.0 |
+  | GVHMR + GMR, grounded | 1.53 | 0.12 | 0.18 | −6.5 |
+  | ViT-H, samples 1-3 | 2.21–2.26 | 0.25–0.26 | 0.19–0.23 | −8.6 to −9.3 |
+
+- **Conclusion.** Confirmed. ViT-H's jumps obey gravity; GVHMR + GMR's keeps rising after
+  take-off as if it hangs in the air. No tracker can follow that: the robot can only follow a
+  jump it can push off for.
 
 ## 4. The robots in the videos were seen from the wrong side
 

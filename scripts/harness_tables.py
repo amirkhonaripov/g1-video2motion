@@ -182,16 +182,42 @@ def mjlab_success(path):
     return f"finishes {json.load(f)['metrics']['success_rate']:.0%}"
 
 
-def tennis_table(runs, mjlab_dir):
-  refs = [("GVHMR + GMR", "gmr", ""), ("GVHMR + GMR, clipped", "gmr", "_clipped"),
-          ("ViT-H sample 1", "vith", ""), ("ViT-H sample 1, clipped", "vith", "_clipped")]
-  bm = [tracker_rows(runs, f"beyondmimic_{src}_tennis{c}") for _, src, c in refs]
-  so = [tracker_rows(runs, f"sonic_{src}_tennis{c}") for _, src, c in refs]
+def tracker_table(runs, mjlab_dir, title, refs):
+  """refs: (column, BeyondMimic run, SONIC run or None)."""
+  bm = [tracker_rows(runs, f"beyondmimic_{b}") for _, b, _ in refs]
+  so = [tracker_rows(runs, f"sonic_{x}") for _, _, x in refs]
   labels = ["flat ground", "harder (of 50)", "pose error (cm)"]
-  rows = [("BeyondMimic: mjlab (1024 tries)", [mjlab_success(f"{mjlab_dir}/{src}_tennis{c}_mjlab.json") for _, src, c in refs])]
+  rows = [("BeyondMimic: mjlab (1024 tries)", [mjlab_success(f"{mjlab_dir}/{b}_mjlab.json") for _, b, _ in refs])]
   rows += [(f"BeyondMimic: {label}", [b[i] for b in bm]) for i, label in enumerate(labels)]
   rows += [(f"SONIC (ViT-H): {label}", [x[i] for x in so]) for i, label in enumerate(labels)]
-  return table("Tennis serve", [r[0] for r in refs], rows)
+  return table(title, [r[0] for r in refs], rows)
+
+
+def tennis_table(runs, mjlab_dir):
+  refs = [("GVHMR + GMR", "gmr_tennis", "gmr_tennis"), ("GVHMR + GMR, clipped", "gmr_tennis_clipped", "gmr_tennis_clipped"),
+          ("ViT-H sample 1", "vith_tennis", "vith_tennis"),
+          ("ViT-H sample 1, clipped", "vith_tennis_clipped", "vith_tennis_clipped")]
+  return tracker_table(runs, mjlab_dir, "Tennis serve", refs)
+
+
+def trackers_table(runs, mjlab_dir):
+  rows = []
+  for clip, title in CLIPS.items():
+    for label, src in (("GVHMR + GMR", "gmr"), ("ViT-H sample 1", "vith")):
+      bm = f"{src}_tennis" if clip == "tennis" else f"{clip}_{src}"
+      rows.append((f"{title}, {label}", [mjlab_success(f"{mjlab_dir}/{bm}_mjlab.json"),
+                                         *tracker_rows(runs, f"beyondmimic_{bm}"), *tracker_rows(runs, f"sonic_{src}_{clip}")]))
+  cols = ["BeyondMimic: mjlab", "BeyondMimic: flat ground", "BeyondMimic: harder (of 50)", "BeyondMimic: pose error (cm)",
+          "SONIC (ViT-H): flat ground", "SONIC (ViT-H): harder (of 50)", "SONIC (ViT-H): pose error (cm)"]
+  return table("BeyondMimic (3000 iterations) vs SONIC (ViT-H)", cols, rows)
+
+
+def jump_kick_table(runs, mjlab_dir):
+  refs = [("GVHMR + GMR", "jump_kick_gmr", "gmr_jump_kick"),
+          ("GVHMR + GMR, grounded", "jump_kick_gmr_grounded", "gmr_jump_kick_grounded"),
+          ("ViT-H sample 1", "jump_kick_vith", "vith_jump_kick"),
+          ("GVHMR + GMR, 18500 iterations", "jump_kick_gmr_18500", None)]
+  return tracker_table(runs, mjlab_dir, "Jump and knee kick", refs)
 
 
 def demo_table(runs, latency, mjlab):
@@ -224,7 +250,9 @@ def main():
   parts = ["### At a glance", summary_table(runs)]
   for clip, title in CLIPS.items():
     parts += [f"### {title}", *clip_tables(runs, quality, timings, clip)]
+  parts += ["### BeyondMimic vs SONIC (ViT-H), every clip", trackers_table(runs, args.mjlab)]
   parts += ["### Tennis serve: BeyondMimic vs SONIC (ViT-H)", tennis_table(runs, args.mjlab)]
+  parts += ["### Jump and knee kick: BeyondMimic vs SONIC (ViT-H)", jump_kick_table(runs, args.mjlab)]
   parts += ["### Feet put back on the floor (grounded)", grounded_table(runs)]
   parts += ["### LAFAN1 dance: BeyondMimic vs SONIC (ViT-H)", demo_table(runs, load_runs(args.latency), mjlab)]
   parts += ["### Notes", NOTES]

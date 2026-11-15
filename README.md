@@ -12,7 +12,7 @@ get the motion from video, **GVHMR + GMR** and **ViT-H**, are compared, each tra
 
 ![Hip-hop: input, GVHMR + GMR on SONIC (ViT-H), ViT-H on SONIC (ViT-H)](results/routes/hiphop_back.gif)
 
-**Jump and knee kick** ([Pexels](https://www.pexels.com/video/video-of-man-doing-knee-kick-4806533/)): SONIC (ViT-H) doesn't take off for either motion
+**Jump and knee kick** ([Pexels](https://www.pexels.com/video/video-of-man-doing-knee-kick-4806533/)): SONIC (ViT-H) doesn't take off for either motion; BeyondMimic does ViT-H's jump
 
 ![Jump and knee kick: input, GVHMR + GMR on SONIC (ViT-H), ViT-H on SONIC (ViT-H)](results/routes/jump_kick.gif)
 
@@ -52,7 +52,10 @@ by [our fork](https://github.com/amirkhonaripov/g1-eval-harness) of an evaluatio
 - **Dances work with both methods,** on flat ground and under pushes and ice.
 - **SONIC (ViT-H) doesn't jump.** At take-off the reference pelvis rises 23 cm; the robot's stays down, and
   a foot ends up more than 25 cm below the reference ("fails": BeyondMimic's rule, used for every
-  tracker).
+  tracker). ViT-H's own tracker script fails the same way. A BeyondMimic policy trained on ViT-H's
+  motion does the jump (93% in mjlab, 50/50 under harder conditions); on GVHMR + GMR's it can't,
+  because that jump keeps rising after take-off, against gravity. Details:
+  [`docs/experiments.md`](docs/experiments.md).
 - **On the tennis serve, ViT-H does better,** but its samples differ: same video, 2 of 3 finish.
 - **ViT-H's motions are easier to track** (lower pose error on 5 of 6 clips) **but break joint
   limits** on up to 13% of frames; GMR's IK keeps them inside. Pose error is measured against each
