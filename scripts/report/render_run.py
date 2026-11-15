@@ -9,9 +9,10 @@ import mujoco
 import numpy as np
 import torch
 
-from scripts.g1 import G1_XML, yaw
-from scripts.ros2.analyze_ros2 import resample, set_pose
-from scripts.ros2.recording import read_recording
+from scripts.g1 import G1_XML, JOINT_NAMES, yaw
+from scripts.ros2.analyze_ros2 import load_run, next_to, policy_start, resample, set_pose
+
+GHOST_RGBA = (1.0, 0.6, 0.2, 0.35)
 
 
 def parse_args():
@@ -28,6 +29,9 @@ def parse_args():
   parser.add_argument("--start", type=float, help="first second to render, in the run's clock")
   parser.add_argument("--duration", type=float, help="seconds to render (default: to the end)")
   parser.add_argument("--fps", type=int, default=30, help="ROS 2 run: frame rate (a log or motion keeps its own)")
+  parser.add_argument("--ghost", help="motion .npz drawn see-through at the same motion time (0 = trial start or "
+                      "policy start, hidden after its end), at the robot's pelvis x, y and heading but its own "
+                      "height plus the robot's start offset, to show pose and height misses, not drift")
   return parser.parse_args()
 
 
@@ -76,13 +80,17 @@ def window(times, frames, start, duration):
   return times[keep], frames[keep]
 
 
-def ros2_frames(run, model, start, duration, fps):
-  """Poses at a steady frame rate, the pelvis placed under the recorded lidar pose."""
-  data = mujoco.MjData(model)
-  adr = [model.joint(name).qposadr[0] for name in run["joint_names"]]
+def ros2_times(run, start, duration, fps):
+  """Sim times at a steady frame rate."""
   start = run["joint_time"][0] if start is None else start
   end = run["joint_time"][-1] if duration is None else start + duration
-  times = np.arange(start, end, 1 / fps)
+  return np.arange(start, end, 1 / fps)
+
+
+def ros2_frames(run, model, times):
+  """Poses at these sim times, the pelvis placed under the recorded lidar pose."""
+  data = mujoco.MjData(model)
+  adr = [model.joint(name).qposadr[0] for name in run["joint_names"]]
   joints = resample(run["joint_time"], run["joint_pos"], times)
   base = resample(run["base_time"], run["base_pos"], times)
   k = np.minimum(np.searchsorted(run["base_time"], times), len(run["base_time"]) - 1)
@@ -90,7 +98,30 @@ def ros2_frames(run, model, start, duration, fps):
   for i in range(len(times)):
     set_pose(model, data, adr, base[i], run["base_quat"][k[i]], joints[i])
     qpos.append(data.qpos.copy())
-  return times - start, np.array(qpos)
+  return np.array(qpos)
+
+
+def ghost_frames(motion, model, frames, motion_t, z0):
+  """The motion's pose at each motion time, moved to the robot's pelvis x, y and heading; None after its end."""
+  t, qpos = motion_frames(motion, model)
+  k = np.round(motion_t / t[1]).astype(int)
+  ghost = qpos[np.clip(k, 0, len(qpos) - 1)]
+  ghost[:, :2] = frames[:, :2]
+  ghost[:, 2] += z0 - qpos[0, 2]
+  half = (yaw(frames[:, 3:7]) - yaw(ghost[:, 3:7])) / 2
+  c, s = np.cos(half), np.sin(half)
+  w, x, y, z = ghost[:, 3:7].T.copy()
+  ghost[:, 3:7] = np.stack([c * w - s * z, c * x - s * y, c * y + s * x, c * z + s * w], axis=1)
+  return [g if 0 <= i < len(qpos) else None for g, i in zip(ghost, k)]
+
+
+def add_ghost(model, data, scene):
+  """Append data's pose to the scene, see-through and without shadows."""
+  n = scene.ngeom
+  mujoco.mjv_addGeoms(model, data, mujoco.MjvOption(), mujoco.MjvPerturb(), mujoco.mjtCatBit.mjCAT_DYNAMIC, scene)
+  for i in range(n, scene.ngeom):
+    geom = scene.geoms[i]
+    geom.rgba[:], geom.matid, geom.castshadow, geom.transparent = GHOST_RGBA, -1, 0, 1
 
 
 def camera_azimuth(times, base_quat, args):
@@ -111,12 +142,24 @@ def main():
   args = parse_args()
   model = mujoco.MjModel.from_xml_path(args.model_xml)
   data = mujoco.MjData(model)
+  motion = dict(np.load(args.ghost)) if args.ghost else None
   if Path(args.run_file).is_dir():
-    times, frames = ros2_frames(read_recording(args.run_file), model, args.start, args.duration, args.fps)
+    names = list(motion["joint_names"]) if motion and "joint_names" in motion else JOINT_NAMES
+    run = load_run(args.run_file, names)
+    sim_t = ros2_times(run, args.start, args.duration, args.fps)
+    times, frames = sim_t - sim_t[0], ros2_frames(run, model, sim_t)
+    if motion:
+      zero, method = policy_start(run, motion, None, next_to(args.run_file, ".sim.log"))
+      print(f"[INFO] policy start {zero:.3f} s ({method})")
+      motion_t, z0 = sim_t - zero, ros2_frames(run, model, np.array([zero]))[0, 2]
   else:
     log = np.load(args.run_file)
     times, frames = harness_frames(log, model) if "base_pos" in log else motion_frames(log, model)
+    z0 = frames[0, 2]
     times, frames = window(times, frames, args.start, args.duration)
+    motion_t = times
+  ghosts = ghost_frames(motion, model, frames, motion_t, z0) if motion else [None] * len(frames)
+  ghost_data = mujoco.MjData(model)
   model.vis.global_.offwidth, model.vis.global_.offheight = args.width, args.height
   renderer = mujoco.Renderer(model, height=args.height, width=args.width)
   azimuth = camera_azimuth(times, frames[:, 3:7], args)
@@ -128,11 +171,15 @@ def main():
     ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{args.width}x{args.height}",
      "-r", str(fps), "-i", "-", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20", args.output_file],
     stdin=subprocess.PIPE)
-  for qpos, az in zip(frames, azimuth):
+  for qpos, ghost, az in zip(frames, ghosts, azimuth):
     data.qpos[:] = qpos
     mujoco.mj_forward(model, data)
     cam.lookat[:], cam.azimuth = [qpos[0], qpos[1], 0.8], az
     renderer.update_scene(data, camera=cam)
+    if ghost is not None:
+      ghost_data.qpos[:] = ghost
+      mujoco.mj_forward(model, ghost_data)
+      add_ghost(model, ghost_data, renderer.scene)
     ffmpeg.stdin.write(renderer.render().tobytes())
   ffmpeg.stdin.close()
   ffmpeg.wait()

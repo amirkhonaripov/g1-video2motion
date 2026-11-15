@@ -10,66 +10,67 @@ training per motion) are scored on the same motions for comparison.
 [4. Limitations and definitions](#4-limitations-and-definitions) · [5. Install](#5-install) · [6. Run](#6-run) ·
 [7. Credits and licenses](#7-credits-and-licenses)
 
-**BeyondMimic in the ROS 2 stack** (HybridRobotics' robot software, run with MuJoCo). We recorded the robot's states and rendered them afterwards. SONIC isn't in this stack; it is compared in the harness below.
+**How to read the videos:** the orange see-through figure is the target motion; the gap between it and the robot is the tracking error. Each panel shows its average pose error; a red tag marks a tracking failure, a dark-red one a real fall.
 
-![Jump kick: input video, the GVHMR + GMR motion, BeyondMimic on it and on ViT-H's motion in the ROS 2 stack](results/gifs/ros2_jump_kick.gif)
+**BeyondMimic in the ROS 2 stack.** HybridRobotics' robot software (ROS 2 Jazzy), run with MuJoCo. Panels: the input video, then BeyondMimic on GVHMR + GMR's motion and on ViT-H's. SONIC isn't here: this stack only runs BeyondMimic policies, and SONIC has its own deploy software from NVIDIA.
 
-*Jump kick ([Pexels video by Ketut Subiyanto](https://www.pexels.com/video/video-of-man-doing-knee-kick-4806533/)). Panels: the input video; GVHMR + GMR's motion itself; BeyondMimic following it; BeyondMimic on ViT-H's motion. GVHMR + GMR's motion keeps rising after take-off, higher than a real jump can, and the robot can't follow it: at about 0.8 s its feet or hands are more than 25 cm off the motion, a tracking failure ([why](#362-jump-kick)). The policy on ViT-H's motion follows its jump. All panels stop 0.5 s after the motion ends.*
+![Jump kick: input video, BeyondMimic on GVHMR + GMR's motion and on ViT-H's in the ROS 2 stack](results/gifs/ros2_jump_kick.gif)
+
+*Jump kick ([Pexels, Ketut Subiyanto](https://www.pexels.com/video/video-of-man-doing-knee-kick-4806533/)). GVHMR + GMR's motion rises higher than a real jump can, so the robot can't follow it: tracking failure at 0.84 s ([why](#362-jump-kick)). On ViT-H's motion it does the jump.*
 
 ![Tennis serve: input video, GVHMR + GMR and ViT-H policies in the ROS 2 stack](results/gifs/ros2_tennis.gif)
 
-*Tennis serve (GVHMR's example video, `docs/example_video/tennis.mp4`). Input video, then the GVHMR + GMR and ViT-H sample 1 policies.*
+*Tennis serve (GVHMR's example video).*
 
 ![Studio dance: input video, GVHMR + GMR and ViT-H policies in the ROS 2 stack](results/gifs/ros2_studio_dance.gif)
 
-*Studio dance ([Pexels video by PNW Production](https://www.pexels.com/video/a-barefooted-man-dancing-in-a-studio-8377696/)). Input video, then the GVHMR + GMR and ViT-H sample 1 policies.*
+*Studio dance ([Pexels, PNW Production](https://www.pexels.com/video/a-barefooted-man-dancing-in-a-studio-8377696/)).*
 
 ![Hip-hop: input video, GVHMR + GMR and ViT-H policies in the ROS 2 stack](results/gifs/ros2_hiphop_back.gif)
 
-*Hip-hop, filmed from behind ([Pexels video by cottonbro studio](https://www.pexels.com/video/a-man-dancing-hip-hop-7958174/)). Input video, then the GVHMR + GMR and ViT-H sample 1 policies.*
+*Hip-hop, filmed from behind ([Pexels, cottonbro studio](https://www.pexels.com/video/a-man-dancing-hip-hop-7958174/)).*
 
 ![AIST++ Pop: GVHMR + GMR and ViT-H policies in the ROS 2 stack](results/gifs/ros2_pop.gif)
 
-*AIST++ Pop (`gPO_sBM_c01_d10_mPO0_ch01` from the [AIST Dance Video Database](https://aistdancedb.ongaaccel.jp/); robots only, the videos can't be shared). GVHMR + GMR and ViT-H sample 1 policies.*
+*AIST++ Pop (`gPO_sBM_c01_d10_mPO0_ch01`, [AIST Dance DB](https://aistdancedb.ongaaccel.jp/); the video can't be shared).*
 
 ![AIST++ Jazz: GVHMR + GMR and ViT-H policies in the ROS 2 stack](results/gifs/ros2_jazz.gif)
 
-*AIST++ Jazz (`gJS_sBM_c01_d01_mJS0_ch01`; robots only). GVHMR + GMR and ViT-H sample 1 policies.*
+*AIST++ Jazz (`gJS_sBM_c01_d01_mJS0_ch01`, [AIST Dance DB](https://aistdancedb.ongaaccel.jp/); the video can't be shared).*
 
 ![LAFAN1 dance: the pretrained policy in the ROS 2 stack, 25 s excerpt](results/gifs/ros2_lafan1_dance.gif)
 
-*LAFAN1 dance, the pretrained policy: a 25 s excerpt of the 131 s dance. This GIF is under LAFAN1's CC BY-NC-ND 4.0, not this repo's CC BY 4.0.*
+*LAFAN1 dance, the pretrained policy, 25 s of 131 s. Under LAFAN1's CC BY-NC-ND 4.0.*
 
-**Three trackers compared in the harness** (our shared evaluation tool, plain MuJoCo, the same robot body). A tracker that fails a run keeps going, so you see what happens next.
+**Three trackers compared in the harness.** Our shared evaluation tool: plain MuJoCo with the same G1 model as the ROS 2 stack, flat ground. Top row: GVHMR + GMR's motion; bottom row: ViT-H's; one column per tracker.
 
 ![Jump kick: BeyondMimic, SONIC v1.1 and SONIC (ViT-H) in the harness](results/gifs/compare_jump_kick.gif)
 
-*Jump kick ([Pexels video by Ketut Subiyanto](https://www.pexels.com/video/video-of-man-doing-knee-kick-4806533/)). BeyondMimic jumps; both SONIC versions fail at take-off (about 1.0 s), then recover and stand.*
+*Jump kick. Only BeyondMimic on ViT-H's motion jumps. Both SONIC versions keep their feet on the floor, so the motion's feet end up more than 25 cm above theirs: tracking failure at about 1.0 s. On GVHMR + GMR's impossible jump, BeyondMimic fails too.*
 
 ![Tennis serve: the three trackers in the harness](results/gifs/compare_tennis.gif)
 
-*Tennis serve. BeyondMimic, SONIC v1.1 and SONIC (ViT-H) on the same motion (ViT-H sample 1), flat ground, seed 0.*
+*Tennis serve. Both SONIC versions fail at about 4.5 s on GVHMR + GMR's motion, when it starts to float ([3.6.1](#361-floating-feet)).*
 
 ![Studio dance: the three trackers in the harness](results/gifs/compare_studio_dance.gif)
 
-*Studio dance ([Pexels video by PNW Production](https://www.pexels.com/video/a-barefooted-man-dancing-in-a-studio-8377696/)). BeyondMimic, SONIC v1.1 and SONIC (ViT-H) on the same motion (ViT-H sample 1), flat ground, seed 0.*
+*Studio dance.*
 
 ![Hip-hop: the three trackers in the harness](results/gifs/compare_hiphop_back.gif)
 
-*Hip-hop ([Pexels video by cottonbro studio](https://www.pexels.com/video/a-man-dancing-hip-hop-7958174/)). BeyondMimic, SONIC v1.1 and SONIC (ViT-H) on the same motion (ViT-H sample 1), flat ground, seed 0.*
+*Hip-hop.*
 
 ![AIST++ Pop: the three trackers in the harness](results/gifs/compare_pop.gif)
 
-*AIST++ Pop (robots only). BeyondMimic, SONIC v1.1 and SONIC (ViT-H) on the same motion (ViT-H sample 1), flat ground, seed 0.*
+*AIST++ Pop.*
 
 ![AIST++ Jazz: the three trackers in the harness](results/gifs/compare_jazz.gif)
 
-*AIST++ Jazz (robots only). BeyondMimic, SONIC v1.1 and SONIC (ViT-H) on the same motion (ViT-H sample 1), flat ground, seed 0.*
+*AIST++ Jazz.*
 
 ![LAFAN1 dance around the cartwheel: the three trackers in the harness](results/gifs/compare_lafan1_dance.gif)
 
-*LAFAN1 dance, 86–109 s of the 131 s dance, around the cartwheel: both SONIC versions fall, BeyondMimic stays up. Under LAFAN1's CC BY-NC-ND 4.0.*
-
+*LAFAN1 dance around the cartwheel (86–109 s of 131 s): both SONIC versions fall, BeyondMimic stays up. Under LAFAN1's CC BY-NC-ND 4.0.*
 
 ## 1. How it works
 
@@ -834,9 +835,17 @@ Output: `my_clip_gmr.mp4`, then `my_clip.gif`. The input video is the 30 fps cop
 `my_clip.mp4` itself if it was already 30 fps. Give `-` instead of the input video to leave it out.
 
 ```bash
-python -m scripts.report.render_run runs/bags/my_clip_gmr_r1 --output-file my_clip_gmr.mp4
+python -m scripts.report.render_run runs/bags/my_clip_gmr_r1 --ghost runs/onnx/my_clip_gmr/reference.npz \
+  --output-file my_clip_gmr.mp4
 bash scripts/report/make_gif.sh my_clip.gif data/videos/my_clip.mp4 "BeyondMimic, ROS 2" my_clip_gmr.mp4
 ```
+
+`--ghost` draws the target motion as the orange see-through figure. For a harness log, give the motion file
+the run tracked (e.g. `data/motions/gmr/my_clip.npz`).
+
+The labelled grids at the top (pose error, tracking-failure and fall tags) are built with
+`python -m scripts.report.grid_gif out.gif <columns> cells.json`, where `cells.json` lists each panel's
+video, label and numbers (see `--help`).
 
 ## 7. Credits and licenses
 
