@@ -9,6 +9,8 @@ import re
 
 import numpy as np
 
+from scripts.g1 import METHODS
+
 HARD = {
   "low_friction": "Low friction",
   "ice": "Ice",
@@ -24,8 +26,7 @@ CLIPS = {
   "pop": "AIST++ Pop",
   "jazz": "AIST++ Jazz",
 }
-METHODS = [("GVHMR + GMR", "gmr", ""), ("ViT-H sample 1", "vith", ""), ("ViT-H sample 2", "vith", "_s1"),
-           ("ViT-H sample 3", "vith", "_s2")]
+G1_TRACKER_DEMO = "fails at 106.7 s"  # ViT-H's own tracker script; no results file
 NOTES = """- **Flat ground:** 10 tries that differ only by tiny start noise (±0.02 rad per joint), so they
   nearly always agree; the harder conditions are where tries really differ.
 - **Fails:** torso height, torso tilt or a hand/foot height more than 0.25 m from the reference
@@ -41,12 +42,15 @@ NOTES = """- **Flat ground:** 10 tries that differ only by tiny start noise (±0
 
 def parse_args():
   parser = argparse.ArgumentParser(description="Results tables")
-  parser.add_argument("--runs", default="runs/harness_v2")
-  parser.add_argument("--latency", default="runs/latency")
-  parser.add_argument("--quality", default="results/routes/motion_quality.json")
-  parser.add_argument("--mjlab", default="results/routes/beyondmimic")
-  parser.add_argument("--timings", default="results/routes/timings.csv")
-  parser.add_argument("--output", default="results/routes/harness_tables.md")
+  parser.add_argument("--runs", default="runs/harness", help="harness runs, ros2 robot model")
+  parser.add_argument("--latency", default="runs/latency", help="harness runs timing the policies")
+  parser.add_argument("--quality", default="results/motion_quality.json")
+  parser.add_argument("--mjlab", default="results/mjlab", help="eval_mjlab results")
+  parser.add_argument("--demo", default="results/mjlab/demo_dance_mjlab.json", help="eval_mjlab of the LAFAN1 dance")
+  parser.add_argument("--demo-ros2", default="results/ros2/demo_dance.json",
+                      help="analyze_ros2 of the LAFAN1 dance in the ROS 2 stack")
+  parser.add_argument("--timings", default="results/timings.csv")
+  parser.add_argument("--output", default="results/tables.md")
   return parser.parse_args()
 
 
@@ -72,8 +76,8 @@ def outcome(trials):
   return f"fails at {when} ({len(falls)}/{len(trials)})"
 
 
-def tries(trials):
-  return f"{len(trials) - len(vals(trials, 'time_to_fall_s'))}/{len(trials)}"
+def finished(trials):
+  return len(trials) - len(vals(trials, "time_to_fall_s"))
 
 
 def cm(trials, key):
@@ -122,16 +126,14 @@ def clip_tables(runs, quality, timings, clip):
     ("Pose error, mean / worst (cm)", [f"{cm(t, 'r_mpkpe_m')} / {cm(t, 'max_r_mpkpe_m')}" for t in flat]),
     ("Position error, mean / worst (cm)", [f"{cm(t, 'mpkpe_m')} / {cm(t, 'max_mpkpe_m')}" for t in flat]),
     ("Joint error (°)", [f"{np.degrees(vals(t, 'joint_pos_tracking_mae').mean()):.1f}" for t in flat]),
-    ("Robot joints past limits (% of time)", [f"{100 * vals(t, 'joint_limit_violation_rate').mean():.1f}" for t in flat]),
+    ("Robot joints past limits (% of time)",
+     [f"{100 * vals(t, 'joint_limit_violation_rate').mean():.1f}" for t in flat]),
     ("Power (W)", [f"{vals(t, 'mean_mech_power_w').mean():.0f}" for t in flat]),
     ("Time to make the motion (s)", [f"{t:.0f}" for t in time]),
   ])
-  hard = table("Finishes (of 10 tries)", cols, [(label, [tries(s[k]) for s in scen]) for k, label in HARD.items()])
+  hard = table("Finishes (of 10 tries)", cols,
+               [(label, [f"{finished(s[k])}/{len(s[k])}" for s in scen]) for k, label in HARD.items()])
   return [main, hard]
-
-
-def finished(trials):
-  return len(trials) - len(vals(trials, "time_to_fall_s"))
 
 
 def summary_table(runs):
@@ -194,7 +196,8 @@ def tracker_table(runs, mjlab_dir, title, refs):
 
 
 def tennis_table(runs, mjlab_dir):
-  refs = [("GVHMR + GMR", "gmr_tennis", "gmr_tennis"), ("GVHMR + GMR, clipped", "gmr_tennis_clipped", "gmr_tennis_clipped"),
+  refs = [("GVHMR + GMR", "gmr_tennis", "gmr_tennis"),
+          ("GVHMR + GMR, clipped", "gmr_tennis_clipped", "gmr_tennis_clipped"),
           ("ViT-H sample 1", "vith_tennis", "vith_tennis"),
           ("ViT-H sample 1, clipped", "vith_tennis_clipped", "vith_tennis_clipped")]
   return tracker_table(runs, mjlab_dir, "Tennis serve", refs)
@@ -205,10 +208,12 @@ def trackers_table(runs, mjlab_dir):
   for clip, title in CLIPS.items():
     for label, src in (("GVHMR + GMR", "gmr"), ("ViT-H sample 1", "vith")):
       bm = f"{src}_tennis" if clip == "tennis" else f"{clip}_{src}"
-      rows.append((f"{title}, {label}", [mjlab_success(f"{mjlab_dir}/{bm}_mjlab.json"),
-                                         *tracker_rows(runs, f"beyondmimic_{bm}"), *tracker_rows(runs, f"sonic_{src}_{clip}")]))
-  cols = ["BeyondMimic: mjlab", "BeyondMimic: flat ground", "BeyondMimic: harder (of 50)", "BeyondMimic: pose error (cm)",
-          "SONIC (ViT-H): flat ground", "SONIC (ViT-H): harder (of 50)", "SONIC (ViT-H): pose error (cm)"]
+      cells = [mjlab_success(f"{mjlab_dir}/{bm}_mjlab.json"), *tracker_rows(runs, f"beyondmimic_{bm}"),
+               *tracker_rows(runs, f"sonic_{src}_{clip}")]
+      rows.append((f"{title}, {label}", cells))
+  cols = ["BeyondMimic: mjlab", "BeyondMimic: flat ground", "BeyondMimic: harder (of 50)",
+          "BeyondMimic: pose error (cm)", "SONIC (ViT-H): flat ground", "SONIC (ViT-H): harder (of 50)",
+          "SONIC (ViT-H): pose error (cm)"]
   return table("BeyondMimic (3000 iterations) vs SONIC (ViT-H)", cols, rows)
 
 
@@ -220,33 +225,36 @@ def jump_kick_table(runs, mjlab_dir):
   return tracker_table(runs, mjlab_dir, "Jump and knee kick", refs)
 
 
-def demo_table(runs, latency, mjlab):
+def ros2_success(path):
+  with open(path) as f:
+    s = json.load(f)["summary"]
+  return f"finishes {s['successes']}/{s['scored']}"
+
+
+def demo_table(runs, latency, mjlab, ros2):
   bm, so = runs["beyondmimic_demo_dance"], runs["sonic_demo_dance"]
   fb, fs = bm["flat_nominal"], so["flat_nominal"]
   rows = [
     ("Flat ground", [outcome(fb), outcome(fs)]),
-    ("Harder conditions", [f"{sum(int(tries(bm[k]).split('/')[0]) for k in HARD)}/50",
-                           f"{sum(int(tries(so[k]).split('/')[0]) for k in HARD)}/50"]),
+    ("Harder conditions", [f"{sum(finished(bm[k]) for k in HARD)}/50", f"{sum(finished(so[k]) for k in HARD)}/50"]),
     ("Pose error, mean (cm)", [cm(fb, "r_mpkpe_m"), cm(fs, "r_mpkpe_m")]),
     ("Position error, mean (cm)", [cm(fb, "mpkpe_m"), cm(fs, "mpkpe_m")]),
   ]
   lat = {k: f"{vals(v['flat_nominal'], 'mean_policy_latency_ms').mean():.2f}" for k, v in latency.items()}
   rows += [
     ("Policy time per step (ms)", [lat["beyondmimic_demo_dance"], lat["sonic_demo_dance"]]),
-    ("mjlab (training simulator, 1024 tries)", [f"finishes {mjlab:.0%}", "–"]),
-    ("ROS 2 deployment stack (5 tries)", ["finishes 5/5", "–"]),
-    ("ViT-H's tracker script (g1_tracker)", ["–", "fails at 106.7 s"]),
+    ("mjlab (training simulator, 1024 tries)", [mjlab, "–"]),
+    ("ROS 2 deployment stack (5 tries)", [ros2, "–"]),
+    ("ViT-H's tracker script (g1_tracker)", ["–", G1_TRACKER_DEMO]),
   ]
   return table("LAFAN1 dance (131 s, motion capture)", ["BeyondMimic", "SONIC (ViT-H)"], rows)
 
 
 def main():
   args = parse_args()
-  runs = load_runs(f"{args.runs}/ros2")
+  runs = load_runs(args.runs)
   quality = load_quality(args.quality)
   timings = load_timings(args.timings)
-  with open("results/demo_policy.json") as f:
-    mjlab = json.load(f)["metrics"]["success_rate"]
   parts = ["### At a glance", summary_table(runs)]
   for clip, title in CLIPS.items():
     parts += [f"### {title}", *clip_tables(runs, quality, timings, clip)]
@@ -254,7 +262,8 @@ def main():
   parts += ["### Tennis serve: BeyondMimic vs SONIC (ViT-H)", tennis_table(runs, args.mjlab)]
   parts += ["### Jump and knee kick: BeyondMimic vs SONIC (ViT-H)", jump_kick_table(runs, args.mjlab)]
   parts += ["### Feet put back on the floor (grounded)", grounded_table(runs)]
-  parts += ["### LAFAN1 dance: BeyondMimic vs SONIC (ViT-H)", demo_table(runs, load_runs(args.latency), mjlab)]
+  demo = demo_table(runs, load_runs(args.latency), mjlab_success(args.demo), ros2_success(args.demo_ros2))
+  parts += ["### LAFAN1 dance: BeyondMimic vs SONIC (ViT-H)", demo]
   parts += ["### Notes", NOTES]
   text = "\n\n".join(parts)
   with open(args.output, "w") as f:

@@ -5,7 +5,7 @@ import argparse
 import numpy as np
 from scipy.ndimage import minimum_filter1d, uniform_filter1d
 
-ANKLES = [6, 12]  # left/right ankle_roll_link in mjlab's body order
+ANKLES = [6, 12]  # left/right ankle_roll_link; motion files hold no body names
 ANKLE_ON_FLOOR = 0.04  # ankle height (m) with the foot flat, as in LAFAN1
 
 

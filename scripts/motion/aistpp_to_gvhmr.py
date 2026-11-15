@@ -3,7 +3,6 @@
 import argparse
 import pickle
 
-import numpy as np
 import smplx
 import torch
 
@@ -15,7 +14,7 @@ def parse_args():
   parser = argparse.ArgumentParser(description="AIST++ to GVHMR format")
   parser.add_argument("input_file", help="AIST++ motions/<sequence>.pkl (60 fps)")
   parser.add_argument("--output-file", required=True)
-  parser.add_argument("--body-models", default="assets/body_models", help="GMR's SMPL-X folder")
+  parser.add_argument("--body-models", default="third_party/GMR/assets/body_models", help="SMPL-X models")
   return parser.parse_args()
 
 

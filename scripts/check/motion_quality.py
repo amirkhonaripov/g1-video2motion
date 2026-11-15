@@ -5,9 +5,9 @@ import json
 
 import mujoco
 import numpy as np
-from gmr_to_npz import JOINT_NAMES
 
-G1_XML = "/opt/ros/jazzy/share/unitree_description/mjcf/g1.xml"
+from scripts.g1 import G1_XML, JOINT_NAMES
+
 FEET = ["left_ankle_roll_link", "right_ankle_roll_link"]
 CONTACT_M = 0.03  # a foot counts as planted within this height of its lowest point
 
@@ -16,11 +16,11 @@ def parse_args():
   parser = argparse.ArgumentParser(description="Motion artifacts of mjlab motions")
   parser.add_argument("motions", nargs="+", help="mjlab motion .npz files")
   parser.add_argument("--output", help="write the results as JSON")
+  parser.add_argument("--model-xml", default=G1_XML, help="G1 MuJoCo model")
   return parser.parse_args()
 
 
 def foot_positions(model, motion):
-  # forward kinematics
   data = mujoco.MjData(model)
   adr = [model.joint(name).qposadr[0] for name in JOINT_NAMES]
   ids = [model.body(name).id for name in FEET]
@@ -35,7 +35,7 @@ def foot_positions(model, motion):
 
 
 def foot_sliding(feet, fps):
-  # foot speed while planted
+  """Foot speed while planted."""
   speeds = []
   for f in range(2):
     z = feet[:, f, 2]
@@ -72,7 +72,7 @@ def analyze(path, model):
 
 def main():
   args = parse_args()
-  model = mujoco.MjModel.from_xml_path(G1_XML)
+  model = mujoco.MjModel.from_xml_path(args.model_xml)
   results = [analyze(path, model) for path in args.motions]
   for r in results:
     print(json.dumps(r))

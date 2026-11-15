@@ -39,11 +39,11 @@ def read_bag(path):
 
   joints, lidar, odom, names = [], [], [], None
   while reader.has_next():
-    topic, data, _ = reader.read_next()
+    topic, data, received = reader.read_next()
     msg = deserialize_message(data, get_message(types[topic]))
     if topic == "/joint_states":
       names = list(msg.name)
-      joints.append([stamp(msg), *msg.position])
+      joints.append([stamp(msg), received * 1e-9, *msg.position])
     elif topic == "/mid360":
       lidar.append(pose_row(msg))
     else:
@@ -64,7 +64,8 @@ def main():
       out,
       joint_names=np.array(names),
       joint_time=joints[:, 0],
-      joint_pos=joints[:, 1:].astype(np.float32),
+      joint_wall_time=joints[:, 1],  # when the recorder got it (system clock), to place the sim logs in sim time
+      joint_pos=joints[:, 2:].astype(np.float32),
       base_frame=np.array("mid360"),
       base_time=lidar[:, 0],
       base_pos=lidar[:, 1:4],

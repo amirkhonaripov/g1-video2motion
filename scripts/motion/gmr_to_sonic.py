@@ -4,8 +4,8 @@ import argparse
 import pickle
 
 import numpy as np
-from gmr_to_npz import JOINT_NAMES
-from vith_to_gmr import VITH_JOINT_NAMES
+
+from scripts.g1 import JOINT_NAMES, VITH_JOINT_NAMES
 
 
 def parse_args():
