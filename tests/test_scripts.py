@@ -89,12 +89,12 @@ def test_harness_sonic_motion(motion, sonic):
   assert harness.sonic_motion(motion) == sonic
 
 
-def write_run(folder, conditions):
+def write_run(folder, conditions, trials=None):
   trial = {"fall": False, "mpkpe_m": 0.1, "r_mpkpe_m": 0.05}
   pushes = {c: [{"start_s": 4.0}] if c.startswith("push") else [] for c in conditions}
   summary = {
     "adapter": {"describe": {"motion_frames": 500}},
-    "trials": {c: {"seed_0": trial} for c in conditions},
+    "trials": {c: {"seed_0": (trials or {}).get(c, trial)} for c in conditions},
     "perturbations": {c: {"seed_0": {"pushes": pushes[c]}} for c in conditions},
   }
   folder.mkdir(parents=True)
@@ -131,3 +131,26 @@ def test_harness_tables(tmp_path, monkeypatch):
   text = (tmp_path / "zz.md").read_text()
   assert "| zz_custom |  | 6/6 |" in text
   assert "| Pop |" not in text and "| Jazz |" not in text
+
+
+def test_harness_tables_real_falls(tmp_path, monkeypatch):
+  """Real falls from a run that kept going after the tracking failure, or from the rerun of an older run."""
+  monkeypatch.chdir(tmp_path)
+  ok = {"fall": False, "tracking_failure": False, "fell": False, "mpkpe_m": 0.1, "r_mpkpe_m": 0.05,
+        "pre_failure_mpkpe_m": 0.1, "pre_failure_r_mpkpe_m": 0.05}
+  failed = {**ok, "fall": True, "tracking_failure": True, "fell": True, "mpkpe_m": 0.9, "r_mpkpe_m": 0.8}
+  write_run(tmp_path / "runs/harness/beyondmimic_pop_gmr__all", CONDITIONS,
+            {c: failed if c == "flat_nominal" else ok for c in CONDITIONS})
+  stopped = {"fall": True, "mpkpe_m": 0.1, "r_mpkpe_m": 0.05}
+  write_run(tmp_path / "runs/harness/beyondmimic_jazz_gmr__all", CONDITIONS, {"flat_nominal": stopped})
+  write_run(tmp_path / "runs/harness_falls/beyondmimic_jazz_gmr__flat_nominal", ["flat_nominal"],
+            {"flat_nominal": failed})
+  write_run(tmp_path / "runs/harness/beyondmimic_hiphop_back_gmr__all", CONDITIONS, {"flat_nominal": stopped})
+  (tmp_path / "results").mkdir()
+
+  make_tables(monkeypatch)
+  text = (tmp_path / "results/tables.md").read_text()
+  assert "| Pop | GVHMR+GMR | 5/6 | 0/1 | 2/2 | 3/3 | 10.0 / 5.0 | 1/6 |" in text
+  assert "| Jazz | GVHMR+GMR | 5/6 | 0/1 | 2/2 | 3/3 | 10.0 / 5.0 | 1/6 |" in text
+  assert "| Hip-hop (back) | GVHMR+GMR | 5/6 | 0/1 | 2/2 | 3/3 | 10.0 / 5.0 | 0/6 (1 not rerun) |" in text
+  assert "| Pop | GVHMR+GMR | 0/1 · 1/1 · 5.0 |" in text

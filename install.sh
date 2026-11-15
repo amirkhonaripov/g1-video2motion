@@ -237,7 +237,7 @@ part_tools() {
   clone_at "$TP/vit-h/third-party/Fast-SAM-3D-Body" https://github.com/yangtiming/Fast-SAM-3D-Body.git d72aa36
   clone_at "$TP/mjlab" https://github.com/mujocolab/mjlab.git 1b5c91c
   clone_at "$TP/GR00T-WholeBodyControl" https://github.com/NVlabs/GR00T-WholeBodyControl.git 1e1ec4f
-  clone_at "$TP/g1-eval-harness" "${HARNESS_FROM:-$HARNESS_URL}" 2b3f676
+  clone_at "$TP/g1-eval-harness" "${HARNESS_FROM:-$HARNESS_URL}" e81718b
   if [ -n "$HARNESS_FROM" ]; then
     run git -C "$TP/g1-eval-harness" remote set-url origin "$HARNESS_URL"
   fi

@@ -10,33 +10,65 @@ training per motion) are scored on the same motions for comparison.
 [4. Limitations and definitions](#4-limitations-and-definitions) · [5. Install](#5-install) · [6. Run](#6-run) ·
 [7. Credits and licenses](#7-credits-and-licenses)
 
-![Jump kick: input video, then the GVHMR + GMR and ViT-H policies in the ROS 2 stack](results/gifs/ros2_jump_kick.gif)
+**BeyondMimic in the ROS 2 stack** (HybridRobotics' robot software, run with MuJoCo). We recorded the robot's states and rendered them afterwards. SONIC isn't in this stack; it is compared in the harness below.
 
-*Jump kick ([Pexels video by Ketut Subiyanto](https://www.pexels.com/video/video-of-man-doing-knee-kick-4806533/)), BeyondMimic in the ROS 2 stack (replay of a recording). Left: the input video.
-Middle: the policy trained on GVHMR + GMR's motion. That motion keeps rising after take-off, higher than a real
-jump can, so at about 0.8 s the robot's feet or hands are more than 25 cm off the motion and the run fails
-([why](#372-jump-kick)). Right: the policy trained on ViT-H's motion follows the jump. The middle robot's fall
-at the end is the fall after the motion that most policies show ([3.7.4](#374-falls-after-the-motion-ends)),
-not the jump.*
+![Jump kick: input video, the GVHMR + GMR motion, BeyondMimic on it and on ViT-H's motion in the ROS 2 stack](results/gifs/ros2_jump_kick.gif)
 
-<table>
-<tr>
-<td width="50%"><img src="results/gifs/ros2_tennis.gif" alt="Tennis serve: input video, GVHMR + GMR and ViT-H policies in the ROS 2 stack"><br><sub>Tennis serve (GVHMR's example video, <code>docs/example_video/tennis.mp4</code>)</sub></td>
-<td width="50%"><img src="results/gifs/ros2_studio_dance.gif" alt="Studio dance: input video, GVHMR + GMR and ViT-H policies in the ROS 2 stack"><br><sub>Studio dance ([Pexels video by PNW Production](https://www.pexels.com/video/a-barefooted-man-dancing-in-a-studio-8377696/))</sub></td>
-</tr>
-<tr>
-<td><img src="results/gifs/ros2_hiphop_back.gif" alt="Hip-hop: input video, GVHMR + GMR and ViT-H policies in the ROS 2 stack"><br><sub>Hip-hop, filmed from behind ([Pexels video by cottonbro studio](https://www.pexels.com/video/a-man-dancing-hip-hop-7958174/))</sub></td>
-<td><img src="results/gifs/ros2_pop.gif" alt="AIST++ Pop: GVHMR + GMR and ViT-H policies in the ROS 2 stack"><br><sub>AIST++ Pop, <code>gPO_sBM_c01_d10_mPO0_ch01</code> from the [AIST Dance Video Database](https://aistdancedb.ongaaccel.jp/) (robots only: the videos can't be shared)</sub></td>
-</tr>
-<tr>
-<td><img src="results/gifs/ros2_jazz.gif" alt="AIST++ Jazz: GVHMR + GMR and ViT-H policies in the ROS 2 stack"><br><sub>AIST++ Jazz, <code>gJS_sBM_c01_d01_mJS0_ch01</code> (robots only)</sub></td>
-<td><img src="results/gifs/ros2_lafan1_dance.gif" alt="LAFAN1 dance: the pretrained policy in the ROS 2 stack, 25 s excerpt"><br><sub>LAFAN1 dance, pretrained policy: a 25 s excerpt of the 131 s dance. This GIF is under LAFAN1's CC BY-NC-ND 4.0, not this repo's CC BY 4.0.</sub></td>
-</tr>
-</table>
+*Jump kick ([Pexels video by Ketut Subiyanto](https://www.pexels.com/video/video-of-man-doing-knee-kick-4806533/)). Panels: the input video; GVHMR + GMR's motion itself; BeyondMimic following it; BeyondMimic on ViT-H's motion. GVHMR + GMR's motion keeps rising after take-off, higher than a real jump can, and the robot can't follow it: at about 0.8 s its feet or hands are more than 25 cm off the motion, a tracking failure ([why](#362-jump-kick)). The policy on ViT-H's motion follows its jump. All panels stop 0.5 s after the motion ends.*
 
-*BeyondMimic only, in the ROS 2 stack: we recorded the robot's states and rendered them afterwards. Each clip
-shows the input video (where it can be shared), then the GVHMR + GMR and ViT-H sample 1 policies side by side.
-SONIC wasn't run in the ROS 2 stack; its videos, from the harness, are in [3.6](#36-videos).*
+![Tennis serve: input video, GVHMR + GMR and ViT-H policies in the ROS 2 stack](results/gifs/ros2_tennis.gif)
+
+*Tennis serve (GVHMR's example video, `docs/example_video/tennis.mp4`). Input video, then the GVHMR + GMR and ViT-H sample 1 policies.*
+
+![Studio dance: input video, GVHMR + GMR and ViT-H policies in the ROS 2 stack](results/gifs/ros2_studio_dance.gif)
+
+*Studio dance ([Pexels video by PNW Production](https://www.pexels.com/video/a-barefooted-man-dancing-in-a-studio-8377696/)). Input video, then the GVHMR + GMR and ViT-H sample 1 policies.*
+
+![Hip-hop: input video, GVHMR + GMR and ViT-H policies in the ROS 2 stack](results/gifs/ros2_hiphop_back.gif)
+
+*Hip-hop, filmed from behind ([Pexels video by cottonbro studio](https://www.pexels.com/video/a-man-dancing-hip-hop-7958174/)). Input video, then the GVHMR + GMR and ViT-H sample 1 policies.*
+
+![AIST++ Pop: GVHMR + GMR and ViT-H policies in the ROS 2 stack](results/gifs/ros2_pop.gif)
+
+*AIST++ Pop (`gPO_sBM_c01_d10_mPO0_ch01` from the [AIST Dance Video Database](https://aistdancedb.ongaaccel.jp/); robots only, the videos can't be shared). GVHMR + GMR and ViT-H sample 1 policies.*
+
+![AIST++ Jazz: GVHMR + GMR and ViT-H policies in the ROS 2 stack](results/gifs/ros2_jazz.gif)
+
+*AIST++ Jazz (`gJS_sBM_c01_d01_mJS0_ch01`; robots only). GVHMR + GMR and ViT-H sample 1 policies.*
+
+![LAFAN1 dance: the pretrained policy in the ROS 2 stack, 25 s excerpt](results/gifs/ros2_lafan1_dance.gif)
+
+*LAFAN1 dance, the pretrained policy: a 25 s excerpt of the 131 s dance. This GIF is under LAFAN1's CC BY-NC-ND 4.0, not this repo's CC BY 4.0.*
+
+**Three trackers compared in the harness** (our shared evaluation tool, plain MuJoCo, the same robot body). A tracker that fails a run keeps going, so you see what happens next.
+
+![Jump kick: BeyondMimic, SONIC v1.1 and SONIC (ViT-H) in the harness](results/gifs/compare_jump_kick.gif)
+
+*Jump kick ([Pexels video by Ketut Subiyanto](https://www.pexels.com/video/video-of-man-doing-knee-kick-4806533/)). BeyondMimic jumps; both SONIC versions fail at take-off (about 1.0 s), then recover and stand.*
+
+![Tennis serve: the three trackers in the harness](results/gifs/compare_tennis.gif)
+
+*Tennis serve. BeyondMimic, SONIC v1.1 and SONIC (ViT-H) on the same motion (ViT-H sample 1), flat ground, seed 0.*
+
+![Studio dance: the three trackers in the harness](results/gifs/compare_studio_dance.gif)
+
+*Studio dance ([Pexels video by PNW Production](https://www.pexels.com/video/a-barefooted-man-dancing-in-a-studio-8377696/)). BeyondMimic, SONIC v1.1 and SONIC (ViT-H) on the same motion (ViT-H sample 1), flat ground, seed 0.*
+
+![Hip-hop: the three trackers in the harness](results/gifs/compare_hiphop_back.gif)
+
+*Hip-hop ([Pexels video by cottonbro studio](https://www.pexels.com/video/a-man-dancing-hip-hop-7958174/)). BeyondMimic, SONIC v1.1 and SONIC (ViT-H) on the same motion (ViT-H sample 1), flat ground, seed 0.*
+
+![AIST++ Pop: the three trackers in the harness](results/gifs/compare_pop.gif)
+
+*AIST++ Pop (robots only). BeyondMimic, SONIC v1.1 and SONIC (ViT-H) on the same motion (ViT-H sample 1), flat ground, seed 0.*
+
+![AIST++ Jazz: the three trackers in the harness](results/gifs/compare_jazz.gif)
+
+*AIST++ Jazz (robots only). BeyondMimic, SONIC v1.1 and SONIC (ViT-H) on the same motion (ViT-H sample 1), flat ground, seed 0.*
+
+![LAFAN1 dance around the cartwheel: the three trackers in the harness](results/gifs/compare_lafan1_dance.gif)
+
+*LAFAN1 dance, 86–109 s of the 131 s dance, around the cartwheel: both SONIC versions fall, BeyondMimic stays up. Under LAFAN1's CC BY-NC-ND 4.0.*
 
 
 ## 1. How it works
@@ -75,13 +107,13 @@ scored with a small adapter.
 **Which tracker when:**
 
 - **A fixed set of motions to perform on our G1** (a dance, a demo), with the ROS 2 stack: **BeyondMimic.**
-  - One policy per motion (24–33 min of training each on our GPU; see [Cost](#38-cost)).
+  - One policy per motion (24–33 min of training each on our GPU; see [Cost](#37-cost)).
   - On these clips it is the most reliable: 1228/1320 harness trials succeed, against 995/1320 for SONIC
     v1.1 and 1096/1320 for SONIC (ViT-H). It is the only one that does the jump kick and finishes the LAFAN1
     dance (50/60; both SONIC 0/60).
   - It already runs in the robot's own software: 236/250 ROS 2 runs succeed, and all 14 failures are on the
     jump kick (10 of them the GVHMR + GMR jump kick, which fails everywhere). The 250 runs took 389 launches:
-    139 were relaunches after a [start-up drop](#375-start-up-drops-in-the-ros-2-sim) or a recording that started
+    139 were relaunches after a [start-up drop](#365-start-up-drops-in-the-ros-2-sim) or a recording that started
     late.
   - When it fails, the robot can really fall: 45 of its 92 failed harness trials end in a real fall, all
     under pushes. So the safety procedure matters.
@@ -132,7 +164,7 @@ grounded motions: [`results/tables.md`](results/tables.md).
 One policy per motion, 3000 iterations. The LAFAN1 dance uses the public pretrained policy.
 **mjlab:** mjlab's own evaluation, 1024 episodes. **ROS 2:** the ROS 2 stack, 10 scored runs per policy,
 shown as k/n. N in "(N launches)" counts every launch, including the relaunches after
-[start-up drops](#375-start-up-drops-in-the-ros-2-sim). **ROS 2 r-MPKPE:** up to the end or the tracking failure, mean of the
+[start-up drops](#365-start-up-drops-in-the-ros-2-sim). **ROS 2 r-MPKPE:** up to the end or the tracking failure, mean of the
 scored runs. **ROS 2 falls:** real falls in the scored runs.
 
 | Clip | Motion | Success | r-MPKPE (cm) | Real falls | mjlab | ROS 2 | ROS 2 r-MPKPE (cm) | ROS 2 falls |
@@ -241,34 +273,9 @@ best time offset (at most 0.3 s).
 - **Joint angles favour GVHMR + GMR by design:** the reference is retargeted by GMR too.
 - Two dances, filmed from the front by a fixed camera: a small, easy sample.
 
-### 3.6 Videos
+### 3.6 Findings
 
-The BeyondMimic replays from the ROS 2 stack are at the [top](#g1-video2motion). Below: SONIC (ViT-H)
-and BeyondMimic in the harness.
-
-<details>
-<summary><b>In the harness:</b> SONIC (ViT-H) on both motions of each clip, and BeyondMimic on the tennis serve</summary>
-
-In these GIFs "SONIC" means SONIC (ViT-H). Panels: input video, GVHMR + GMR, ViT-H. A panel that freezes
-means a tracking failure there.
-
-![Studio dance: input, GVHMR + GMR on SONIC (ViT-H), ViT-H on SONIC (ViT-H)](results/gifs/studio_dance.gif)
-
-![Hip-hop: input, GVHMR + GMR on SONIC (ViT-H), ViT-H on SONIC (ViT-H)](results/gifs/hiphop_back.gif)
-
-![Jump kick: input, GVHMR + GMR on SONIC (ViT-H), ViT-H on SONIC (ViT-H)](results/gifs/jump_kick.gif)
-
-![Tennis serve: input, GVHMR + GMR on SONIC (ViT-H), ViT-H on SONIC (ViT-H)](results/gifs/tennis.gif)
-
-![AIST++ Pop: GVHMR + GMR on SONIC (ViT-H), ViT-H on SONIC (ViT-H)](results/gifs/pop.gif)
-
-![Tennis serve: input, GVHMR + GMR on BeyondMimic, ViT-H on BeyondMimic](results/gifs/tennis_beyondmimic.gif)
-
-</details>
-
-### 3.7 Findings
-
-#### 3.7.1 Floating feet
+#### 3.6.1 Floating feet
 
 After the tennis serve's jump, GVHMR + GMR's reconstruction leaves the person's feet about 10–15 cm above the floor from about 5 s to the end.
 The feet never come back down in the data. A robot standing on the floor can't follow a pose that floats.
@@ -288,7 +295,7 @@ Grounding (`scripts/check/ground_motion.py`) follows a slow floor estimate, so s
 - Grounding also lowers SONIC (ViT-H)'s pose error on three other GVHMR + GMR dances: studio dance
   7.5 → 3.5 cm, hip-hop 11.9 → 4.2 cm, Pop 3.7 → 2.5 cm. On Jazz it makes it slightly worse: 2.0 → 2.2 cm.
 
-#### 3.7.2 Jump kick
+#### 3.6.2 Jump kick
 
 GVHMR + GMR's jump breaks gravity. Once the feet leave the floor, the body can only slow down at g.
 So the take-off speed sets how high it can go.
@@ -302,12 +309,12 @@ So the take-off speed sets how high it can go.
   fails at 0.76–0.86 s, mid-jump, when its feet or hands are more than 25 cm off the motion. In 7 of 10 runs
   the robot still lands and only falls about 1 s after the motion ends, like most policies; in 3 it falls
   during the motion
-  ([3.7.4](#374-falls-after-the-motion-ends)).
+  ([3.6.4](#364-falls-after-the-motion-ends)).
 - BeyondMimic fails it: 0/30, also when grounded (0/30) and with 18500 iterations (0/30).
 - BeyondMimic learns ViT-H's jump: 30/30 for each sample in the harness. In the ROS 2 stack: 9/10, 8/10, 9/10.
 - Neither SONIC version jumps. Both fail every motion of this clip at about 1 s, at take-off.
 
-#### 3.7.3 More training
+#### 3.6.3 More training
 
 Tennis was also trained to 23000 (GVHMR + GMR) and 22500 (ViT-H sample 1) iterations.
 3000 iterations is already enough to succeed (harness 60/60 and 59/60, the same as with longer
@@ -316,7 +323,7 @@ from 57.7 to 19.0 cm (GVHMR + GMR) and from 30.4 to 12.3 cm (ViT-H). In the ROS 
 training doesn't raise success: 9/10 at 23000 iterations against 10/10 at 3000 (GVHMR + GMR), and
 10/10 at both 22500 and 3000 (ViT-H).
 
-#### 3.7.4 Falls after the motion ends
+#### 3.6.4 Falls after the motion ends
 
 In the ROS 2 stack the policy keeps running after the last frame of the motion. It has nothing left to
 follow, and the robot usually falls. Each recording goes on for about 22–26 s after the last frame.
@@ -330,7 +337,7 @@ follow, and the robot usually falls. Each recording goes on for about 22–26 s 
 
 The harness can't see this: its trials end with the motion.
 
-#### 3.7.5 Start-up drops in the ROS 2 sim
+#### 3.6.5 Start-up drops in the ROS 2 sim
 
 Sometimes the simulated robot drops before the controllers are up, even in standby. This comes from
 the simulator start, not from the policy: the same policies, started from the spawn pose in the harness,
@@ -339,7 +346,7 @@ drop or a recording that started late. That is why the ROS 2 column says "k/n (N
 
 `scripts.ros2.rollouts` detects these drops, launches again by itself and counts the launches.
 
-#### 3.7.6 ROS 2 vs mjlab
+#### 3.6.6 ROS 2 vs mjlab
 
 Outside the jump kick, every 3000-iteration policy and the LAFAN1 policy succeed in all 10 of their ROS 2
 runs, in line with mjlab. The one other failure is the tennis GVHMR + GMR policy trained to 23000
@@ -358,7 +365,7 @@ This short, fast start is where the ROS 2 stack costs a little: the robot starts
 not from the motion's first frame as in mjlab and the harness, and it reads its base state from a state
 estimator. Trained to 18500 iterations, ViT-H sample 1 succeeds in all 10 ROS 2 runs.
 
-### 3.8 Cost
+### 3.7 Cost
 
 **Making a motion** (one NVIDIA RTX PRO 5000 Blackwell; [`results/timings.csv`](results/timings.csv)):
 
@@ -387,9 +394,9 @@ training per motion.
 
 - **Success:** the motion plays to its end without a tracking failure.
 - **Tracking failure:** BeyondMimic's termination rule fires. The torso height or a hand or foot height
-  is more than 0.25 m off the reference, or the torso tilts too far. The trial stops there.
-- **Real fall:** we rerun failed conditions and keep going after the tracking failure. A real fall is when
-  the head stays below 0.5 m for more than 2 s, or is still down when the motion ends.
+  is more than 0.25 m off the reference, or the torso tilts too far.
+- **Real fall:** the trial keeps going after the tracking failure. A real fall is when the head stays
+  below 0.5 m for more than 2 s, or is still down when the motion ends.
 - **MPKPE / r-MPKPE:** mean distance (cm) of 14 key bodies from the reference, over the 10 flat-ground
   trials, up to the end or the tracking failure. MPKPE uses world positions, so it includes drift.
   r-MPKPE places the reference on the robot first, so it measures the pose only.
@@ -469,7 +476,7 @@ part (`tools`, `gvhmr`, `gmr`, `vith`, `mjlab`, `sonic`, `checks`); `bash instal
   | `vit-h/third-party/Fast-SAM-3D-Body` | [yangtiming/Fast-SAM-3D-Body](https://github.com/yangtiming/Fast-SAM-3D-Body) | `d72aa36` |
   | `mjlab` | [mujocolab/mjlab](https://github.com/mujocolab/mjlab) | `1b5c91c` |
   | `GR00T-WholeBodyControl` | [NVlabs/GR00T-WholeBodyControl](https://github.com/NVlabs/GR00T-WholeBodyControl) | `1e1ec4f` |
-  | `g1-eval-harness` | [amirkhonaripov/g1-eval-harness](https://github.com/amirkhonaripov/g1-eval-harness) | `2b3f676` |
+  | `g1-eval-harness` | [amirkhonaripov/g1-eval-harness](https://github.com/amirkhonaripov/g1-eval-harness) | `e81718b` |
   | `pytorch3d` (built for GVHMR and ViT-H) | [facebookresearch/pytorch3d](https://github.com/facebookresearch/pytorch3d) | `3eac7c6` (0.7.9 plus CUDA 13 build fixes) |
 
   The fixes load the camera track with `weights_only=False` (PyTorch 2.6 changed the default), handle newer
@@ -751,11 +758,11 @@ take a motion; it is converted to SONIC's format first, into `data/motions/sonic
 Output, for example for `beyondmimic my_clip_gmr`:
 
 - `runs/harness/beyondmimic_my_clip_gmr__all/summary.md`: the results table (read this first), with
-  `summary.json`, per-step logs in `logs/` and videos of the first seed of each condition in `videos/`;
-- `runs/harness_falls/beyondmimic_my_clip_gmr__all/`: the conditions with a tracking failure, run again
-  without stopping at the failure, to count real falls.
+  `summary.json`, per-step logs in `logs/` and videos of the first seed of each condition in `videos/`.
 
-`--seeds` sets the seeds (default `0 1 2 3 4 5 6 7 8 9`). `--no-falls` skips the real-fall reruns.
+A trial keeps going after a tracking failure, so the same run also counts real falls.
+`--seeds` sets the seeds (default `0 1 2 3 4 5 6 7 8 9`). `--stop-at-tracking-failure` ends each trial at
+its tracking failure, with no real falls.
 
 Our SONIC results were converted from GMR's 30 fps output instead of the 50 fps motion file. Both give the
 same results: on Pop, the same outcomes and MPKPE within 1 cm.

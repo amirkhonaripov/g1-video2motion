@@ -1,7 +1,6 @@
-"""Score a policy in the eval harness under the 6 conditions, then rerun the failed conditions to count real falls."""
+"""Score a policy in the eval harness under the 6 conditions; real falls are counted in the same run."""
 
 import argparse
-import json
 import shlex
 import subprocess
 import sys
@@ -23,14 +22,15 @@ VITH_TRACKER_ROOT = "third_party/vit-h/g1_tracker"
 
 
 def parse_args():
-  parser = argparse.ArgumentParser(description="Score a policy in the eval harness (6 conditions, then real falls)")
+  parser = argparse.ArgumentParser(description="Score a policy in the eval harness (6 conditions, with real falls)")
   parser.add_argument("tracker", choices=list(ADAPTERS))
   parser.add_argument("what", help="beyondmimic: a policy name (runs/onnx/<name>/policy.onnx) or a .onnx path; "
                       "sonicv11/sonicvith: a mjlab motion .npz, or a SONIC motion in data/motions/sonic/")
   parser.add_argument("--seeds", nargs="+", default=[str(s) for s in range(10)], help="default: 0 to 9")
   parser.add_argument("--name", help="stem of the output folders (default: from the policy or motion)")
   parser.add_argument("--checkpoint", help="policy file (default: from <what>, or SONIC's released one)")
-  parser.add_argument("--no-falls", action="store_true", help="skip the rerun of failed conditions")
+  parser.add_argument("--stop-at-tracking-failure", action="store_true",
+                      help="end each trial at its first tracking failure (no real falls counted)")
   return parser.parse_args()
 
 
@@ -55,13 +55,6 @@ def run(cmd):
   subprocess.run([sys.executable if c == "python" else c for c in cmd], check=True)
 
 
-def failed_conditions(out_dir):
-  """Conditions with at least one tracking failure."""
-  with open(f"{out_dir}/summary.json") as f:
-    trials = json.load(f)["trials"]
-  return [cond for cond, seeds in trials.items() if any(t["fall"] for t in seeds.values())]
-
-
 def main():
   args = parse_args()
   if args.tracker == "beyondmimic":
@@ -80,20 +73,12 @@ def main():
   if not Path(checkpoint).exists():
     sys.exit(f"no policy file {checkpoint}")
 
-  base = ["python", EVALUATE, "--adapter", ADAPTERS[args.tracker], "--checkpoint", checkpoint, *extra,
-          "--seeds", *args.seeds]
+  if args.stop_at_tracking_failure:
+    extra.append("--stop-at-tracking-failure")
   out = f"runs/harness/{args.tracker}_{stem}__all"
-  run([*base, "--output-dir", out])
-  summaries = [f"{out}/summary.md"]
-
-  failed = [] if args.no_falls else failed_conditions(out)
-  if failed:
-    falls = f"runs/harness_falls/{args.tracker}_{stem}__all"
-    run([*base, "--scenarios", *failed, "--keep-running-after-tracking-failure", "--output-dir", falls])
-    summaries.append(f"{falls}/summary.md")
-  elif not args.no_falls:
-    print("[info] no tracking failures, so no rerun for real falls")
-  print("[done] summary tables:", *summaries)
+  run(["python", EVALUATE, "--adapter", ADAPTERS[args.tracker], "--checkpoint", checkpoint, *extra,
+       "--seeds", *args.seeds, "--output-dir", out])
+  print("[done] summary table:", f"{out}/summary.md")
 
 
 if __name__ == "__main__":

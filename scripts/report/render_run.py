@@ -1,4 +1,5 @@
-"""Render a harness run or a ROS 2 recording to an MP4, filmed from the same side as the person in the input video."""
+"""Render a harness run, a ROS 2 recording or a motion to an MP4, filmed from the same side as the person in the
+input video."""
 
 import argparse
 import subprocess
@@ -14,8 +15,9 @@ from scripts.ros2.recording import read_recording
 
 
 def parse_args():
-  parser = argparse.ArgumentParser(description="Render a harness run or a ROS 2 run")
-  parser.add_argument("run_file", help="ROS 2 recording folder (runs/bags/<stem>_r<k>/) or harness log .npz")
+  parser = argparse.ArgumentParser(description="Render a harness run, a ROS 2 run or a motion")
+  parser.add_argument("run_file", help="ROS 2 recording folder (runs/bags/<stem>_r<k>/), harness log .npz or "
+                      "motion .npz (joint_pos, body_pos_w, body_quat_w), played back as is")
   parser.add_argument("--output-file", required=True)
   parser.add_argument("--gvhmr-file", help="hmr4d_results.pt of the same video, for the camera side")
   parser.add_argument("--follow", action="store_true", help="turn with the video's camera (for moving cameras)")
@@ -23,9 +25,9 @@ def parse_args():
   parser.add_argument("--model-xml", default=G1_XML)
   parser.add_argument("--width", type=int, default=640)
   parser.add_argument("--height", type=int, default=480)
-  parser.add_argument("--start", type=float, help="ROS 2 run: first second to render, in the run's clock")
-  parser.add_argument("--duration", type=float, help="ROS 2 run: seconds to render (default: to the end)")
-  parser.add_argument("--fps", type=int, default=30, help="ROS 2 run: frame rate (a harness log keeps its own)")
+  parser.add_argument("--start", type=float, help="first second to render, in the run's clock")
+  parser.add_argument("--duration", type=float, help="seconds to render (default: to the end)")
+  parser.add_argument("--fps", type=int, default=30, help="ROS 2 run: frame rate (a log or motion keeps its own)")
   return parser.parse_args()
 
 
@@ -53,6 +55,25 @@ def harness_frames(log, model):
   qpos = np.zeros((len(log["t"]), model.nq))
   qpos[:, :3], qpos[:, 3:7], qpos[:, 7:] = log["base_pos"], log["base_quat"], log["q"]
   return log["t"], qpos
+
+
+def motion_frames(motion, model):
+  """Poses of a motion file: the root from the first body, the joints in its own order."""
+  adr = [model.joint(n).qposadr[0] for n in motion["joint_names"]] if "joint_names" in motion else slice(7, None)
+  fps = float(motion["fps"].squeeze()) if "fps" in motion else 50.0
+  qpos = np.zeros((len(motion["joint_pos"]), model.nq))
+  qpos[:, :3], qpos[:, 3:7] = motion["body_pos_w"][:, 0], motion["body_quat_w"][:, 0]
+  qpos[:, adr] = motion["joint_pos"]
+  return np.arange(len(qpos)) / fps, qpos
+
+
+def window(times, frames, start, duration):
+  keep = np.ones(len(times), bool)
+  if start is not None:
+    keep &= times >= start - 1e-6
+  if duration is not None:
+    keep &= times < (times[0] if start is None else start) + duration - 1e-6
+  return times[keep], frames[keep]
 
 
 def ros2_frames(run, model, start, duration, fps):
@@ -93,7 +114,9 @@ def main():
   if Path(args.run_file).is_dir():
     times, frames = ros2_frames(read_recording(args.run_file), model, args.start, args.duration, args.fps)
   else:
-    times, frames = harness_frames(np.load(args.run_file), model)
+    log = np.load(args.run_file)
+    times, frames = harness_frames(log, model) if "base_pos" in log else motion_frames(log, model)
+    times, frames = window(times, frames, args.start, args.duration)
   model.vis.global_.offwidth, model.vis.global_.offheight = args.width, args.height
   renderer = mujoco.Renderer(model, height=args.height, width=args.width)
   azimuth = camera_azimuth(times, frames[:, 3:7], args)

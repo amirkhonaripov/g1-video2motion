@@ -64,7 +64,8 @@ DEFINITIONS = """- **Harness:** one shared MuJoCo sim (the G1 of the ROS 2 stack
 def parse_args():
   parser = argparse.ArgumentParser(description="Results tables")
   parser.add_argument("--runs", default="runs/harness", help="harness runs, ros2 robot model")
-  parser.add_argument("--falls", default="runs/harness_falls", help="reruns that keep going after a tracking failure")
+  parser.add_argument("--falls", default="runs/harness_falls",
+                      help="older runs that stopped at a tracking failure: their reruns that keep going")
   parser.add_argument("--latency", default="runs/latency", help="harness runs timing the policies")
   parser.add_argument("--mjlab", default="results/mjlab", help="eval_mjlab results")
   parser.add_argument("--ros2", default="results/ros2", help="analyze_ros2 results")
@@ -176,6 +177,16 @@ def vals(trials, key):
   return np.array([t[key] for t in trials.values() if t.get(key) is not None], dtype=float)
 
 
+def kept_going(trials):
+  """The run kept going after a tracking failure, so its trials have real falls."""
+  return any("fell" in t for t in trials.values())
+
+
+def tracking_error(trials, key):
+  """Mean of an error (cm) up to the end or the tracking failure."""
+  return 100 * vals(trials, f"pre_failure_{key}" if kept_going(trials) else key).mean()
+
+
 def tally(runs, falls, name, conds):
   """Successes, real falls, trials and failed trials without a rerun, over these conditions."""
   ok = fell = n = unknown = 0
@@ -185,7 +196,9 @@ def tally(runs, falls, name, conds):
       continue
     ok += sum(not t["fall"] for t in trials.values())
     n += len(trials)
-    if cond in falls.get(name, {}):
+    if kept_going(trials):
+      fell += sum(t["fell"] for t in trials.values())
+    elif cond in falls.get(name, {}):
       fell += sum(t["fell"] for t in falls[name][cond].values())
     else:
       unknown += sum(t["fall"] for t in trials.values())
@@ -203,7 +216,7 @@ def real_falls(t):
 
 
 def error(trials):
-  return f"{100 * vals(trials, 'mpkpe_m').mean():.1f} / {100 * vals(trials, 'r_mpkpe_m').mean():.1f}"
+  return f"{tracking_error(trials, 'mpkpe_m'):.1f} / {tracking_error(trials, 'r_mpkpe_m'):.1f}"
 
 
 def summary_cells(runs, falls, name):
@@ -286,7 +299,7 @@ def detail_table(tracker, runs, falls, clips, variants, custom):
         cells.append("n/a")
         continue
       t = tally(runs, falls, name, [cond])
-      cells.append(f"{success(t)} · {real_falls(t)} · {100 * vals(runs[name][cond], 'r_mpkpe_m').mean():.1f}")
+      cells.append(f"{success(t)} · {real_falls(t)} · {tracking_error(runs[name][cond], 'r_mpkpe_m'):.1f}")
     rows.append([clip, label, *cells])
   return table(["Clip", "Motion", *CONDITIONS.values()], rows)
 
