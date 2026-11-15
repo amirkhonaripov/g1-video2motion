@@ -180,7 +180,7 @@ $PY scripts/gmr_to_sonic.py data/motions/gmr/my_clip_grounded.npz --output-file 
 
 ```bash
 cd third_party/g1-eval-harness
-.venv/bin/python evaluate.py --adapter adapters.sonic_adapter:SonicAdapter \
+.venv/bin/python evaluate.py --adapter adapters.sonic_vith_adapter:SonicVitHAdapter \
   --checkpoint ../vit-h/inputs/checkpoints/g1_tracker/model_step_020000_g1.onnx \
   --set tracker_root=../vit-h/g1_tracker --set motion=../../runs/sonic/gmr_my_clip_in.npz \
   --seeds 0 1 2 3 4 5 6 7 8 9 --output-dir ../../runs/harness/sonic_gmr_my_clip

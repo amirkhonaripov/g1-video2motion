@@ -1,233 +1,343 @@
-### At a glance
+### Definitions
 
-| SONIC (ViT-H) | GVHMR + GMR: flat ground | harder | pose error (cm) | ViT-H, 3 samples: flat ground | harder | pose error (cm) |
-|---|---|---|---|---|---|---|
-| Studio dance (Pexels) | finishes | 50/50 | 7.5 | 3/3 finish | 150/150 | 4.4 |
-| Hip-hop, filmed from behind (Pexels) | finishes | 49/50 | 11.9 | 3/3 finish | 150/150 | 3.1 |
-| Jump and knee kick (Pexels) | fails at 1.0 s (10/10) | 0/50 | 6.4 | 0/3 finish | 0/150 | 6.1 |
-| Tennis serve (GVHMR demo video) | fails at 4.5–7.8 s (10/10) | 0/50 | 6.9 | 2/3 finish | 111/150 | 5.0 |
-| AIST++ Pop | finishes | 50/50 | 3.7 | 3/3 finish | 150/150 | 2.4 |
-| AIST++ Jazz | finishes | 50/50 | 2.0 | 3/3 finish | 150/150 | 2.8 |
+- **Harness:** one shared MuJoCo sim (the G1 of the ROS 2 stack) for every tracker; each condition runs 10 seeds
+  that differ only by tiny start noise (±0.02 rad per joint). **Conditions:** flat ground; slippery: low friction
+  (μ 0.4) and ice (μ 0.2); pushes: 0.2 s shoves on the pelvis at t = 4 s ± 0.3 s, 150 N from the side, 250 N from
+  behind, 150 N from the front.
+- **Success:** the motion plays to its end without a tracking failure.
+- **Tracking failure:** BeyondMimic's termination rule fires (torso height or a hand/foot height more than 0.25 m
+  off the reference, or the torso tilted too far). The trial stops there; the robot may still recover.
+- **Real fall:** in a rerun that keeps going after a tracking failure, the head stays below 0.5 m for more than
+  2 s, or is still down when the motion ends. Only conditions with a tracking failure were rerun; "not rerun"
+  counts failed trials whose rerun is missing.
+- **MPKPE / r-MPKPE:** mean distance (cm) of 14 key bodies from the reference over the 10 flat-ground trials, up to
+  the end or the tracking failure. MPKPE in world position (pose plus drift); r-MPKPE with the reference placed on
+  the robot (pose only). SONIC follows the reference relative to itself, so its MPKPE grows on long motions.
+- **k/n:** k of n trials (mjlab: episodes; ROS 2: scored runs).
+- **ViT-H sample N:** ViT-H samples a motion from random noise; samples 1-3 are three draws (seeds 42, 1, 2).
+  **Grounded:** the motion moved down so the feet touch the floor.
+- **n/a:** the jump kick is 2.2 s long and the pushes come at 3.7-4.3 s, so no push happens.
+- **BeyondMimic:** one policy per motion, 3000 mjlab iterations unless the row says otherwise; the LAFAN1 dance uses
+  BeyondMimic's pretrained policy. **mjlab:** its own evaluation, 1024 episodes. **ROS 2:** the full ROS 2 stack.
+- ViT-H's own tracker script (g1_tracker) also fails the LAFAN1 dance at 106.7 s.
 
-### Studio dance (Pexels)
+### BeyondMimic
 
-| SONIC (ViT-H) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
-|---|---|---|---|---|
-| Reference: frames past joint limits (%) | 0.0 | 10.7 | 10.2 | 13.2 |
-| Reference: fastest joint (rad/s) | 10 | 20 | 21 | 16 |
-| Reference: foot sliding (cm/s) | 10 | 14 | 14 | 14 |
-| Flat ground | finishes | finishes | finishes | finishes |
-| Never more than 15 cm off | 0/10 | 0/10 | 0/10 | 0/10 |
-| Pose error, mean / worst (cm) | 7.5 / 12.8 | 3.9 / 10.7 | 5.0 / 14.8 | 4.4 / 13.1 |
-| Position error, mean / worst (cm) | 15.6 / 22.9 | 19.2 / 29.8 | 17.2 / 29.4 | 15.8 / 24.5 |
-| Joint error (°) | 5.8 | 5.7 | 5.8 | 6.7 |
-| Robot joints past limits (% of time) | 0.0 | 0.0 | 0.0 | 0.0 |
-| Power (W) | 35 | 41 | 44 | 44 |
-| Time to make the motion (s) | 97 | 31 | 31 | 31 |
+| Clip | Motion | Success: all | flat | slippery | pushes | MPKPE / r-MPKPE (cm), flat | Real falls | mjlab success | ROS 2 success |
+|---|---|---|---|---|---|---|---|---|---|
+| Tennis serve | GVHMR+GMR | 60/60 | 10/10 | 20/20 | 30/30 | 57.7 / 9.3 | 0/60 | 96.6% (989/1024) | 5/5 (8 launches) |
+| Tennis serve | ViT-H sample 1 | 59/60 | 10/10 | 20/20 | 29/30 | 30.4 / 4.5 | 0/60 | 99.9% (1023/1024) | 5/5 (5 launches) |
+| Tennis serve | ViT-H sample 2 | 57/60 | 10/10 | 20/20 | 27/30 | 35.2 / 5.7 | 2/60 | 100.0% (1024/1024) | 5/5 (6 launches) |
+| Tennis serve | ViT-H sample 3 | 53/60 | 10/10 | 20/20 | 23/30 | 29.7 / 6.0 | 1/60 | 98.6% (1010/1024) | 5/5 (9 launches) |
+| Studio dance | GVHMR+GMR | 41/60 | 10/10 | 20/20 | 11/30 | 14.0 / 8.0 | 19/60 | 100.0% (1024/1024) | 5/5 (7 launches) |
+| Studio dance | ViT-H sample 1 | 57/60 | 10/10 | 20/20 | 27/30 | 15.5 / 4.5 | 3/60 | 99.8% (1022/1024) | 5/5 (11 launches) |
+| Studio dance | ViT-H sample 2 | 59/60 | 10/10 | 20/20 | 29/30 | 19.0 / 5.8 | 1/60 | 100.0% (1024/1024) | 5/5 (6 launches) |
+| Studio dance | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 16.9 / 4.4 | 0/60 | 100.0% (1024/1024) | 4/5 (14 launches) |
+| Hip-hop (back) | GVHMR+GMR | 52/60 | 10/10 | 20/20 | 22/30 | 18.7 / 12.5 | 0/60 | 99.9% (1023/1024) | 5/5 (10 launches) |
+| Hip-hop (back) | ViT-H sample 1 | 60/60 | 10/10 | 20/20 | 30/30 | 7.0 / 2.7 | 0/60 | 99.9% (1023/1024) | 5/5 (10 launches) |
+| Hip-hop (back) | ViT-H sample 2 | 60/60 | 10/10 | 20/20 | 30/30 | 8.2 / 2.7 | 0/60 | 99.9% (1023/1024) | 5/5 (9 launches) |
+| Hip-hop (back) | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 8.7 / 2.8 | 0/60 | 100.0% (1024/1024) | 5/5 (6 launches) |
+| Pop | GVHMR+GMR | 50/60 | 10/10 | 20/20 | 20/30 | 5.5 / 2.9 | 10/60 | 100.0% (1024/1024) | 5/5 (8 launches) |
+| Pop | ViT-H sample 1 | 54/60 | 10/10 | 20/20 | 24/30 | 7.6 / 1.7 | 6/60 | 100.0% (1024/1024) | 5/5 (5 launches) |
+| Pop | ViT-H sample 2 | 57/60 | 10/10 | 20/20 | 27/30 | 5.3 / 1.8 | 3/60 | 100.0% (1024/1024) | 5/5 (7 launches) |
+| Pop | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 8.3 / 2.8 | 0/60 | 99.9% (1023/1024) | 5/5 (6 launches) |
+| Jazz | GVHMR+GMR | 60/60 | 10/10 | 20/20 | 30/30 | 2.7 / 1.6 | 0/60 | 100.0% (1024/1024) | 5/5 (9 launches) |
+| Jazz | ViT-H sample 1 | 60/60 | 10/10 | 20/20 | 30/30 | 3.6 / 2.0 | 0/60 | 100.0% (1024/1024) | 5/5 (9 launches) |
+| Jazz | ViT-H sample 2 | 60/60 | 10/10 | 20/20 | 30/30 | 3.3 / 1.8 | 0/60 | 100.0% (1024/1024) | 5/5 (8 launches) |
+| Jazz | ViT-H sample 3 | 59/60 | 10/10 | 20/20 | 29/30 | 2.9 / 1.9 | 0/60 | 100.0% (1024/1024) | 4/5 (5 launches) |
+| Jump kick | GVHMR+GMR | 0/30 | 0/10 | 0/20 | n/a | 8.4 / 7.7 | 0/30 | 0.0% (0/1024) | 0/5 (5 launches) |
+| Jump kick | GVHMR+GMR, grounded | 0/30 | 0/10 | 0/20 | n/a | 8.8 / 7.2 | 9/30 | 0.0% (0/1024) | – |
+| Jump kick | GVHMR+GMR, 18500 iterations | 0/30 | 0/10 | 0/20 | n/a | 9.8 / 7.2 | 0/30 | 0.0% (0/1024) | – |
+| Jump kick | ViT-H sample 1 | 30/30 | 10/10 | 20/20 | n/a | 18.8 / 3.4 | 0/30 | 93.4% (956/1024) | 5/5 (5 launches) |
+| Jump kick | ViT-H sample 1, 18500 iterations | 30/30 | 10/10 | 20/20 | n/a | 5.2 / 2.9 | 0/30 | – | – |
+| Jump kick | ViT-H sample 2 | 30/30 | 10/10 | 20/20 | n/a | 7.2 / 5.1 | 0/30 | 98.7% (1011/1024) | 3/5 (5 launches) |
+| Jump kick | ViT-H sample 3 | 30/30 | 10/10 | 20/20 | n/a | 5.9 / 3.5 | 0/30 | 97.7% (1000/1024) | 4/5 (8 launches) |
+| LAFAN1 dance | motion capture | 50/60 | 10/10 | 10/20 | 30/30 | 7.6 / 3.5 | 0/60 | 93.1% (953/1024) | 5/5 (5 launches) |
 
-| Finishes (of 10 tries) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
-|---|---|---|---|---|
-| Low friction | 10/10 | 10/10 | 10/10 | 10/10 |
-| Ice | 10/10 | 10/10 | 10/10 | 10/10 |
-| Push from the side | 10/10 | 10/10 | 10/10 | 10/10 |
-| Hard push from behind | 10/10 | 10/10 | 10/10 | 10/10 |
-| Push from the front | 10/10 | 10/10 | 10/10 | 10/10 |
+### SONIC v1.1
 
-### Hip-hop, filmed from behind (Pexels)
-
-| SONIC (ViT-H) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
-|---|---|---|---|---|
-| Reference: frames past joint limits (%) | 0.0 | 0.3 | 0.6 | 0.0 |
-| Reference: fastest joint (rad/s) | 5 | 13 | 24 | 19 |
-| Reference: foot sliding (cm/s) | 5 | 11 | 11 | 11 |
-| Flat ground | finishes | finishes | finishes | finishes |
-| Never more than 15 cm off | 0/10 | 0/10 | 0/10 | 0/10 |
-| Pose error, mean / worst (cm) | 11.9 / 19.5 | 3.2 / 4.8 | 3.0 / 4.4 | 3.1 / 4.5 |
-| Position error, mean / worst (cm) | 19.3 / 26.9 | 13.0 / 20.5 | 24.8 / 36.9 | 21.7 / 28.0 |
-| Joint error (°) | 5.1 | 4.8 | 4.8 | 4.8 |
-| Robot joints past limits (% of time) | 0.0 | 0.0 | 0.0 | 0.0 |
-| Power (W) | 38 | 39 | 40 | 43 |
-| Time to make the motion (s) | 51 | 22 | 22 | 22 |
-
-| Finishes (of 10 tries) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
-|---|---|---|---|---|
-| Low friction | 10/10 | 10/10 | 10/10 | 10/10 |
-| Ice | 10/10 | 10/10 | 10/10 | 10/10 |
-| Push from the side | 9/10 | 10/10 | 10/10 | 10/10 |
-| Hard push from behind | 10/10 | 10/10 | 10/10 | 10/10 |
-| Push from the front | 10/10 | 10/10 | 10/10 | 10/10 |
-
-### Jump and knee kick (Pexels)
-
-| SONIC (ViT-H) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
-|---|---|---|---|---|
-| Reference: frames past joint limits (%) | 0.0 | 5.4 | 6.3 | 9.9 |
-| Reference: fastest joint (rad/s) | 16 | 24 | 27 | 25 |
-| Reference: foot sliding (cm/s) | 31 | 14 | 22 | 19 |
-| Flat ground | fails at 1.0 s (10/10) | fails at 1.0 s (10/10) | fails at 1.0 s (10/10) | fails at 1.0 s (10/10) |
-| Never more than 15 cm off | 0/10 | 0/10 | 0/10 | 0/10 |
-| Pose error, mean / worst (cm) | 6.4 / 20.0 | 6.1 / 22.8 | 6.0 / 21.5 | 6.2 / 22.5 |
-| Position error, mean / worst (cm) | 8.7 / 26.8 | 12.1 / 35.1 | 11.7 / 33.0 | 11.2 / 31.1 |
-| Joint error (°) | 7.5 | 6.5 | 6.7 | 6.4 |
-| Robot joints past limits (% of time) | 0.0 | 2.9 | 0.2 | 3.9 |
-| Power (W) | 340 | 257 | 245 | 255 |
-| Time to make the motion (s) | 23 | 17 | 17 | 17 |
-
-| Finishes (of 10 tries) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
-|---|---|---|---|---|
-| Low friction | 0/10 | 0/10 | 0/10 | 0/10 |
-| Ice | 0/10 | 0/10 | 0/10 | 0/10 |
-| Push from the side | 0/10 | 0/10 | 0/10 | 0/10 |
-| Hard push from behind | 0/10 | 0/10 | 0/10 | 0/10 |
-| Push from the front | 0/10 | 0/10 | 0/10 | 0/10 |
-
-### Tennis serve (GVHMR demo video)
-
-| SONIC (ViT-H) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
-|---|---|---|---|---|
-| Reference: frames past joint limits (%) | 0.0 | 5.6 | 4.4 | 11.3 |
-| Reference: fastest joint (rad/s) | 20 | 25 | 44 | 50 |
-| Reference: foot sliding (cm/s) | 17 | 18 | 15 | 20 |
-| Flat ground | fails at 4.5–7.8 s (10/10) | finishes | fails at 8.0 s (4/10) | finishes |
-| Never more than 15 cm off | 0/10 | 0/10 | 0/10 | 0/10 |
-| Pose error, mean / worst (cm) | 6.9 / 18.8 | 4.5 / 13.7 | 5.1 / 15.6 | 5.3 / 16.4 |
-| Position error, mean / worst (cm) | 25.4 / 51.6 | 20.5 / 40.9 | 21.8 / 49.0 | 36.9 / 73.7 |
-| Joint error (°) | 7.4 | 6.6 | 6.7 | 7.3 |
-| Robot joints past limits (% of time) | 0.0 | 0.0 | 0.0 | 1.2 |
-| Power (W) | 121 | 133 | 128 | 152 |
-| Time to make the motion (s) | 49 | 43 | 43 | 43 |
-
-| Finishes (of 10 tries) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
-|---|---|---|---|---|
-| Low friction | 0/10 | 10/10 | 6/10 | 10/10 |
-| Ice | 0/10 | 10/10 | 6/10 | 10/10 |
-| Push from the side | 0/10 | 9/10 | 6/10 | 6/10 |
-| Hard push from behind | 0/10 | 10/10 | 2/10 | 3/10 |
-| Push from the front | 0/10 | 10/10 | 8/10 | 5/10 |
-
-### AIST++ Pop
-
-| SONIC (ViT-H) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
-|---|---|---|---|---|
-| Reference: frames past joint limits (%) | 0.0 | 9.2 | 11.0 | 8.5 |
-| Reference: fastest joint (rad/s) | 5 | 12 | 10 | 84 |
-| Reference: foot sliding (cm/s) | 2 | 11 | 10 | 16 |
-| Flat ground | finishes | finishes | finishes | finishes |
-| Never more than 15 cm off | 5/10 | 0/10 | 10/10 | 0/10 |
-| Pose error, mean / worst (cm) | 3.7 / 6.8 | 2.2 / 6.3 | 2.3 / 3.8 | 2.8 / 13.6 |
-| Position error, mean / worst (cm) | 7.7 / 15.0 | 9.0 / 16.2 | 8.9 / 14.2 | 8.3 / 20.2 |
-| Joint error (°) | 4.5 | 4.2 | 4.3 | 5.8 |
-| Robot joints past limits (% of time) | 0.0 | 0.0 | 0.0 | 0.3 |
-| Power (W) | 26 | 28 | 29 | 59 |
-| Time to make the motion (s) | 58 | 43 | 43 | 43 |
-
-| Finishes (of 10 tries) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
-|---|---|---|---|---|
-| Low friction | 10/10 | 10/10 | 10/10 | 10/10 |
-| Ice | 10/10 | 10/10 | 10/10 | 10/10 |
-| Push from the side | 10/10 | 10/10 | 10/10 | 10/10 |
-| Hard push from behind | 10/10 | 10/10 | 10/10 | 10/10 |
-| Push from the front | 10/10 | 10/10 | 10/10 | 10/10 |
-
-### AIST++ Jazz
-
-| SONIC (ViT-H) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
-|---|---|---|---|---|
-| Reference: frames past joint limits (%) | 0.0 | 0.0 | 0.0 | 0.0 |
-| Reference: fastest joint (rad/s) | 16 | 14 | 12 | 16 |
-| Reference: foot sliding (cm/s) | 1 | 4 | 4 | 3 |
-| Flat ground | finishes | finishes | finishes | finishes |
-| Never more than 15 cm off | 10/10 | 10/10 | 10/10 | 10/10 |
-| Pose error, mean / worst (cm) | 2.0 / 3.7 | 2.9 / 3.8 | 2.7 / 3.5 | 2.7 / 3.4 |
-| Position error, mean / worst (cm) | 3.2 / 5.0 | 4.9 / 7.2 | 4.8 / 7.2 | 4.9 / 6.7 |
-| Joint error (°) | 5.9 | 4.9 | 5.0 | 5.2 |
-| Robot joints past limits (% of time) | 0.0 | 0.0 | 0.0 | 0.0 |
-| Power (W) | 10 | 11 | 12 | 11 |
-| Time to make the motion (s) | 58 | 44 | 44 | 44 |
-
-| Finishes (of 10 tries) | GVHMR + GMR | ViT-H sample 1 | ViT-H sample 2 | ViT-H sample 3 |
-|---|---|---|---|---|
-| Low friction | 10/10 | 10/10 | 10/10 | 10/10 |
-| Ice | 10/10 | 10/10 | 10/10 | 10/10 |
-| Push from the side | 10/10 | 10/10 | 10/10 | 10/10 |
-| Hard push from behind | 10/10 | 10/10 | 10/10 | 10/10 |
-| Push from the front | 10/10 | 10/10 | 10/10 | 10/10 |
-
-### BeyondMimic vs SONIC (ViT-H), every clip
-
-| BeyondMimic (3000 iterations) vs SONIC (ViT-H) | BeyondMimic: mjlab | BeyondMimic: flat ground | BeyondMimic: harder (of 50) | BeyondMimic: pose error (cm) | SONIC (ViT-H): flat ground | SONIC (ViT-H): harder (of 50) | SONIC (ViT-H): pose error (cm) |
+| Clip | Motion | Success: all | flat | slippery | pushes | MPKPE / r-MPKPE (cm), flat | Real falls |
 |---|---|---|---|---|---|---|---|
-| Studio dance (Pexels), GVHMR + GMR | – | – | – | – | finishes | 50/50 | 7.5 |
-| Studio dance (Pexels), ViT-H sample 1 | – | – | – | – | finishes | 50/50 | 3.9 |
-| Hip-hop, filmed from behind (Pexels), GVHMR + GMR | – | – | – | – | finishes | 49/50 | 11.9 |
-| Hip-hop, filmed from behind (Pexels), ViT-H sample 1 | – | – | – | – | finishes | 50/50 | 3.2 |
-| Jump and knee kick (Pexels), GVHMR + GMR | finishes 0% | fails at 0.9 s (10/10) | 0/50 | 7.7 | fails at 1.0 s (10/10) | 0/50 | 6.4 |
-| Jump and knee kick (Pexels), ViT-H sample 1 | finishes 93% | finishes | 50/50 | 3.4 | fails at 1.0 s (10/10) | 0/50 | 6.1 |
-| Tennis serve (GVHMR demo video), GVHMR + GMR | finishes 97% | finishes | 50/50 | 9.3 | fails at 4.5–7.8 s (10/10) | 0/50 | 6.9 |
-| Tennis serve (GVHMR demo video), ViT-H sample 1 | finishes 100% | finishes | 49/50 | 4.5 | finishes | 49/50 | 4.5 |
-| AIST++ Pop, GVHMR + GMR | – | – | – | – | finishes | 50/50 | 3.7 |
-| AIST++ Pop, ViT-H sample 1 | – | – | – | – | finishes | 50/50 | 2.2 |
-| AIST++ Jazz, GVHMR + GMR | – | – | – | – | finishes | 50/50 | 2.0 |
-| AIST++ Jazz, ViT-H sample 1 | – | – | – | – | finishes | 50/50 | 2.9 |
+| Tennis serve | GVHMR+GMR | 0/60 | 0/10 | 0/20 | 0/30 | 39.8 / 7.4 | 0/60 |
+| Tennis serve | GVHMR+GMR, grounded | 0/60 | 0/10 | 0/20 | 0/30 | 38.4 / 5.2 | 0/60 |
+| Tennis serve | ViT-H sample 1 | 60/60 | 10/10 | 20/20 | 30/30 | 48.1 / 4.5 | 0/60 |
+| Tennis serve | ViT-H sample 2 | 0/60 | 0/10 | 0/20 | 0/30 | 35.0 / 4.1 | 0/60 |
+| Tennis serve | ViT-H sample 3 | 0/60 | 0/10 | 0/20 | 0/30 | 32.4 / 4.8 | 0/60 |
+| Studio dance | GVHMR+GMR | 60/60 | 10/10 | 20/20 | 30/30 | 16.0 / 8.3 | 0/60 |
+| Studio dance | GVHMR+GMR, grounded | 60/60 | 10/10 | 20/20 | 30/30 | 13.4 / 4.4 | 0/60 |
+| Studio dance | ViT-H sample 1 | 60/60 | 10/10 | 20/20 | 30/30 | 28.8 / 4.5 | 0/60 |
+| Studio dance | ViT-H sample 2 | 60/60 | 10/10 | 20/20 | 30/30 | 23.8 / 5.4 | 0/60 |
+| Studio dance | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 28.8 / 5.0 | 0/60 |
+| Hip-hop (back) | GVHMR+GMR | 60/60 | 10/10 | 20/20 | 30/30 | 23.6 / 11.7 | 0/60 |
+| Hip-hop (back) | GVHMR+GMR, grounded | 60/60 | 10/10 | 20/20 | 30/30 | 20.2 / 4.1 | 0/60 |
+| Hip-hop (back) | ViT-H sample 1 | 60/60 | 10/10 | 20/20 | 30/30 | 16.6 / 3.5 | 0/60 |
+| Hip-hop (back) | ViT-H sample 2 | 60/60 | 10/10 | 20/20 | 30/30 | 21.9 / 3.2 | 0/60 |
+| Hip-hop (back) | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 21.3 / 3.2 | 0/60 |
+| Pop | GVHMR+GMR | 60/60 | 10/10 | 20/20 | 30/30 | 8.6 / 3.9 | 0/60 |
+| Pop | GVHMR+GMR, grounded | 60/60 | 10/10 | 20/20 | 30/30 | 8.4 / 3.1 | 0/60 |
+| Pop | ViT-H sample 1 | 60/60 | 10/10 | 20/20 | 30/30 | 10.0 / 3.0 | 0/60 |
+| Pop | ViT-H sample 2 | 60/60 | 10/10 | 20/20 | 30/30 | 10.7 / 2.7 | 0/60 |
+| Pop | ViT-H sample 3 | 35/60 | 3/10 | 6/20 | 26/30 | 8.8 / 3.3 | 0/60 |
+| Jazz | GVHMR+GMR | 60/60 | 10/10 | 20/20 | 30/30 | 5.5 / 2.4 | 0/60 |
+| Jazz | GVHMR+GMR, grounded | 60/60 | 10/10 | 20/20 | 30/30 | 5.3 / 2.6 | 0/60 |
+| Jazz | ViT-H sample 1 | 60/60 | 10/10 | 20/20 | 30/30 | 5.2 / 3.1 | 0/60 |
+| Jazz | ViT-H sample 2 | 60/60 | 10/10 | 20/20 | 30/30 | 5.0 / 2.7 | 0/60 |
+| Jazz | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 4.5 / 2.9 | 0/60 |
+| Jump kick | GVHMR+GMR | 0/30 | 0/10 | 0/20 | n/a | 10.4 / 6.8 | 0/30 |
+| Jump kick | GVHMR+GMR, grounded | 0/30 | 0/10 | 0/20 | n/a | 10.7 / 6.7 | 0/30 |
+| Jump kick | ViT-H sample 1 | 0/30 | 0/10 | 0/20 | n/a | 9.9 / 6.3 | 0/30 |
+| Jump kick | ViT-H sample 2 | 0/30 | 0/10 | 0/20 | n/a | 12.0 / 6.1 | 0/30 |
+| Jump kick | ViT-H sample 3 | 0/30 | 0/10 | 0/20 | n/a | 10.2 / 5.9 | 0/30 |
+| LAFAN1 dance | motion capture | 0/60 | 0/10 | 0/20 | 0/30 | 235.2 / 4.1 | 60/60 |
 
-### Tennis serve: BeyondMimic vs SONIC (ViT-H)
+### SONIC (ViT-H)
 
-| Tennis serve | GVHMR + GMR | GVHMR + GMR, clipped | ViT-H sample 1 | ViT-H sample 1, clipped |
-|---|---|---|---|---|
-| BeyondMimic: mjlab (1024 tries) | finishes 97% | finishes 97% | finishes 100% | finishes 100% |
-| BeyondMimic: flat ground | finishes | finishes | finishes | finishes |
-| BeyondMimic: harder (of 50) | 50/50 | 42/50 | 49/50 | 45/50 |
-| BeyondMimic: pose error (cm) | 9.3 | 9.5 | 4.5 | 4.6 |
-| SONIC (ViT-H): flat ground | fails at 4.5–7.8 s (10/10) | fails at 4.5–7.8 s (10/10) | finishes | finishes |
-| SONIC (ViT-H): harder (of 50) | 0/50 | 0/50 | 49/50 | 50/50 |
-| SONIC (ViT-H): pose error (cm) | 6.9 | 5.1 | 4.5 | 4.5 |
+| Clip | Motion | Success: all | flat | slippery | pushes | MPKPE / r-MPKPE (cm), flat | Real falls |
+|---|---|---|---|---|---|---|---|
+| Tennis serve | GVHMR+GMR | 0/60 | 0/10 | 0/20 | 0/30 | 25.4 / 6.9 | 0/60 |
+| Tennis serve | GVHMR+GMR, grounded | 55/60 | 10/10 | 20/20 | 25/30 | 43.7 / 5.0 | 0/60 |
+| Tennis serve | ViT-H sample 1 | 59/60 | 10/10 | 20/20 | 29/30 | 20.5 / 4.5 | 0/60 |
+| Tennis serve | ViT-H sample 2 | 34/60 | 6/10 | 12/20 | 16/30 | 21.8 / 5.1 | 0/60 |
+| Tennis serve | ViT-H sample 3 | 44/60 | 10/10 | 20/20 | 14/30 | 36.9 / 5.3 | 0/60 |
+| Studio dance | GVHMR+GMR | 60/60 | 10/10 | 20/20 | 30/30 | 15.6 / 7.5 | 0/60 |
+| Studio dance | GVHMR+GMR, grounded | 60/60 | 10/10 | 20/20 | 30/30 | 13.8 / 3.5 | 0/60 |
+| Studio dance | ViT-H sample 1 | 60/60 | 10/10 | 20/20 | 30/30 | 19.2 / 3.9 | 0/60 |
+| Studio dance | ViT-H sample 2 | 60/60 | 10/10 | 20/20 | 30/30 | 17.2 / 5.0 | 0/60 |
+| Studio dance | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 15.8 / 4.4 | 0/60 |
+| Hip-hop (back) | GVHMR+GMR | 59/60 | 10/10 | 20/20 | 29/30 | 19.3 / 11.9 | 0/60 |
+| Hip-hop (back) | GVHMR+GMR, grounded | 60/60 | 10/10 | 20/20 | 30/30 | 15.2 / 4.2 | 0/60 |
+| Hip-hop (back) | ViT-H sample 1 | 60/60 | 10/10 | 20/20 | 30/30 | 13.0 / 3.2 | 0/60 |
+| Hip-hop (back) | ViT-H sample 2 | 60/60 | 10/10 | 20/20 | 30/30 | 24.8 / 3.0 | 0/60 |
+| Hip-hop (back) | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 21.7 / 3.1 | 0/60 |
+| Pop | GVHMR+GMR | 60/60 | 10/10 | 20/20 | 30/30 | 7.7 / 3.7 | 0/60 |
+| Pop | GVHMR+GMR, grounded | 60/60 | 10/10 | 20/20 | 30/30 | 7.3 / 2.5 | 0/60 |
+| Pop | ViT-H sample 1 | 60/60 | 10/10 | 20/20 | 30/30 | 9.0 / 2.2 | 0/60 |
+| Pop | ViT-H sample 2 | 60/60 | 10/10 | 20/20 | 30/30 | 8.9 / 2.3 | 0/60 |
+| Pop | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 8.3 / 2.8 | 0/60 |
+| Jazz | GVHMR+GMR | 60/60 | 10/10 | 20/20 | 30/30 | 3.2 / 2.0 | 0/60 |
+| Jazz | GVHMR+GMR, grounded | 60/60 | 10/10 | 20/20 | 30/30 | 3.4 / 2.2 | 0/60 |
+| Jazz | ViT-H sample 1 | 60/60 | 10/10 | 20/20 | 30/30 | 4.9 / 2.9 | 0/60 |
+| Jazz | ViT-H sample 2 | 60/60 | 10/10 | 20/20 | 30/30 | 4.8 / 2.7 | 0/60 |
+| Jazz | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 4.9 / 2.7 | 0/60 |
+| Jump kick | GVHMR+GMR | 0/30 | 0/10 | 0/20 | n/a | 8.7 / 6.4 | 0/30 |
+| Jump kick | GVHMR+GMR, grounded | 0/30 | 0/10 | 0/20 | n/a | 8.8 / 6.3 | 0/30 |
+| Jump kick | ViT-H sample 1 | 0/30 | 0/10 | 0/20 | n/a | 12.1 / 6.1 | 0/30 |
+| Jump kick | ViT-H sample 2 | 0/30 | 0/10 | 0/20 | n/a | 11.7 / 6.0 | 0/30 |
+| Jump kick | ViT-H sample 3 | 0/30 | 0/10 | 0/20 | n/a | 11.2 / 6.2 | 0/30 |
+| LAFAN1 dance | motion capture | 0/60 | 0/10 | 0/20 | 0/30 | 185.0 / 4.2 | 60/60 |
 
-### Jump and knee kick: BeyondMimic vs SONIC (ViT-H)
+### Trackers side by side
 
-| Jump and knee kick | GVHMR + GMR | GVHMR + GMR, grounded | ViT-H sample 1 | GVHMR + GMR, 18500 iterations |
-|---|---|---|---|---|
-| BeyondMimic: mjlab (1024 tries) | finishes 0% | finishes 0% | finishes 93% | finishes 0% |
-| BeyondMimic: flat ground | fails at 0.9 s (10/10) | fails at 0.9 s (10/10) | finishes | fails at 1.0 s (10/10) |
-| BeyondMimic: harder (of 50) | 0/50 | 0/50 | 50/50 | 0/50 |
-| BeyondMimic: pose error (cm) | 7.7 | 7.2 | 3.4 | 7.2 |
-| SONIC (ViT-H): flat ground | fails at 1.0 s (10/10) | fails at 1.0 s (10/10) | fails at 1.0 s (10/10) | – |
-| SONIC (ViT-H): harder (of 50) | 0/50 | 0/50 | 0/50 | – |
-| SONIC (ViT-H): pose error (cm) | 6.4 | 6.3 | 6.1 | – |
+| Clip | Motion | Success: BeyondMimic | Success: SONIC v1.1 | Success: SONIC (ViT-H) | MPKPE / r-MPKPE (cm): BeyondMimic | MPKPE / r-MPKPE (cm): SONIC v1.1 | MPKPE / r-MPKPE (cm): SONIC (ViT-H) | Real falls: BeyondMimic | Real falls: SONIC v1.1 | Real falls: SONIC (ViT-H) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Tennis serve | GVHMR+GMR | 60/60 | 0/60 | 0/60 | 57.7 / 9.3 | 39.8 / 7.4 | 25.4 / 6.9 | 0/60 | 0/60 | 0/60 |
+| Tennis serve | GVHMR+GMR, grounded | no run | 0/60 | 55/60 | – | 38.4 / 5.2 | 43.7 / 5.0 | – | 0/60 | 0/60 |
+| Tennis serve | ViT-H sample 1 | 59/60 | 60/60 | 59/60 | 30.4 / 4.5 | 48.1 / 4.5 | 20.5 / 4.5 | 0/60 | 0/60 | 0/60 |
+| Tennis serve | ViT-H sample 2 | 57/60 | 0/60 | 34/60 | 35.2 / 5.7 | 35.0 / 4.1 | 21.8 / 5.1 | 2/60 | 0/60 | 0/60 |
+| Tennis serve | ViT-H sample 3 | 53/60 | 0/60 | 44/60 | 29.7 / 6.0 | 32.4 / 4.8 | 36.9 / 5.3 | 1/60 | 0/60 | 0/60 |
+| Studio dance | GVHMR+GMR | 41/60 | 60/60 | 60/60 | 14.0 / 8.0 | 16.0 / 8.3 | 15.6 / 7.5 | 19/60 | 0/60 | 0/60 |
+| Studio dance | GVHMR+GMR, grounded | no run | 60/60 | 60/60 | – | 13.4 / 4.4 | 13.8 / 3.5 | – | 0/60 | 0/60 |
+| Studio dance | ViT-H sample 1 | 57/60 | 60/60 | 60/60 | 15.5 / 4.5 | 28.8 / 4.5 | 19.2 / 3.9 | 3/60 | 0/60 | 0/60 |
+| Studio dance | ViT-H sample 2 | 59/60 | 60/60 | 60/60 | 19.0 / 5.8 | 23.8 / 5.4 | 17.2 / 5.0 | 1/60 | 0/60 | 0/60 |
+| Studio dance | ViT-H sample 3 | 60/60 | 60/60 | 60/60 | 16.9 / 4.4 | 28.8 / 5.0 | 15.8 / 4.4 | 0/60 | 0/60 | 0/60 |
+| Hip-hop (back) | GVHMR+GMR | 52/60 | 60/60 | 59/60 | 18.7 / 12.5 | 23.6 / 11.7 | 19.3 / 11.9 | 0/60 | 0/60 | 0/60 |
+| Hip-hop (back) | GVHMR+GMR, grounded | no run | 60/60 | 60/60 | – | 20.2 / 4.1 | 15.2 / 4.2 | – | 0/60 | 0/60 |
+| Hip-hop (back) | ViT-H sample 1 | 60/60 | 60/60 | 60/60 | 7.0 / 2.7 | 16.6 / 3.5 | 13.0 / 3.2 | 0/60 | 0/60 | 0/60 |
+| Hip-hop (back) | ViT-H sample 2 | 60/60 | 60/60 | 60/60 | 8.2 / 2.7 | 21.9 / 3.2 | 24.8 / 3.0 | 0/60 | 0/60 | 0/60 |
+| Hip-hop (back) | ViT-H sample 3 | 60/60 | 60/60 | 60/60 | 8.7 / 2.8 | 21.3 / 3.2 | 21.7 / 3.1 | 0/60 | 0/60 | 0/60 |
+| Pop | GVHMR+GMR | 50/60 | 60/60 | 60/60 | 5.5 / 2.9 | 8.6 / 3.9 | 7.7 / 3.7 | 10/60 | 0/60 | 0/60 |
+| Pop | GVHMR+GMR, grounded | no run | 60/60 | 60/60 | – | 8.4 / 3.1 | 7.3 / 2.5 | – | 0/60 | 0/60 |
+| Pop | ViT-H sample 1 | 54/60 | 60/60 | 60/60 | 7.6 / 1.7 | 10.0 / 3.0 | 9.0 / 2.2 | 6/60 | 0/60 | 0/60 |
+| Pop | ViT-H sample 2 | 57/60 | 60/60 | 60/60 | 5.3 / 1.8 | 10.7 / 2.7 | 8.9 / 2.3 | 3/60 | 0/60 | 0/60 |
+| Pop | ViT-H sample 3 | 60/60 | 35/60 | 60/60 | 8.3 / 2.8 | 8.8 / 3.3 | 8.3 / 2.8 | 0/60 | 0/60 | 0/60 |
+| Jazz | GVHMR+GMR | 60/60 | 60/60 | 60/60 | 2.7 / 1.6 | 5.5 / 2.4 | 3.2 / 2.0 | 0/60 | 0/60 | 0/60 |
+| Jazz | GVHMR+GMR, grounded | no run | 60/60 | 60/60 | – | 5.3 / 2.6 | 3.4 / 2.2 | – | 0/60 | 0/60 |
+| Jazz | ViT-H sample 1 | 60/60 | 60/60 | 60/60 | 3.6 / 2.0 | 5.2 / 3.1 | 4.9 / 2.9 | 0/60 | 0/60 | 0/60 |
+| Jazz | ViT-H sample 2 | 60/60 | 60/60 | 60/60 | 3.3 / 1.8 | 5.0 / 2.7 | 4.8 / 2.7 | 0/60 | 0/60 | 0/60 |
+| Jazz | ViT-H sample 3 | 59/60 | 60/60 | 60/60 | 2.9 / 1.9 | 4.5 / 2.9 | 4.9 / 2.7 | 0/60 | 0/60 | 0/60 |
+| Jump kick | GVHMR+GMR | 0/30 | 0/30 | 0/30 | 8.4 / 7.7 | 10.4 / 6.8 | 8.7 / 6.4 | 0/30 | 0/30 | 0/30 |
+| Jump kick | GVHMR+GMR, grounded | 0/30 | 0/30 | 0/30 | 8.8 / 7.2 | 10.7 / 6.7 | 8.8 / 6.3 | 9/30 | 0/30 | 0/30 |
+| Jump kick | ViT-H sample 1 | 30/30 | 0/30 | 0/30 | 18.8 / 3.4 | 9.9 / 6.3 | 12.1 / 6.1 | 0/30 | 0/30 | 0/30 |
+| Jump kick | ViT-H sample 2 | 30/30 | 0/30 | 0/30 | 7.2 / 5.1 | 12.0 / 6.1 | 11.7 / 6.0 | 0/30 | 0/30 | 0/30 |
+| Jump kick | ViT-H sample 3 | 30/30 | 0/30 | 0/30 | 5.9 / 3.5 | 10.2 / 5.9 | 11.2 / 6.2 | 0/30 | 0/30 | 0/30 |
+| LAFAN1 dance | motion capture | 50/60 | 0/60 | 0/60 | 7.6 / 3.5 | 235.2 / 4.1 | 185.0 / 4.2 | 0/60 | 60/60 | 60/60 |
 
-### Feet put back on the floor (grounded)
+### Policy time
 
-| SONIC (ViT-H) finishes: flat ground · harder | GVHMR + GMR, raw | GVHMR + GMR, grounded | ViT-H, raw | ViT-H, grounded |
-|---|---|---|---|---|
-| Studio dance (Pexels) | 10/10 · 50/50 | 10/10 · 50/50 | 30/30 · 150/150 | 30/30 · 150/150 |
-| Hip-hop, filmed from behind (Pexels) | 10/10 · 49/50 | 10/10 · 50/50 | 30/30 · 150/150 | 30/30 · 150/150 |
-| Jump and knee kick (Pexels) | 0/10 · 0/50 | 0/10 · 0/50 | 0/30 · 0/150 | 0/30 · 0/150 |
-| Tennis serve (GVHMR demo video) | 0/10 · 0/50 | 10/10 · 45/50 | 26/30 · 111/150 | 30/30 · 133/150 |
-| AIST++ Pop | 10/10 · 50/50 | 10/10 · 50/50 | 30/30 · 150/150 | 30/30 · 150/150 |
-| AIST++ Jazz | 10/10 · 50/50 | 10/10 · 50/50 | 30/30 · 150/150 | 30/30 · 150/150 |
+|  | BeyondMimic | SONIC v1.1 | SONIC (ViT-H) |
+|---|---|---|---|
+| Policy time per step (ms), LAFAN1 dance | 0.05 | 4.62 | 1.34 |
 
-### LAFAN1 dance: BeyondMimic vs SONIC (ViT-H)
+### Motion sources
 
-| LAFAN1 dance (131 s, motion capture) | BeyondMimic | SONIC (ViT-H) |
-|---|---|---|
-| Flat ground | finishes | fails at 106.7 s (10/10) |
-| Harder conditions | 40/50 | 0/50 |
-| Pose error, mean (cm) | 3.5 | 4.2 |
-| Position error, mean (cm) | 7.6 | 185.0 |
-| Policy time per step (ms) | 0.05 | 1.34 |
-| mjlab (training simulator, 1024 tries) | finishes 93% | – |
-| ROS 2 deployment stack (5 tries) | finishes 5/5 | – |
-| ViT-H's tracker script (g1_tracker) | – | fails at 106.7 s |
+| Clip | Motion | Time to make (s) | Frames past joint limits (%) | Fastest joint (rad/s) | Foot sliding (cm/s) |
+|---|---|---|---|---|---|
+| Tennis serve | GVHMR+GMR | 49 | 0.0 | 20 | 17 |
+| Tennis serve | ViT-H sample 1 | 43 | 5.6 | 25 | 18 |
+| Tennis serve | ViT-H sample 2 | 43 | 4.4 | 44 | 15 |
+| Tennis serve | ViT-H sample 3 | 43 | 11.3 | 50 | 20 |
+| Studio dance | GVHMR+GMR | 97 | 0.0 | 10 | 10 |
+| Studio dance | ViT-H sample 1 | 31 | 10.7 | 20 | 14 |
+| Studio dance | ViT-H sample 2 | 31 | 10.2 | 21 | 14 |
+| Studio dance | ViT-H sample 3 | 31 | 13.2 | 16 | 14 |
+| Hip-hop (back) | GVHMR+GMR | 51 | 0.0 | 5 | 5 |
+| Hip-hop (back) | ViT-H sample 1 | 22 | 0.3 | 13 | 11 |
+| Hip-hop (back) | ViT-H sample 2 | 22 | 0.6 | 24 | 11 |
+| Hip-hop (back) | ViT-H sample 3 | 22 | 0.0 | 19 | 11 |
+| Pop | GVHMR+GMR | 58 | 0.0 | 5 | 2 |
+| Pop | ViT-H sample 1 | 43 | 9.2 | 12 | 11 |
+| Pop | ViT-H sample 2 | 43 | 11.0 | 10 | 10 |
+| Pop | ViT-H sample 3 | 43 | 8.5 | 84 | 16 |
+| Jazz | GVHMR+GMR | 58 | 0.0 | 16 | 1 |
+| Jazz | ViT-H sample 1 | 44 | 0.0 | 14 | 4 |
+| Jazz | ViT-H sample 2 | 44 | 0.0 | 12 | 4 |
+| Jazz | ViT-H sample 3 | 44 | 0.0 | 16 | 3 |
+| Jump kick | GVHMR+GMR | 23 | 0.0 | 16 | 31 |
+| Jump kick | ViT-H sample 1 | 17 | 5.4 | 24 | 14 |
+| Jump kick | ViT-H sample 2 | 17 | 6.3 | 27 | 22 |
+| Jump kick | ViT-H sample 3 | 17 | 9.9 | 25 | 19 |
 
-### Notes
+### Every condition
 
-- **Flat ground:** 10 tries that differ only by tiny start noise (±0.02 rad per joint), so they
-  nearly always agree; the harder conditions are where tries really differ.
-- **Fails:** torso height, torso tilt or a hand/foot height more than 0.25 m from the reference
-  (BeyondMimic's rules). **Never more than 15 cm off:** PHUMA's strict success.
-- **Pose error (r-MPKPE):** body-part error after placing the reference on the robot: how well the
-  pose is copied. **Position error (MPKPE):** the same without moving it: pose plus drift.
-- **SONIC (ViT-H) drifts partly by design:** it follows the reference relative to itself, not a world
-  position, so its position error grows on long motions while its pose error stays low.
-- **ViT-H samples:** ViT-H generates a motion from random noise; samples 1-3 are three draws
-  (seeds 42, 1, 2) from the same video.
-- **Robot model:** the harness default, `ros2`: the G1 of the ROS 2 stack that runs the real robot.
+Each cell: success · real falls · r-MPKPE (cm).
+
+#### BeyondMimic
+
+| Clip | Motion | Flat | Low friction | Ice | Push from the side | Hard push from behind | Push from the front |
+|---|---|---|---|---|---|---|---|
+| Tennis serve | GVHMR+GMR | 10/10 · 0/10 · 9.3 | 10/10 · 0/10 · 9.3 | 10/10 · 0/10 · 9.3 | 10/10 · 0/10 · 9.8 | 10/10 · 0/10 · 9.6 | 10/10 · 0/10 · 9.4 |
+| Tennis serve | ViT-H sample 1 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.7 | 10/10 · 0/10 · 5.2 | 9/10 · 0/10 · 5.0 |
+| Tennis serve | ViT-H sample 2 | 10/10 · 0/10 · 5.7 | 10/10 · 0/10 · 5.7 | 10/10 · 0/10 · 5.7 | 10/10 · 0/10 · 6.0 | 7/10 · 2/10 · 5.9 | 10/10 · 0/10 · 6.0 |
+| Tennis serve | ViT-H sample 3 | 10/10 · 0/10 · 6.0 | 10/10 · 0/10 · 6.0 | 10/10 · 0/10 · 6.0 | 9/10 · 0/10 · 6.3 | 5/10 · 1/10 · 6.7 | 9/10 · 0/10 · 6.4 |
+| Studio dance | GVHMR+GMR | 10/10 · 0/10 · 8.0 | 10/10 · 0/10 · 8.0 | 10/10 · 0/10 · 8.0 | 10/10 · 0/10 · 7.7 | 1/10 · 9/10 · 8.1 | 0/10 · 10/10 · 7.4 |
+| Studio dance | ViT-H sample 1 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.5 | 8/10 · 2/10 · 5.1 | 9/10 · 1/10 · 4.8 | 10/10 · 0/10 · 4.4 |
+| Studio dance | ViT-H sample 2 | 10/10 · 0/10 · 5.8 | 10/10 · 0/10 · 5.8 | 10/10 · 0/10 · 5.8 | 10/10 · 0/10 · 5.7 | 9/10 · 1/10 · 5.8 | 10/10 · 0/10 · 5.7 |
+| Studio dance | ViT-H sample 3 | 10/10 · 0/10 · 4.4 | 10/10 · 0/10 · 4.4 | 10/10 · 0/10 · 4.4 | 10/10 · 0/10 · 4.6 | 10/10 · 0/10 · 4.8 | 10/10 · 0/10 · 4.6 |
+| Hip-hop (back) | GVHMR+GMR | 10/10 · 0/10 · 12.5 | 10/10 · 0/10 · 12.5 | 10/10 · 0/10 · 12.5 | 9/10 · 0/10 · 12.6 | 3/10 · 0/10 · 10.6 | 10/10 · 0/10 · 12.7 |
+| Hip-hop (back) | ViT-H sample 1 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 3.3 | 10/10 · 0/10 · 3.1 |
+| Hip-hop (back) | ViT-H sample 2 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 3.3 | 10/10 · 0/10 · 3.2 |
+| Hip-hop (back) | ViT-H sample 3 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.2 |
+| Pop | GVHMR+GMR | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 3.7 | 0/10 · 10/10 · 3.1 | 10/10 · 0/10 · 3.5 |
+| Pop | ViT-H sample 1 | 10/10 · 0/10 · 1.7 | 10/10 · 0/10 · 1.7 | 10/10 · 0/10 · 1.7 | 10/10 · 0/10 · 2.5 | 4/10 · 6/10 · 3.9 | 10/10 · 0/10 · 2.6 |
+| Pop | ViT-H sample 2 | 10/10 · 0/10 · 1.8 | 10/10 · 0/10 · 1.8 | 10/10 · 0/10 · 1.8 | 10/10 · 0/10 · 2.5 | 7/10 · 3/10 · 3.4 | 10/10 · 0/10 · 3.3 |
+| Pop | ViT-H sample 3 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 3.5 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.2 |
+| Jazz | GVHMR+GMR | 10/10 · 0/10 · 1.6 | 10/10 · 0/10 · 1.6 | 10/10 · 0/10 · 1.6 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.7 |
+| Jazz | ViT-H sample 1 | 10/10 · 0/10 · 2.0 | 10/10 · 0/10 · 2.0 | 10/10 · 0/10 · 2.0 | 10/10 · 0/10 · 2.5 | 10/10 · 0/10 · 2.5 | 10/10 · 0/10 · 3.0 |
+| Jazz | ViT-H sample 2 | 10/10 · 0/10 · 1.8 | 10/10 · 0/10 · 1.8 | 10/10 · 0/10 · 1.8 | 10/10 · 0/10 · 3.3 | 10/10 · 0/10 · 2.1 | 10/10 · 0/10 · 2.7 |
+| Jazz | ViT-H sample 3 | 10/10 · 0/10 · 1.9 | 10/10 · 0/10 · 1.9 | 10/10 · 0/10 · 1.9 | 9/10 · 0/10 · 2.8 | 10/10 · 0/10 · 2.1 | 10/10 · 0/10 · 2.7 |
+| Jump kick | GVHMR+GMR | 0/10 · 0/10 · 7.7 | 0/10 · 0/10 · 7.7 | 0/10 · 0/10 · 7.7 | n/a | n/a | n/a |
+| Jump kick | GVHMR+GMR, grounded | 0/10 · 3/10 · 7.2 | 0/10 · 3/10 · 7.2 | 0/10 · 3/10 · 7.2 | n/a | n/a | n/a |
+| Jump kick | GVHMR+GMR, 18500 iterations | 0/10 · 0/10 · 7.2 | 0/10 · 0/10 · 7.2 | 0/10 · 0/10 · 7.2 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 1 | 10/10 · 0/10 · 3.4 | 10/10 · 0/10 · 3.4 | 10/10 · 0/10 · 3.4 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 1, 18500 iterations | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 2 | 10/10 · 0/10 · 5.1 | 10/10 · 0/10 · 5.1 | 10/10 · 0/10 · 5.1 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 3 | 10/10 · 0/10 · 3.5 | 10/10 · 0/10 · 3.5 | 10/10 · 0/10 · 3.5 | n/a | n/a | n/a |
+| LAFAN1 dance | motion capture | 10/10 · 0/10 · 3.5 | 10/10 · 0/10 · 3.5 | 0/10 · 0/10 · 3.6 | 10/10 · 0/10 · 3.6 | 10/10 · 0/10 · 3.6 | 10/10 · 0/10 · 3.6 |
+
+#### SONIC v1.1
+
+| Clip | Motion | Flat | Low friction | Ice | Push from the side | Hard push from behind | Push from the front |
+|---|---|---|---|---|---|---|---|
+| Tennis serve | GVHMR+GMR | 0/10 · 0/10 · 7.4 | 0/10 · 0/10 · 7.4 | 0/10 · 0/10 · 7.4 | 0/10 · 0/10 · 6.7 | 0/10 · 0/10 · 6.7 | 0/10 · 0/10 · 6.0 |
+| Tennis serve | GVHMR+GMR, grounded | 0/10 · 0/10 · 5.2 | 0/10 · 0/10 · 5.2 | 0/10 · 0/10 · 5.2 | 0/10 · 0/10 · 5.2 | 0/10 · 0/10 · 5.1 | 0/10 · 0/10 · 4.9 |
+| Tennis serve | ViT-H sample 1 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.6 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.6 |
+| Tennis serve | ViT-H sample 1, grounded | 9/10 · 0/10 · 4.9 | 9/10 · 0/10 · 4.9 | 9/10 · 0/10 · 4.9 | 4/10 · 0/10 · 4.9 | 6/10 · 0/10 · 4.7 | 7/10 · 0/10 · 4.9 |
+| Tennis serve | ViT-H sample 2 | 0/10 · 0/10 · 4.1 | 0/10 · 0/10 · 4.1 | 0/10 · 0/10 · 4.1 | 0/10 · 0/10 · 4.4 | 0/10 · 0/10 · 4.6 | 0/10 · 0/10 · 4.9 |
+| Tennis serve | ViT-H sample 2, grounded | 0/10 · 0/10 · 4.1 | 0/10 · 0/10 · 4.1 | 0/10 · 0/10 · 4.1 | 0/10 · 0/10 · 4.3 | 0/10 · 0/10 · 4.6 | 0/10 · 0/10 · 4.7 |
+| Tennis serve | ViT-H sample 3 | 0/10 · 0/10 · 4.8 | 0/10 · 0/10 · 4.8 | 0/10 · 0/10 · 4.8 | 0/10 · 0/10 · 4.7 | 0/10 · 0/10 · 5.0 | 0/10 · 0/10 · 4.9 |
+| Tennis serve | ViT-H sample 3, grounded | 1/10 · 0/10 · 5.6 | 1/10 · 0/10 · 5.6 | 0/10 · 0/10 · 5.6 | 0/10 · 0/10 · 5.1 | 0/10 · 0/10 · 5.4 | 0/10 · 0/10 · 5.5 |
+| Studio dance | GVHMR+GMR | 10/10 · 0/10 · 8.3 | 10/10 · 0/10 · 8.3 | 10/10 · 0/10 · 8.3 | 10/10 · 0/10 · 8.3 | 10/10 · 0/10 · 8.3 | 10/10 · 0/10 · 8.4 |
+| Studio dance | GVHMR+GMR, grounded | 10/10 · 0/10 · 4.4 | 10/10 · 0/10 · 4.4 | 10/10 · 0/10 · 4.4 | 10/10 · 0/10 · 4.4 | 10/10 · 0/10 · 4.4 | 10/10 · 0/10 · 4.5 |
+| Studio dance | ViT-H sample 1 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.6 | 10/10 · 0/10 · 4.5 |
+| Studio dance | ViT-H sample 1, grounded | 10/10 · 0/10 · 4.2 | 10/10 · 0/10 · 4.2 | 10/10 · 0/10 · 4.2 | 10/10 · 0/10 · 4.2 | 10/10 · 0/10 · 4.3 | 10/10 · 0/10 · 4.1 |
+| Studio dance | ViT-H sample 2 | 10/10 · 0/10 · 5.4 | 10/10 · 0/10 · 5.4 | 10/10 · 0/10 · 5.4 | 10/10 · 0/10 · 5.5 | 10/10 · 0/10 · 5.6 | 10/10 · 0/10 · 5.4 |
+| Studio dance | ViT-H sample 2, grounded | 10/10 · 0/10 · 4.3 | 10/10 · 0/10 · 4.2 | 10/10 · 0/10 · 4.2 | 10/10 · 0/10 · 4.3 | 10/10 · 0/10 · 4.4 | 10/10 · 0/10 · 4.2 |
+| Studio dance | ViT-H sample 3 | 10/10 · 0/10 · 5.0 | 10/10 · 0/10 · 5.0 | 10/10 · 0/10 · 5.0 | 10/10 · 0/10 · 5.1 | 10/10 · 0/10 · 5.2 | 10/10 · 0/10 · 5.0 |
+| Studio dance | ViT-H sample 3, grounded | 10/10 · 0/10 · 4.3 | 10/10 · 0/10 · 4.3 | 10/10 · 0/10 · 4.3 | 10/10 · 0/10 · 4.4 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.3 |
+| Hip-hop (back) | GVHMR+GMR | 10/10 · 0/10 · 11.7 | 10/10 · 0/10 · 11.7 | 10/10 · 0/10 · 11.7 | 10/10 · 0/10 · 11.8 | 10/10 · 0/10 · 11.9 | 10/10 · 0/10 · 12.1 |
+| Hip-hop (back) | GVHMR+GMR, grounded | 10/10 · 0/10 · 4.1 | 10/10 · 0/10 · 4.1 | 10/10 · 0/10 · 4.1 | 10/10 · 0/10 · 4.2 | 10/10 · 0/10 · 4.3 | 10/10 · 0/10 · 4.3 |
+| Hip-hop (back) | ViT-H sample 1 | 10/10 · 0/10 · 3.5 | 10/10 · 0/10 · 3.5 | 10/10 · 0/10 · 3.5 | 10/10 · 0/10 · 3.6 | 10/10 · 0/10 · 3.7 | 10/10 · 0/10 · 3.5 |
+| Hip-hop (back) | ViT-H sample 1, grounded | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.3 | 10/10 · 0/10 · 3.4 | 10/10 · 0/10 · 3.2 |
+| Hip-hop (back) | ViT-H sample 2 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.3 | 10/10 · 0/10 · 3.3 | 10/10 · 0/10 · 3.3 |
+| Hip-hop (back) | ViT-H sample 2, grounded | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.1 |
+| Hip-hop (back) | ViT-H sample 3 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.4 | 10/10 · 0/10 · 3.5 | 10/10 · 0/10 · 3.4 |
+| Hip-hop (back) | ViT-H sample 3, grounded | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.0 |
+| Pop | GVHMR+GMR | 10/10 · 0/10 · 3.9 | 10/10 · 0/10 · 3.9 | 10/10 · 0/10 · 3.9 | 10/10 · 0/10 · 4.2 | 10/10 · 0/10 · 4.2 | 10/10 · 0/10 · 4.1 |
+| Pop | GVHMR+GMR, grounded | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.3 | 10/10 · 0/10 · 3.2 |
+| Pop | ViT-H sample 1 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.0 |
+| Pop | ViT-H sample 1, grounded | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.0 |
+| Pop | ViT-H sample 2 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 2.9 |
+| Pop | ViT-H sample 2, grounded | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 |
+| Pop | ViT-H sample 3 | 3/10 · 0/10 · 3.3 | 3/10 · 0/10 · 3.3 | 3/10 · 0/10 · 3.3 | 10/10 · 0/10 · 3.4 | 7/10 · 0/10 · 3.5 | 9/10 · 0/10 · 3.5 |
+| Pop | ViT-H sample 3, grounded | 0/10 · 0/10 · 3.1 | 0/10 · 0/10 · 3.1 | 0/10 · 0/10 · 3.1 | 0/10 · 0/10 · 3.2 | 1/10 · 0/10 · 3.3 | 0/10 · 0/10 · 3.2 |
+| Jazz | GVHMR+GMR | 10/10 · 0/10 · 2.4 | 10/10 · 0/10 · 2.4 | 10/10 · 0/10 · 2.4 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 2.6 |
+| Jazz | GVHMR+GMR, grounded | 10/10 · 0/10 · 2.6 | 10/10 · 0/10 · 2.6 | 10/10 · 0/10 · 2.6 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 2.8 |
+| Jazz | ViT-H sample 1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.3 | 10/10 · 0/10 · 3.3 |
+| Jazz | ViT-H sample 1, grounded | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.4 | 10/10 · 0/10 · 3.3 |
+| Jazz | ViT-H sample 2 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 2.9 |
+| Jazz | ViT-H sample 2, grounded | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.1 |
+| Jazz | ViT-H sample 3 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 |
+| Jazz | ViT-H sample 3, grounded | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.3 | 10/10 · 0/10 · 3.1 |
+| Jump kick | GVHMR+GMR | 0/10 · 0/10 · 6.8 | 0/10 · 0/10 · 6.8 | 0/10 · 0/10 · 6.8 | n/a | n/a | n/a |
+| Jump kick | GVHMR+GMR, grounded | 0/10 · 0/10 · 6.7 | 0/10 · 0/10 · 6.7 | 0/10 · 0/10 · 6.7 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 1 | 0/10 · 0/10 · 6.3 | 0/10 · 0/10 · 6.3 | 0/10 · 0/10 · 6.3 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 1, grounded | 0/10 · 0/10 · 6.3 | 0/10 · 0/10 · 6.3 | 0/10 · 0/10 · 6.3 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 2 | 0/10 · 0/10 · 6.1 | 0/10 · 0/10 · 6.1 | 0/10 · 0/10 · 6.1 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 2, grounded | 0/10 · 0/10 · 6.0 | 0/10 · 0/10 · 6.0 | 0/10 · 0/10 · 6.0 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 3 | 0/10 · 0/10 · 5.9 | 0/10 · 0/10 · 5.9 | 0/10 · 0/10 · 5.9 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 3, grounded | 0/10 · 0/10 · 6.0 | 0/10 · 0/10 · 6.0 | 0/10 · 0/10 · 6.0 | n/a | n/a | n/a |
+| LAFAN1 dance | motion capture | 0/10 · 10/10 · 4.1 | 0/10 · 10/10 · 4.1 | 0/10 · 10/10 · 4.1 | 0/10 · 10/10 · 4.1 | 0/10 · 10/10 · 4.1 | 0/10 · 10/10 · 4.1 |
+
+#### SONIC (ViT-H)
+
+| Clip | Motion | Flat | Low friction | Ice | Push from the side | Hard push from behind | Push from the front |
+|---|---|---|---|---|---|---|---|
+| Tennis serve | GVHMR+GMR | 0/10 · 0/10 · 6.9 | 0/10 · 0/10 · 6.9 | 0/10 · 0/10 · 6.9 | 0/10 · 0/10 · 6.2 | 0/10 · 0/10 · 6.5 | 0/10 · 0/10 · 6.7 |
+| Tennis serve | GVHMR+GMR, grounded | 10/10 · 0/10 · 5.0 | 10/10 · 0/10 · 5.0 | 10/10 · 0/10 · 5.0 | 8/10 · 0/10 · 4.9 | 9/10 · 0/10 · 5.0 | 8/10 · 0/10 · 4.9 |
+| Tennis serve | ViT-H sample 1 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.5 | 9/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.5 |
+| Tennis serve | ViT-H sample 1, grounded | 10/10 · 0/10 · 4.8 | 10/10 · 0/10 · 4.8 | 10/10 · 0/10 · 4.8 | 10/10 · 0/10 · 4.9 | 10/10 · 0/10 · 4.8 | 10/10 · 0/10 · 4.8 |
+| Tennis serve | ViT-H sample 2 | 6/10 · 0/10 · 5.1 | 6/10 · 0/10 · 5.1 | 6/10 · 0/10 · 5.1 | 6/10 · 0/10 · 5.0 | 2/10 · 0/10 · 4.8 | 8/10 · 0/10 · 5.3 |
+| Tennis serve | ViT-H sample 2, grounded | 10/10 · 0/10 · 4.7 | 10/10 · 0/10 · 4.7 | 10/10 · 0/10 · 4.7 | 7/10 · 0/10 · 4.6 | 9/10 · 0/10 · 4.6 | 5/10 · 0/10 · 4.4 |
+| Tennis serve | ViT-H sample 3 | 10/10 · 0/10 · 5.3 | 10/10 · 0/10 · 5.3 | 10/10 · 0/10 · 5.3 | 6/10 · 0/10 · 5.1 | 3/10 · 0/10 · 4.9 | 5/10 · 0/10 · 5.1 |
+| Tennis serve | ViT-H sample 3, grounded | 10/10 · 0/10 · 5.2 | 10/10 · 0/10 · 5.2 | 10/10 · 0/10 · 5.2 | 9/10 · 0/10 · 5.2 | 4/10 · 0/10 · 4.9 | 9/10 · 0/10 · 5.2 |
+| Studio dance | GVHMR+GMR | 10/10 · 0/10 · 7.5 | 10/10 · 0/10 · 7.5 | 10/10 · 0/10 · 7.5 | 10/10 · 0/10 · 7.6 | 10/10 · 0/10 · 7.6 | 10/10 · 0/10 · 7.6 |
+| Studio dance | GVHMR+GMR, grounded | 10/10 · 0/10 · 3.5 | 10/10 · 0/10 · 3.5 | 10/10 · 0/10 · 3.5 | 10/10 · 0/10 · 3.7 | 10/10 · 0/10 · 3.7 | 10/10 · 0/10 · 3.6 |
+| Studio dance | ViT-H sample 1 | 10/10 · 0/10 · 3.9 | 10/10 · 0/10 · 3.9 | 10/10 · 0/10 · 3.9 | 10/10 · 0/10 · 4.0 | 10/10 · 0/10 · 4.0 | 10/10 · 0/10 · 3.9 |
+| Studio dance | ViT-H sample 1, grounded | 10/10 · 0/10 · 3.6 | 10/10 · 0/10 · 3.6 | 10/10 · 0/10 · 3.6 | 10/10 · 0/10 · 3.7 | 10/10 · 0/10 · 3.8 | 10/10 · 0/10 · 3.6 |
+| Studio dance | ViT-H sample 2 | 10/10 · 0/10 · 5.0 | 10/10 · 0/10 · 5.0 | 10/10 · 0/10 · 5.0 | 10/10 · 0/10 · 5.0 | 10/10 · 0/10 · 5.1 | 10/10 · 0/10 · 4.9 |
+| Studio dance | ViT-H sample 2, grounded | 10/10 · 0/10 · 3.8 | 10/10 · 0/10 · 3.8 | 10/10 · 0/10 · 3.8 | 10/10 · 0/10 · 3.9 | 10/10 · 0/10 · 4.0 | 10/10 · 0/10 · 3.8 |
+| Studio dance | ViT-H sample 3 | 10/10 · 0/10 · 4.4 | 10/10 · 0/10 · 4.4 | 10/10 · 0/10 · 4.4 | 10/10 · 0/10 · 4.5 | 10/10 · 0/10 · 4.6 | 10/10 · 0/10 · 4.4 |
+| Studio dance | ViT-H sample 3, grounded | 10/10 · 0/10 · 3.8 | 10/10 · 0/10 · 3.8 | 10/10 · 0/10 · 3.8 | 10/10 · 0/10 · 4.0 | 10/10 · 0/10 · 4.0 | 10/10 · 0/10 · 3.9 |
+| Hip-hop (back) | GVHMR+GMR | 10/10 · 0/10 · 11.9 | 10/10 · 0/10 · 11.9 | 10/10 · 0/10 · 11.9 | 9/10 · 0/10 · 11.8 | 10/10 · 0/10 · 12.1 | 10/10 · 0/10 · 12.3 |
+| Hip-hop (back) | GVHMR+GMR, grounded | 10/10 · 0/10 · 4.2 | 10/10 · 0/10 · 4.2 | 10/10 · 0/10 · 4.2 | 10/10 · 0/10 · 4.4 | 10/10 · 0/10 · 4.4 | 10/10 · 0/10 · 4.5 |
+| Hip-hop (back) | ViT-H sample 1 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.3 | 10/10 · 0/10 · 3.4 | 10/10 · 0/10 · 3.3 |
+| Hip-hop (back) | ViT-H sample 1, grounded | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 |
+| Hip-hop (back) | ViT-H sample 2 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.2 |
+| Hip-hop (back) | ViT-H sample 2, grounded | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 |
+| Hip-hop (back) | ViT-H sample 3 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.3 | 10/10 · 0/10 · 3.2 |
+| Hip-hop (back) | ViT-H sample 3, grounded | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 2.9 |
+| Pop | GVHMR+GMR | 10/10 · 0/10 · 3.7 | 10/10 · 0/10 · 3.7 | 10/10 · 0/10 · 3.7 | 10/10 · 0/10 · 4.0 | 10/10 · 0/10 · 4.0 | 10/10 · 0/10 · 3.8 |
+| Pop | GVHMR+GMR, grounded | 10/10 · 0/10 · 2.5 | 10/10 · 0/10 · 2.5 | 10/10 · 0/10 · 2.5 | 10/10 · 0/10 · 2.6 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.5 |
+| Pop | ViT-H sample 1 | 10/10 · 0/10 · 2.2 | 10/10 · 0/10 · 2.2 | 10/10 · 0/10 · 2.2 | 10/10 · 0/10 · 2.5 | 10/10 · 0/10 · 2.6 | 10/10 · 0/10 · 2.4 |
+| Pop | ViT-H sample 1, grounded | 10/10 · 0/10 · 2.2 | 10/10 · 0/10 · 2.2 | 10/10 · 0/10 · 2.2 | 10/10 · 0/10 · 2.5 | 10/10 · 0/10 · 2.6 | 10/10 · 0/10 · 2.5 |
+| Pop | ViT-H sample 2 | 10/10 · 0/10 · 2.3 | 10/10 · 0/10 · 2.3 | 10/10 · 0/10 · 2.3 | 10/10 · 0/10 · 2.6 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.6 |
+| Pop | ViT-H sample 2, grounded | 10/10 · 0/10 · 2.3 | 10/10 · 0/10 · 2.3 | 10/10 · 0/10 · 2.3 | 10/10 · 0/10 · 2.6 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.5 |
+| Pop | ViT-H sample 3 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 |
+| Pop | ViT-H sample 3, grounded | 10/10 · 0/10 · 2.5 | 10/10 · 0/10 · 2.5 | 10/10 · 0/10 · 2.5 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 2.8 | 10/10 · 0/10 · 2.6 |
+| Jazz | GVHMR+GMR | 10/10 · 0/10 · 2.0 | 10/10 · 0/10 · 2.0 | 10/10 · 0/10 · 2.0 | 10/10 · 0/10 · 2.4 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.3 |
+| Jazz | GVHMR+GMR, grounded | 10/10 · 0/10 · 2.2 | 10/10 · 0/10 · 2.2 | 10/10 · 0/10 · 2.2 | 10/10 · 0/10 · 2.6 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.5 |
+| Jazz | ViT-H sample 1 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.3 |
+| Jazz | ViT-H sample 1, grounded | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.2 | 10/10 · 0/10 · 3.4 | 10/10 · 0/10 · 3.4 | 10/10 · 0/10 · 3.5 |
+| Jazz | ViT-H sample 2 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 |
+| Jazz | ViT-H sample 2, grounded | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.1 | 10/10 · 0/10 · 3.4 | 10/10 · 0/10 · 3.4 | 10/10 · 0/10 · 3.4 |
+| Jazz | ViT-H sample 3 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 2.7 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 2.9 | 10/10 · 0/10 · 3.0 |
+| Jazz | ViT-H sample 3, grounded | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.0 | 10/10 · 0/10 · 3.3 | 10/10 · 0/10 · 3.3 | 10/10 · 0/10 · 3.3 |
+| Jump kick | GVHMR+GMR | 0/10 · 0/10 · 6.4 | 0/10 · 0/10 · 6.4 | 0/10 · 0/10 · 6.4 | n/a | n/a | n/a |
+| Jump kick | GVHMR+GMR, grounded | 0/10 · 0/10 · 6.3 | 0/10 · 0/10 · 6.3 | 0/10 · 0/10 · 6.3 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 1 | 0/10 · 0/10 · 6.1 | 0/10 · 0/10 · 6.1 | 0/10 · 0/10 · 6.1 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 1, grounded | 0/10 · 0/10 · 5.8 | 0/10 · 0/10 · 5.8 | 0/10 · 0/10 · 5.8 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 2 | 0/10 · 0/10 · 6.0 | 0/10 · 0/10 · 6.0 | 0/10 · 0/10 · 6.0 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 2, grounded | 0/10 · 0/10 · 5.8 | 0/10 · 0/10 · 5.8 | 0/10 · 0/10 · 5.8 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 3 | 0/10 · 0/10 · 6.2 | 0/10 · 0/10 · 6.2 | 0/10 · 0/10 · 6.2 | n/a | n/a | n/a |
+| Jump kick | ViT-H sample 3, grounded | 0/10 · 0/10 · 6.0 | 0/10 · 0/10 · 6.0 | 0/10 · 0/10 · 6.0 | n/a | n/a | n/a |
+| LAFAN1 dance | motion capture | 0/10 · 10/10 · 4.2 | 0/10 · 10/10 · 4.2 | 0/10 · 10/10 · 4.2 | 0/10 · 10/10 · 4.3 | 0/10 · 10/10 · 4.3 | 0/10 · 10/10 · 4.3 |

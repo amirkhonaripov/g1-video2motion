@@ -1,4 +1,4 @@
-"""Results tables from the harness runs (ros2 robot model) and the motion-quality check."""
+"""Results tables: harness success, tracking error and real falls per tracker, plus mjlab and ROS 2 for BeyondMimic."""
 
 import argparse
 import csv
@@ -9,79 +9,82 @@ import re
 
 import numpy as np
 
-from scripts.g1 import METHODS
-
-HARD = {
+TRACKERS = {"beyondmimic": "BeyondMimic", "sonicv11": "SONIC v1.1", "sonic": "SONIC (ViT-H)"}
+CLIPS = {
+  "tennis": "Tennis serve",
+  "studio_dance": "Studio dance",
+  "hiphop_back": "Hip-hop (back)",
+  "pop": "Pop",
+  "jazz": "Jazz",
+  "jump_kick": "Jump kick",
+  "demo_dance": "LAFAN1 dance",
+}
+SOURCES = [
+  ("GVHMR+GMR", "gmr", ""),
+  ("ViT-H sample 1", "vith", ""),
+  ("ViT-H sample 2", "vith", "_s1"),
+  ("ViT-H sample 3", "vith", "_s2"),
+]
+VARIANTS = {"": "", "_grounded": ", grounded", "_18500": ", 18500 iterations"}
+CONDITIONS = {
+  "flat_nominal": "Flat",
   "low_friction": "Low friction",
   "ice": "Ice",
   "push_lateral_medium": "Push from the side",
   "push_forward_hard": "Hard push from behind",
   "push_backward_medium": "Push from the front",
 }
-CLIPS = {
-  "studio_dance": "Studio dance (Pexels)",
-  "hiphop_back": "Hip-hop, filmed from behind (Pexels)",
-  "jump_kick": "Jump and knee kick (Pexels)",
-  "tennis": "Tennis serve (GVHMR demo video)",
-  "pop": "AIST++ Pop",
-  "jazz": "AIST++ Jazz",
-}
-G1_TRACKER_DEMO = "fails at 106.7 s"  # ViT-H's own tracker script; no results file
-NOTES = """- **Flat ground:** 10 tries that differ only by tiny start noise (±0.02 rad per joint), so they
-  nearly always agree; the harder conditions are where tries really differ.
-- **Fails:** torso height, torso tilt or a hand/foot height more than 0.25 m from the reference
-  (BeyondMimic's rules). **Never more than 15 cm off:** PHUMA's strict success.
-- **Pose error (r-MPKPE):** body-part error after placing the reference on the robot: how well the
-  pose is copied. **Position error (MPKPE):** the same without moving it: pose plus drift.
-- **SONIC (ViT-H) drifts partly by design:** it follows the reference relative to itself, not a world
-  position, so its position error grows on long motions while its pose error stays low.
-- **ViT-H samples:** ViT-H generates a motion from random noise; samples 1-3 are three draws
-  (seeds 42, 1, 2) from the same video.
-- **Robot model:** the harness default, `ros2`: the G1 of the ROS 2 stack that runs the real robot."""
+SLIPPERY = ["low_friction", "ice"]
+PUSHES = ["push_lateral_medium", "push_forward_hard", "push_backward_medium"]
+DEFINITIONS = """- **Harness:** one shared MuJoCo sim (the G1 of the ROS 2 stack) for every tracker; each condition runs 10 seeds
+  that differ only by tiny start noise (±0.02 rad per joint). **Conditions:** flat ground; slippery: low friction
+  (μ 0.4) and ice (μ 0.2); pushes: 0.2 s shoves on the pelvis at t = 4 s ± 0.3 s, 150 N from the side, 250 N from
+  behind, 150 N from the front.
+- **Success:** the motion plays to its end without a tracking failure.
+- **Tracking failure:** BeyondMimic's termination rule fires (torso height or a hand/foot height more than 0.25 m
+  off the reference, or the torso tilted too far). The trial stops there; the robot may still recover.
+- **Real fall:** in a rerun that keeps going after a tracking failure, the head stays below 0.5 m for more than
+  2 s, or is still down when the motion ends. Only conditions with a tracking failure were rerun; "not rerun"
+  counts failed trials whose rerun is missing.
+- **MPKPE / r-MPKPE:** mean distance (cm) of 14 key bodies from the reference over the 10 flat-ground trials, up to
+  the end or the tracking failure. MPKPE in world position (pose plus drift); r-MPKPE with the reference placed on
+  the robot (pose only). SONIC follows the reference relative to itself, so its MPKPE grows on long motions.
+- **k/n:** k of n trials (mjlab: episodes; ROS 2: scored runs).
+- **ViT-H sample N:** ViT-H samples a motion from random noise; samples 1-3 are three draws (seeds 42, 1, 2).
+  **Grounded:** the motion moved down so the feet touch the floor.
+- **n/a:** the jump kick is 2.2 s long and the pushes come at 3.7-4.3 s, so no push happens.
+- **BeyondMimic:** one policy per motion, 3000 mjlab iterations unless the row says otherwise; the LAFAN1 dance uses
+  BeyondMimic's pretrained policy. **mjlab:** its own evaluation, 1024 episodes. **ROS 2:** the full ROS 2 stack.
+- ViT-H's own tracker script (g1_tracker) also fails the LAFAN1 dance at 106.7 s."""
 
 
 def parse_args():
   parser = argparse.ArgumentParser(description="Results tables")
   parser.add_argument("--runs", default="runs/harness", help="harness runs, ros2 robot model")
+  parser.add_argument("--falls", default="runs/harness_falls", help="reruns that keep going after a tracking failure")
   parser.add_argument("--latency", default="runs/latency", help="harness runs timing the policies")
-  parser.add_argument("--quality", default="results/motion_quality.json")
   parser.add_argument("--mjlab", default="results/mjlab", help="eval_mjlab results")
-  parser.add_argument("--demo", default="results/mjlab/demo_dance_mjlab.json", help="eval_mjlab of the LAFAN1 dance")
-  parser.add_argument("--demo-ros2", default="results/ros2/demo_dance.json",
-                      help="analyze_ros2 of the LAFAN1 dance in the ROS 2 stack")
+  parser.add_argument("--ros2", default="results/ros2", help="analyze_ros2 results")
+  parser.add_argument("--quality", default="results/motion_quality.json")
   parser.add_argument("--timings", default="results/timings.csv")
   parser.add_argument("--output", default="results/tables.md")
   return parser.parse_args()
 
 
 def load_runs(root):
-  # {run: {scenario: {seed: metrics}}}; per-scenario folders (run__scenario) merged
+  """{run: {condition: {seed: trial}}}; None for a push that would come after the motion ends."""
   runs = {}
   for path in sorted(glob.glob(f"{root}/*/summary.json")):
     name = os.path.basename(os.path.dirname(path)).split("__")[0]
+    if "_clipped" in name:
+      continue
     with open(path) as f:
-      runs.setdefault(name, {}).update(json.load(f)["trials"])
+      s = json.load(f)
+    motion_s = s["adapter"]["describe"]["motion_frames"] / 50
+    for cond, trials in s["trials"].items():
+      starts = [p["start_s"] for seed in s["perturbations"][cond].values() for p in seed["pushes"]]
+      runs.setdefault(name, {})[cond] = None if starts and min(starts) >= motion_s else trials
   return runs
-
-
-def vals(trials, key):
-  return np.array([t[key] for t in trials.values() if t.get(key) is not None], dtype=float)
-
-
-def outcome(trials):
-  falls = vals(trials, "time_to_fall_s")
-  if not len(falls):
-    return "finishes"
-  when = f"{falls.min():.1f} s" if np.ptp(falls) < 0.2 else f"{falls.min():.1f}–{falls.max():.1f} s"
-  return f"fails at {when} ({len(falls)}/{len(trials)})"
-
-
-def finished(trials):
-  return len(trials) - len(vals(trials, "time_to_fall_s"))
-
-
-def cm(trials, key):
-  return f"{100 * vals(trials, key).mean():.1f}"
 
 
 def load_quality(path):
@@ -105,166 +108,174 @@ def load_timings(path):
   return out
 
 
-def table(header, cols, rows):
-  lines = [f"| {header} | " + " | ".join(cols) + " |", "|---" * (len(cols) + 1) + "|"]
-  lines += [f"| {label} | " + " | ".join(cells) + " |" for label, cells in rows]
-  return "\n".join(lines)
+def run_name(tracker, clip, src, seed, variant):
+  if clip == "demo_dance":
+    return f"{tracker}_demo_dance"
+  if tracker != "beyondmimic":
+    return f"{tracker}_{src}_{clip}{variant}{seed}"
+  if clip == "tennis" and not seed:
+    return f"beyondmimic_{src}_tennis{variant}"
+  return f"beyondmimic_{clip}{seed}_{src}{variant}"
 
 
-def clip_tables(runs, quality, timings, clip):
-  cols = [m[0] for m in METHODS]
-  scen = [runs[f"sonic_{src}_{clip}{seed}"] for _, src, seed in METHODS]
-  ref = [quality[(clip, src, seed)] for _, src, seed in METHODS]
-  time = [timings[clip]["gvhmr_gmr" if src == "gmr" else "vith"] for _, src, _ in METHODS]
-  flat = [s["flat_nominal"] for s in scen]
-  main = table("SONIC (ViT-H)", cols, [
-    ("Reference: frames past joint limits (%)", [f"{100 * r['frames_outside_joint_limits']:.1f}" for r in ref]),
-    ("Reference: fastest joint (rad/s)", [f"{r['max_joint_speed_rad_s']:.0f}" for r in ref]),
-    ("Reference: foot sliding (cm/s)", [f"{100 * r['foot_sliding_mean_m_s']:.0f}" for r in ref]),
-    ("Flat ground", [outcome(t) for t in flat]),
-    ("Never more than 15 cm off", [f"{int(vals(t, 'success_strict').sum())}/{len(t)}" for t in flat]),
-    ("Pose error, mean / worst (cm)", [f"{cm(t, 'r_mpkpe_m')} / {cm(t, 'max_r_mpkpe_m')}" for t in flat]),
-    ("Position error, mean / worst (cm)", [f"{cm(t, 'mpkpe_m')} / {cm(t, 'max_mpkpe_m')}" for t in flat]),
-    ("Joint error (°)", [f"{np.degrees(vals(t, 'joint_pos_tracking_mae').mean()):.1f}" for t in flat]),
-    ("Robot joints past limits (% of time)",
-     [f"{100 * vals(t, 'joint_limit_violation_rate').mean():.1f}" for t in flat]),
-    ("Power (W)", [f"{vals(t, 'mean_mech_power_w').mean():.0f}" for t in flat]),
-    ("Time to make the motion (s)", [f"{t:.0f}" for t in time]),
-  ])
-  hard = table("Finishes (of 10 tries)", cols,
-               [(label, [f"{finished(s[k])}/{len(s[k])}" for s in scen]) for k, label in HARD.items()])
-  return [main, hard]
+def motions(variants, vith_grounded=False):
+  """(clip, motion label, src, seed, variant) of every row, LAFAN1 dance last."""
+  out = []
+  for clip in CLIPS:
+    if clip == "demo_dance":
+      out.append((clip, "motion capture", "", "", ""))
+      continue
+    for label, src, seed in SOURCES:
+      for v in variants:
+        if v != "_grounded" or src == "gmr" or vith_grounded:
+          out.append((clip, label + VARIANTS[v], src, seed, v))
+  return out
 
 
-def summary_table(runs):
-  rows = []
-  for clip, title in CLIPS.items():
-    gmr = runs[f"sonic_gmr_{clip}"]
-    vith = [runs[f"sonic_vith_{clip}{seed}"] for _, src, seed in METHODS if src == "vith"]
-    flat = sum(finished(v["flat_nominal"]) == len(v["flat_nominal"]) for v in vith)
-    rows.append((title, [
-      outcome(gmr["flat_nominal"]),
-      f"{sum(finished(gmr[k]) for k in HARD)}/50",
-      cm(gmr["flat_nominal"], "r_mpkpe_m"),
-      f"{flat}/{len(vith)} finish",
-      f"{sum(finished(v[k]) for v in vith for k in HARD)}/{50 * len(vith)}",
-      f"{np.mean([vals(v['flat_nominal'], 'r_mpkpe_m').mean() for v in vith]) * 100:.1f}",
-    ]))
-  cols = ["GVHMR + GMR: flat ground", "harder", "pose error (cm)",
-          "ViT-H, 3 samples: flat ground", "harder", "pose error (cm)"]
-  return table("SONIC (ViT-H)", cols, rows)
+def vals(trials, key):
+  return np.array([t[key] for t in trials.values() if t.get(key) is not None], dtype=float)
 
 
-def grounded_table(runs):
-  rows = []
-  for clip, title in CLIPS.items():
-    cells = []
-    for src, seeds in (("gmr", [""]), ("vith", ["", "_s1", "_s2"])):
-      for c in ("", "_grounded"):
-        trials = [runs[f"sonic_{src}_{clip}{c}{seed}"] for seed in seeds]
-        flat = sum(finished(t["flat_nominal"]) for t in trials)
-        hard = sum(finished(t[k]) for t in trials for k in HARD)
-        cells.append(f"{flat}/{10 * len(trials)} · {hard}/{50 * len(trials)}")
-    rows.append((title, cells))
-  cols = ["GVHMR + GMR, raw", "GVHMR + GMR, grounded", "ViT-H, raw", "ViT-H, grounded"]
-  return table("SONIC (ViT-H) finishes: flat ground · harder", cols, rows)
+def tally(runs, falls, name, conds):
+  """Successes, real falls, trials and failed trials without a rerun, over these conditions."""
+  ok = fell = n = unknown = 0
+  for cond in conds:
+    trials = runs[name][cond]
+    if trials is None:
+      continue
+    ok += sum(not t["fall"] for t in trials.values())
+    n += len(trials)
+    if cond in falls.get(name, {}):
+      fell += sum(t["fell"] for t in falls[name][cond].values())
+    else:
+      unknown += sum(t["fall"] for t in trials.values())
+  return ok, fell, n, unknown
 
 
-def tracker_rows(runs, name):
+def success(t):
+  ok, _, n, _ = t
+  return f"{ok}/{n}" if n else "n/a"
+
+
+def real_falls(t):
+  _, fell, n, unknown = t
+  return f"{fell}/{n}" + (f" ({unknown} not rerun)" if unknown else "")
+
+
+def error(trials):
+  return f"{100 * vals(trials, 'mpkpe_m').mean():.1f} / {100 * vals(trials, 'r_mpkpe_m').mean():.1f}"
+
+
+def summary_cells(runs, falls, name):
+  """Success all / flat / slippery / pushes, flat error, real falls."""
   if name not in runs:
-    return ["–"] * 3
-  s = runs[name]
-  return [outcome(s["flat_nominal"]), f"{sum(finished(s[k]) for k in HARD)}/50", cm(s["flat_nominal"], "r_mpkpe_m")]
+    return ["no run"] + ["–"] * 5
+  every = tally(runs, falls, name, CONDITIONS)
+  parts = [success(tally(runs, falls, name, c)) for c in (["flat_nominal"], SLIPPERY, PUSHES)]
+  return [success(every), *parts, error(runs[name]["flat_nominal"]), real_falls(every)]
 
 
-def mjlab_success(path):
+def mjlab(path):
   if not os.path.exists(path):
     return "–"
   with open(path) as f:
-    return f"finishes {json.load(f)['metrics']['success_rate']:.0%}"
+    m = json.load(f)["metrics"]
+  n = m["num_episodes"]
+  return f"{100 * m['success_rate']:.1f}% ({round(m['success_rate'] * n)}/{n})"
 
 
-def tracker_table(runs, mjlab_dir, title, refs):
-  """refs: (column, BeyondMimic run, SONIC run or None)."""
-  bm = [tracker_rows(runs, f"beyondmimic_{b}") for _, b, _ in refs]
-  so = [tracker_rows(runs, f"sonic_{x}") for _, _, x in refs]
-  labels = ["flat ground", "harder (of 50)", "pose error (cm)"]
-  rows = [("BeyondMimic: mjlab (1024 tries)", [mjlab_success(f"{mjlab_dir}/{b}_mjlab.json") for _, b, _ in refs])]
-  rows += [(f"BeyondMimic: {label}", [b[i] for b in bm]) for i, label in enumerate(labels)]
-  rows += [(f"SONIC (ViT-H): {label}", [x[i] for x in so]) for i, label in enumerate(labels)]
-  return table(title, [r[0] for r in refs], rows)
-
-
-def tennis_table(runs, mjlab_dir):
-  refs = [("GVHMR + GMR", "gmr_tennis", "gmr_tennis"),
-          ("GVHMR + GMR, clipped", "gmr_tennis_clipped", "gmr_tennis_clipped"),
-          ("ViT-H sample 1", "vith_tennis", "vith_tennis"),
-          ("ViT-H sample 1, clipped", "vith_tennis_clipped", "vith_tennis_clipped")]
-  return tracker_table(runs, mjlab_dir, "Tennis serve", refs)
-
-
-def trackers_table(runs, mjlab_dir):
-  rows = []
-  for clip, title in CLIPS.items():
-    for label, src in (("GVHMR + GMR", "gmr"), ("ViT-H sample 1", "vith")):
-      bm = f"{src}_tennis" if clip == "tennis" else f"{clip}_{src}"
-      cells = [mjlab_success(f"{mjlab_dir}/{bm}_mjlab.json"), *tracker_rows(runs, f"beyondmimic_{bm}"),
-               *tracker_rows(runs, f"sonic_{src}_{clip}")]
-      rows.append((f"{title}, {label}", cells))
-  cols = ["BeyondMimic: mjlab", "BeyondMimic: flat ground", "BeyondMimic: harder (of 50)",
-          "BeyondMimic: pose error (cm)", "SONIC (ViT-H): flat ground", "SONIC (ViT-H): harder (of 50)",
-          "SONIC (ViT-H): pose error (cm)"]
-  return table("BeyondMimic (3000 iterations) vs SONIC (ViT-H)", cols, rows)
-
-
-def jump_kick_table(runs, mjlab_dir):
-  refs = [("GVHMR + GMR", "jump_kick_gmr", "gmr_jump_kick"),
-          ("GVHMR + GMR, grounded", "jump_kick_gmr_grounded", "gmr_jump_kick_grounded"),
-          ("ViT-H sample 1", "jump_kick_vith", "vith_jump_kick"),
-          ("GVHMR + GMR, 18500 iterations", "jump_kick_gmr_18500", None)]
-  return tracker_table(runs, mjlab_dir, "Jump and knee kick", refs)
-
-
-def ros2_success(path):
+def ros2(path):
+  if not os.path.exists(path):
+    return "–"
   with open(path) as f:
-    s = json.load(f)["summary"]
-  return f"finishes {s['successes']}/{s['scored']}"
+    d = json.load(f)
+  if "summary" not in d:  # old format: a list of runs
+    return "–"
+  s = d["summary"]
+  return f"{s['successes']}/{s['scored']} ({s['launches']} launches)"
 
 
-def demo_table(runs, latency, mjlab, ros2):
-  bm, so = runs["beyondmimic_demo_dance"], runs["sonic_demo_dance"]
-  fb, fs = bm["flat_nominal"], so["flat_nominal"]
-  rows = [
-    ("Flat ground", [outcome(fb), outcome(fs)]),
-    ("Harder conditions", [f"{sum(finished(bm[k]) for k in HARD)}/50", f"{sum(finished(so[k]) for k in HARD)}/50"]),
-    ("Pose error, mean (cm)", [cm(fb, "r_mpkpe_m"), cm(fs, "r_mpkpe_m")]),
-    ("Position error, mean (cm)", [cm(fb, "mpkpe_m"), cm(fs, "mpkpe_m")]),
-  ]
-  lat = {k: f"{vals(v['flat_nominal'], 'mean_policy_latency_ms').mean():.2f}" for k, v in latency.items()}
-  rows += [
-    ("Policy time per step (ms)", [lat["beyondmimic_demo_dance"], lat["sonic_demo_dance"]]),
-    ("mjlab (training simulator, 1024 tries)", [mjlab, "–"]),
-    ("ROS 2 deployment stack (5 tries)", [ros2, "–"]),
-    ("ViT-H's tracker script (g1_tracker)", ["–", G1_TRACKER_DEMO]),
-  ]
-  return table("LAFAN1 dance (131 s, motion capture)", ["BeyondMimic", "SONIC (ViT-H)"], rows)
+def table(cols, rows):
+  lines = ["| " + " | ".join(cols) + " |", "|---" * len(cols) + "|"]
+  return "\n".join(lines + ["| " + " | ".join(r) + " |" for r in rows])
+
+
+def tracker_table(tracker, runs, falls, args):
+  cols = ["Clip", "Motion", "Success: all", "flat", "slippery", "pushes", "MPKPE / r-MPKPE (cm), flat", "Real falls"]
+  if tracker == "beyondmimic":
+    cols += ["mjlab success", "ROS 2 success"]
+  rows = []
+  for clip, label, src, seed, v in motions(VARIANTS):
+    name = run_name(tracker, clip, src, seed, v)
+    if v and name not in runs:
+      continue
+    cells = [CLIPS[clip], label, *summary_cells(runs, falls, name)]
+    if tracker == "beyondmimic":
+      short = name.removeprefix("beyondmimic_")
+      cells += [mjlab(f"{args.mjlab}/{short}_mjlab.json"), ros2(f"{args.ros2}/{short}.json")]
+    rows.append(cells)
+  return table(cols, rows)
+
+
+def comparison_table(runs, falls):
+  cols = ["Clip", "Motion"]
+  cols += [f"{m}: {t}" for m in ("Success", "MPKPE / r-MPKPE (cm)", "Real falls") for t in TRACKERS.values()]
+  rows = []
+  for clip, label, src, seed, v in motions(["", "_grounded"]):
+    names = [run_name(t, clip, src, seed, v) for t in TRACKERS]
+    if v and not any(n in runs for n in names):
+      continue
+    cells = [summary_cells(runs, falls, n) for n in names]
+    rows.append([CLIPS[clip], label] + [c[i] for i in (0, 4, 5) for c in cells])
+  return table(cols, rows)
+
+
+def detail_table(tracker, runs, falls):
+  rows = []
+  for clip, label, src, seed, v in motions(VARIANTS, vith_grounded=True):
+    name = run_name(tracker, clip, src, seed, v)
+    if name not in runs:
+      continue
+    cells = []
+    for cond in CONDITIONS:
+      if runs[name][cond] is None:
+        cells.append("n/a")
+        continue
+      t = tally(runs, falls, name, [cond])
+      cells.append(f"{success(t)} · {real_falls(t)} · {100 * vals(runs[name][cond], 'r_mpkpe_m').mean():.1f}")
+    rows.append([CLIPS[clip], label, *cells])
+  return table(["Clip", "Motion", *CONDITIONS.values()], rows)
+
+
+def latency_table(latency):
+  cells = [f"{vals(latency[f'{t}_demo_dance']['flat_nominal'], 'mean_policy_latency_ms').mean():.2f}" for t in TRACKERS]
+  return table(["", *TRACKERS.values()], [["Policy time per step (ms), LAFAN1 dance", *cells]])
+
+
+def sources_table(quality, timings):
+  rows = []
+  for clip, label, src, seed, _ in motions([""])[:-1]:
+    q = quality[(clip, src, seed)]
+    rows.append([CLIPS[clip], label, f"{timings[clip]['gvhmr_gmr' if src == 'gmr' else 'vith']:.0f}",
+                 f"{100 * q['frames_outside_joint_limits']:.1f}", f"{q['max_joint_speed_rad_s']:.0f}",
+                 f"{100 * q['foot_sliding_mean_m_s']:.0f}"])
+  cols = ["Clip", "Motion", "Time to make (s)", "Frames past joint limits (%)", "Fastest joint (rad/s)",
+          "Foot sliding (cm/s)"]
+  return table(cols, rows)
 
 
 def main():
   args = parse_args()
-  runs = load_runs(args.runs)
-  quality = load_quality(args.quality)
-  timings = load_timings(args.timings)
-  parts = ["### At a glance", summary_table(runs)]
-  for clip, title in CLIPS.items():
-    parts += [f"### {title}", *clip_tables(runs, quality, timings, clip)]
-  parts += ["### BeyondMimic vs SONIC (ViT-H), every clip", trackers_table(runs, args.mjlab)]
-  parts += ["### Tennis serve: BeyondMimic vs SONIC (ViT-H)", tennis_table(runs, args.mjlab)]
-  parts += ["### Jump and knee kick: BeyondMimic vs SONIC (ViT-H)", jump_kick_table(runs, args.mjlab)]
-  parts += ["### Feet put back on the floor (grounded)", grounded_table(runs)]
-  demo = demo_table(runs, load_runs(args.latency), mjlab_success(args.demo), ros2_success(args.demo_ros2))
-  parts += ["### LAFAN1 dance: BeyondMimic vs SONIC (ViT-H)", demo]
-  parts += ["### Notes", NOTES]
+  runs, falls = load_runs(args.runs), load_runs(args.falls)
+  parts = ["### Definitions", DEFINITIONS]
+  for tracker, title in TRACKERS.items():
+    parts += [f"### {title}", tracker_table(tracker, runs, falls, args)]
+  parts += ["### Trackers side by side", comparison_table(runs, falls)]
+  parts += ["### Policy time", latency_table(load_runs(args.latency))]
+  parts += ["### Motion sources", sources_table(load_quality(args.quality), load_timings(args.timings))]
+  parts += ["### Every condition", "Each cell: success · real falls · r-MPKPE (cm)."]
+  for tracker, title in TRACKERS.items():
+    parts += [f"#### {title}", detail_table(tracker, runs, falls)]
   text = "\n\n".join(parts)
   with open(args.output, "w") as f:
     f.write(text + "\n")

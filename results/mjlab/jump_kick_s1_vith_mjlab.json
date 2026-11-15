@@ -1,0 +1,125 @@
+{
+  "metrics": {
+    "num_episodes": 1024,
+    "success_rate": 0.9873046875,
+    "mpkpe": 0.205304354429245,
+    "r_mpkpe": 0.0508299246430397,
+    "joint_vel_error": 1.2451649904251099,
+    "ee_pos_error": 0.07255853712558746,
+    "ee_ori_error": 0.18927843868732452,
+    "max_mpkpe": 0.31099051237106323,
+    "max_r_mpkpe": 0.10153883695602417,
+    "success_rate_strict": 0.07421875,
+    "joint_mae_rad": 0.09754599630832672,
+    "drift_mean_m": 0.1939416080713272,
+    "drift_max_m": 0.3042949438095093
+  },
+  "failures": [
+    {
+      "episode": 696,
+      "step": 34,
+      "time_s": 0.68,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 110,
+      "step": 35,
+      "time_s": 0.7,
+      "rules": [
+        "anchor_pos"
+      ]
+    },
+    {
+      "episode": 200,
+      "step": 38,
+      "time_s": 0.76,
+      "rules": [
+        "anchor_pos"
+      ]
+    },
+    {
+      "episode": 88,
+      "step": 41,
+      "time_s": 0.82,
+      "rules": [
+        "anchor_pos",
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 572,
+      "step": 42,
+      "time_s": 0.84,
+      "rules": [
+        "anchor_pos",
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 631,
+      "step": 42,
+      "time_s": 0.84,
+      "rules": [
+        "anchor_pos"
+      ]
+    },
+    {
+      "episode": 614,
+      "step": 44,
+      "time_s": 0.88,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 332,
+      "step": 48,
+      "time_s": 0.96,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 999,
+      "step": 50,
+      "time_s": 1.0,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 11,
+      "step": 51,
+      "time_s": 1.02,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 854,
+      "step": 51,
+      "time_s": 1.02,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 1019,
+      "step": 54,
+      "time_s": 1.08,
+      "rules": [
+        "ee_body_pos"
+      ]
+    },
+    {
+      "episode": 210,
+      "step": 55,
+      "time_s": 1.1,
+      "rules": [
+        "ee_body_pos"
+      ]
+    }
+  ]
+}

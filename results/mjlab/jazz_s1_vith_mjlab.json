@@ -1,0 +1,18 @@
+{
+  "metrics": {
+    "num_episodes": 1024,
+    "success_rate": 1.0,
+    "mpkpe": 0.0990850180387497,
+    "r_mpkpe": 0.023668333888053894,
+    "joint_vel_error": 0.2816585898399353,
+    "ee_pos_error": 0.040751710534095764,
+    "ee_ori_error": 0.0971309095621109,
+    "max_mpkpe": 0.14824175834655762,
+    "max_r_mpkpe": 0.0415690578520298,
+    "success_rate_strict": 0.5947265625,
+    "joint_mae_rad": 0.060246359556913376,
+    "drift_mean_m": 0.0915384590625763,
+    "drift_max_m": 0.14647623896598816
+  },
+  "failures": []
+}

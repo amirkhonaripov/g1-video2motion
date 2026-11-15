@@ -1,0 +1,27 @@
+{
+  "metrics": {
+    "num_episodes": 1024,
+    "success_rate": 0.9990234375,
+    "mpkpe": 0.1541529893875122,
+    "r_mpkpe": 0.08273594081401825,
+    "joint_vel_error": 0.528854489326477,
+    "ee_pos_error": 0.10382172465324402,
+    "ee_ori_error": 0.17048275470733643,
+    "max_mpkpe": 0.2640208899974823,
+    "max_r_mpkpe": 0.18884417414665222,
+    "success_rate_strict": 0.0,
+    "joint_mae_rad": 0.08310788869857788,
+    "drift_mean_m": 0.11386533826589584,
+    "drift_max_m": 0.19975920021533966
+  },
+  "failures": [
+    {
+      "episode": 709,
+      "step": 38,
+      "time_s": 0.76,
+      "rules": [
+        "ee_body_pos"
+      ]
+    }
+  ]
+}
