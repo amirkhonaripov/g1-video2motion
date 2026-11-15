@@ -1,0 +1,66 @@
+{
+  "pop/GVHMR + GMR": {
+    "lag_s": 0.02,
+    "joint_error_deg": 10.436371803283691,
+    "pose_error_cm": 5.2732696533203125,
+    "pelvis_height_error_cm": 2.422593116760254,
+    "path_error_cm": 5.184624195098877,
+    "heading_error_deg": 12.892915725708008
+  },
+  "pop/ViT-H sample 1": {
+    "lag_s": -0.04,
+    "joint_error_deg": 11.597864151000977,
+    "pose_error_cm": 4.942238807678223,
+    "pelvis_height_error_cm": 4.172501087188721,
+    "path_error_cm": 6.350439071655273,
+    "heading_error_deg": 8.909392356872559
+  },
+  "pop/ViT-H sample 2": {
+    "lag_s": -0.04,
+    "joint_error_deg": 11.268810272216797,
+    "pose_error_cm": 4.982264518737793,
+    "pelvis_height_error_cm": 4.243898868560791,
+    "path_error_cm": 5.737823963165283,
+    "heading_error_deg": 9.36741828918457
+  },
+  "pop/ViT-H sample 3": {
+    "lag_s": -0.02,
+    "joint_error_deg": 12.678193092346191,
+    "pose_error_cm": 6.0761003494262695,
+    "pelvis_height_error_cm": 5.405250549316406,
+    "path_error_cm": 4.0552473068237305,
+    "heading_error_deg": 8.167447090148926
+  },
+  "jazz/GVHMR + GMR": {
+    "lag_s": 0.0,
+    "joint_error_deg": 14.912034034729004,
+    "pose_error_cm": 5.530176639556885,
+    "pelvis_height_error_cm": 3.7324349880218506,
+    "path_error_cm": 3.102728843688965,
+    "heading_error_deg": 2.046074628829956
+  },
+  "jazz/ViT-H sample 1": {
+    "lag_s": -0.02,
+    "joint_error_deg": 17.30928611755371,
+    "pose_error_cm": 4.394876003265381,
+    "pelvis_height_error_cm": 2.860867738723755,
+    "path_error_cm": 1.5686979293823242,
+    "heading_error_deg": 1.4685055017471313
+  },
+  "jazz/ViT-H sample 2": {
+    "lag_s": 0.0,
+    "joint_error_deg": 17.514301300048828,
+    "pose_error_cm": 4.811507701873779,
+    "pelvis_height_error_cm": 2.7036046981811523,
+    "path_error_cm": 1.8858685493469238,
+    "heading_error_deg": 1.7540833950042725
+  },
+  "jazz/ViT-H sample 3": {
+    "lag_s": 0.02,
+    "joint_error_deg": 17.90534782409668,
+    "pose_error_cm": 4.571281909942627,
+    "pelvis_height_error_cm": 2.823403835296631,
+    "path_error_cm": 1.4257876873016357,
+    "heading_error_deg": 1.5887893438339233
+  }
+}

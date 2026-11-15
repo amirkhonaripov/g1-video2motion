@@ -69,6 +69,29 @@ by [our fork](https://github.com/amirkhonaripov/g1-eval-harness) of an evaluatio
 All results are on the harness's default robot model, `ros2`: the G1 of the ROS 2 stack that runs
 the real robot.
 
+### How close the motions are to the real dance
+
+The tables above say how well a robot follows each method's motion, not whether the motion matches
+the video. AIST++ recorded the two AIST dances with motion capture, so there we can check: the capture
+is retargeted to the G1 with GMR (`scripts/aistpp_to_gvhmr.py`) and compared frame by frame with each
+method's motion (`scripts/motion_accuracy.py`, after the best time offset, at most 0.3 s).
+
+| Against motion capture | Pop: GVHMR + GMR | Pop: ViT-H, 3 samples | Jazz: GVHMR + GMR | Jazz: ViT-H, 3 samples |
+|---|---|---|---|---|
+| Body pose error (cm) | 5.3 | 4.9–6.1 | 5.5 | 4.4–4.8 |
+| Joint angle error (°) | 10.4 | 11.3–12.7 | 14.9 | 17.3–17.9 |
+| Pelvis height error (cm) | 2.4 | 4.2–5.4 | 3.7 | 2.7–2.9 |
+| Path error (cm) | 5.2 | 4.1–6.4 | 3.1 | 1.4–1.9 |
+| Heading error (°) | 12.9 | 8.2–9.4 | 2.1 | 1.5–1.8 |
+
+- **Neither method is clearly closer.** Body positions are within 1 cm of each other; ViT-H is a
+  bit closer on jazz, GVHMR + GMR on pop's pelvis height.
+- **Joint angles favour GVHMR + GMR by construction:** the reference is retargeted by GMR too, so
+  for the same body pose it picks the same angles. Body pose error doesn't have that bias.
+- **Body pose error:** body positions relative to the pelvis, turned to face the same way. **Path
+  and heading:** where the pelvis goes and which way it faces, both aligned at the first frame.
+- Two dances, filmed from the front by a fixed camera: a small, easy sample.
+
 ### BeyondMimic on the tennis serve
 
 One policy trained per motion (3000 iterations, 4096 environments, ~1 h per policy on one GPU).
@@ -269,6 +292,8 @@ $PY scripts/analyze_ros2.py runs/npz/run_01.npz --output results/ros2_demo_runs.
     research and non-profit use, with attribution).
   - AIST++ Pop and Jazz: [AIST Dance Video Database](https://aistdancedb.ongaaccel.jp/)
     (Tsuchida et al., ISMIR 2019); no redistribution, so only the robots are shown.
+- **AIST++ motion capture** (accuracy check): [AIST++](https://google.github.io/aistplusplus_dataset/)
+  annotations by Google LLC (Li et al., ICCV 2021), CC BY 4.0; not in the repo.
 - **LAFAN1 dance:** Ubisoft La Forge [LAFAN1](https://github.com/ubisoft/ubisoft-laforge-animation-dataset),
   CC BY-NC-ND 4.0, via mjlab's demo.
 - **Evaluation harness:** forked from
