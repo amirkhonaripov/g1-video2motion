@@ -19,42 +19,44 @@
 - **n/a:** the jump kick is 2.2 s long and the pushes come at 3.7-4.3 s, so no push happens.
 - **BeyondMimic:** one policy per motion, 3000 mjlab iterations unless the row says otherwise; the LAFAN1 dance uses
   BeyondMimic's pretrained policy. **mjlab:** its own evaluation, 1024 episodes. **ROS 2:** the full ROS 2 stack.
+- **ROS 2 r-MPKPE / falls:** r-MPKPE (cm) up to the end or the tracking failure, mean of the scored runs; real falls (head below
+  0.5 m for more than 2 s, or still down when the motion ends) of the scored runs.
 - ViT-H's own tracker script (g1_tracker) also fails the LAFAN1 dance at 106.7 s.
 
 ### BeyondMimic
 
-| Clip | Motion | Success: all | flat | slippery | pushes | MPKPE / r-MPKPE (cm), flat | Real falls | mjlab success | ROS 2 success |
-|---|---|---|---|---|---|---|---|---|---|
-| Tennis serve | GVHMR+GMR | 60/60 | 10/10 | 20/20 | 30/30 | 57.7 / 9.3 | 0/60 | 96.6% (989/1024) | 10/10 (17 launches) |
-| Tennis serve | GVHMR+GMR, 23000 iterations | 60/60 | 10/10 | 20/20 | 30/30 | 19.0 / 8.2 | 0/60 | 100.0% (1024/1024) | 9/10 (17 launches) |
-| Tennis serve | ViT-H sample 1 | 59/60 | 10/10 | 20/20 | 29/30 | 30.4 / 4.5 | 0/60 | 99.9% (1023/1024) | 10/10 (12 launches) |
-| Tennis serve | ViT-H sample 1, 22500 iterations | 59/60 | 10/10 | 20/20 | 29/30 | 12.3 / 3.4 | 0/60 | 100.0% (1024/1024) | 10/10 (17 launches) |
-| Tennis serve | ViT-H sample 2 | 57/60 | 10/10 | 20/20 | 27/30 | 35.2 / 5.7 | 2/60 | 100.0% (1024/1024) | 10/10 (11 launches) |
-| Tennis serve | ViT-H sample 3 | 53/60 | 10/10 | 20/20 | 23/30 | 29.7 / 6.0 | 1/60 | 98.6% (1010/1024) | 10/10 (16 launches) |
-| Studio dance | GVHMR+GMR | 41/60 | 10/10 | 20/20 | 11/30 | 14.0 / 8.0 | 19/60 | 100.0% (1024/1024) | 10/10 (17 launches) |
-| Studio dance | ViT-H sample 1 | 57/60 | 10/10 | 20/20 | 27/30 | 15.5 / 4.5 | 3/60 | 99.8% (1022/1024) | 10/10 (22 launches) |
-| Studio dance | ViT-H sample 2 | 59/60 | 10/10 | 20/20 | 29/30 | 19.0 / 5.8 | 1/60 | 100.0% (1024/1024) | 10/10 (15 launches) |
-| Studio dance | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 16.9 / 4.4 | 0/60 | 100.0% (1024/1024) | 10/10 (22 launches) |
-| Hip-hop (back) | GVHMR+GMR | 52/60 | 10/10 | 20/20 | 22/30 | 18.7 / 12.5 | 0/60 | 99.9% (1023/1024) | 10/10 (16 launches) |
-| Hip-hop (back) | ViT-H sample 1 | 60/60 | 10/10 | 20/20 | 30/30 | 7.0 / 2.7 | 0/60 | 99.9% (1023/1024) | 10/10 (18 launches) |
-| Hip-hop (back) | ViT-H sample 2 | 60/60 | 10/10 | 20/20 | 30/30 | 8.2 / 2.7 | 0/60 | 99.9% (1023/1024) | 10/10 (16 launches) |
-| Hip-hop (back) | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 8.7 / 2.8 | 0/60 | 100.0% (1024/1024) | 10/10 (12 launches) |
-| Pop | GVHMR+GMR | 50/60 | 10/10 | 20/20 | 20/30 | 5.5 / 2.9 | 10/60 | 100.0% (1024/1024) | 10/10 (16 launches) |
-| Pop | ViT-H sample 1 | 54/60 | 10/10 | 20/20 | 24/30 | 7.6 / 1.7 | 6/60 | 100.0% (1024/1024) | 10/10 (13 launches) |
-| Pop | ViT-H sample 2 | 57/60 | 10/10 | 20/20 | 27/30 | 5.3 / 1.8 | 3/60 | 100.0% (1024/1024) | 10/10 (13 launches) |
-| Pop | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 8.3 / 2.8 | 0/60 | 99.9% (1023/1024) | 10/10 (13 launches) |
-| Jazz | GVHMR+GMR | 60/60 | 10/10 | 20/20 | 30/30 | 2.7 / 1.6 | 0/60 | 100.0% (1024/1024) | 10/10 (18 launches) |
-| Jazz | ViT-H sample 1 | 60/60 | 10/10 | 20/20 | 30/30 | 3.6 / 2.0 | 0/60 | 100.0% (1024/1024) | 10/10 (19 launches) |
-| Jazz | ViT-H sample 2 | 60/60 | 10/10 | 20/20 | 30/30 | 3.3 / 1.8 | 0/60 | 100.0% (1024/1024) | 10/10 (18 launches) |
-| Jazz | ViT-H sample 3 | 59/60 | 10/10 | 20/20 | 29/30 | 2.9 / 1.9 | 0/60 | 100.0% (1024/1024) | 10/10 (11 launches) |
-| Jump kick | GVHMR+GMR | 0/30 | 0/10 | 0/20 | n/a | 8.4 / 7.7 | 0/30 | 0.0% (0/1024) | 0/10 (14 launches) |
-| Jump kick | GVHMR+GMR, grounded | 0/30 | 0/10 | 0/20 | n/a | 8.8 / 7.2 | 9/30 | 0.0% (0/1024) | – |
-| Jump kick | GVHMR+GMR, 18500 iterations | 0/30 | 0/10 | 0/20 | n/a | 9.8 / 7.2 | 0/30 | 0.0% (0/1024) | – |
-| Jump kick | ViT-H sample 1 | 30/30 | 10/10 | 20/20 | n/a | 18.8 / 3.4 | 0/30 | 93.4% (956/1024) | 9/10 (14 launches) |
-| Jump kick | ViT-H sample 1, 18500 iterations | 30/30 | 10/10 | 20/20 | n/a | 5.2 / 2.9 | 0/30 | 99.8% (1022/1024) | 10/10 (19 launches) |
-| Jump kick | ViT-H sample 2 | 30/30 | 10/10 | 20/20 | n/a | 7.2 / 5.1 | 0/30 | 98.7% (1011/1024) | 8/10 (11 launches) |
-| Jump kick | ViT-H sample 3 | 30/30 | 10/10 | 20/20 | n/a | 5.9 / 3.5 | 0/30 | 97.7% (1000/1024) | 9/10 (17 launches) |
-| LAFAN1 dance | motion capture | 50/60 | 10/10 | 10/20 | 30/30 | 7.6 / 3.5 | 0/60 | 93.1% (953/1024) | 10/10 (18 launches) |
+| Clip | Motion | Success: all | flat | slippery | pushes | MPKPE / r-MPKPE (cm), flat | Real falls | mjlab success | ROS 2 success | ROS 2 r-MPKPE (cm) | ROS 2 falls |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Tennis serve | GVHMR+GMR | 60/60 | 10/10 | 20/20 | 30/30 | 57.7 / 9.3 | 0/60 | 96.6% (989/1024) | 10/10 (17 launches) | 9.8 | 0/10 |
+| Tennis serve | GVHMR+GMR, 23000 iterations | 60/60 | 10/10 | 20/20 | 30/30 | 19.0 / 8.2 | 0/60 | 100.0% (1024/1024) | 9/10 (17 launches) | 10.9 | 1/10 |
+| Tennis serve | ViT-H sample 1 | 59/60 | 10/10 | 20/20 | 29/30 | 30.4 / 4.5 | 0/60 | 99.9% (1023/1024) | 10/10 (12 launches) | 4.3 | 0/10 |
+| Tennis serve | ViT-H sample 1, 22500 iterations | 59/60 | 10/10 | 20/20 | 29/30 | 12.3 / 3.4 | 0/60 | 100.0% (1024/1024) | 10/10 (17 launches) | 3.6 | 0/10 |
+| Tennis serve | ViT-H sample 2 | 57/60 | 10/10 | 20/20 | 27/30 | 35.2 / 5.7 | 2/60 | 100.0% (1024/1024) | 10/10 (11 launches) | 5.2 | 0/10 |
+| Tennis serve | ViT-H sample 3 | 53/60 | 10/10 | 20/20 | 23/30 | 29.7 / 6.0 | 1/60 | 98.6% (1010/1024) | 10/10 (16 launches) | 5.6 | 0/10 |
+| Studio dance | GVHMR+GMR | 41/60 | 10/10 | 20/20 | 11/30 | 14.0 / 8.0 | 19/60 | 100.0% (1024/1024) | 10/10 (17 launches) | 9.7 | 0/10 |
+| Studio dance | ViT-H sample 1 | 57/60 | 10/10 | 20/20 | 27/30 | 15.5 / 4.5 | 3/60 | 99.8% (1022/1024) | 10/10 (22 launches) | 6.6 | 0/10 |
+| Studio dance | ViT-H sample 2 | 59/60 | 10/10 | 20/20 | 29/30 | 19.0 / 5.8 | 1/60 | 100.0% (1024/1024) | 10/10 (15 launches) | 8.7 | 0/10 |
+| Studio dance | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 16.9 / 4.4 | 0/60 | 100.0% (1024/1024) | 10/10 (22 launches) | 7.0 | 0/10 |
+| Hip-hop (back) | GVHMR+GMR | 52/60 | 10/10 | 20/20 | 22/30 | 18.7 / 12.5 | 0/60 | 99.9% (1023/1024) | 10/10 (16 launches) | 9.0 | 0/10 |
+| Hip-hop (back) | ViT-H sample 1 | 60/60 | 10/10 | 20/20 | 30/30 | 7.0 / 2.7 | 0/60 | 99.9% (1023/1024) | 10/10 (18 launches) | 2.8 | 0/10 |
+| Hip-hop (back) | ViT-H sample 2 | 60/60 | 10/10 | 20/20 | 30/30 | 8.2 / 2.7 | 0/60 | 99.9% (1023/1024) | 10/10 (16 launches) | 3.0 | 0/10 |
+| Hip-hop (back) | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 8.7 / 2.8 | 0/60 | 100.0% (1024/1024) | 10/10 (12 launches) | 2.9 | 0/10 |
+| Pop | GVHMR+GMR | 50/60 | 10/10 | 20/20 | 20/30 | 5.5 / 2.9 | 10/60 | 100.0% (1024/1024) | 10/10 (16 launches) | 3.6 | 0/10 |
+| Pop | ViT-H sample 1 | 54/60 | 10/10 | 20/20 | 24/30 | 7.6 / 1.7 | 6/60 | 100.0% (1024/1024) | 10/10 (13 launches) | 2.2 | 0/10 |
+| Pop | ViT-H sample 2 | 57/60 | 10/10 | 20/20 | 27/30 | 5.3 / 1.8 | 3/60 | 100.0% (1024/1024) | 10/10 (13 launches) | 2.0 | 0/10 |
+| Pop | ViT-H sample 3 | 60/60 | 10/10 | 20/20 | 30/30 | 8.3 / 2.8 | 0/60 | 99.9% (1023/1024) | 10/10 (13 launches) | 3.1 | 0/10 |
+| Jazz | GVHMR+GMR | 60/60 | 10/10 | 20/20 | 30/30 | 2.7 / 1.6 | 0/60 | 100.0% (1024/1024) | 10/10 (18 launches) | 2.5 | 0/10 |
+| Jazz | ViT-H sample 1 | 60/60 | 10/10 | 20/20 | 30/30 | 3.6 / 2.0 | 0/60 | 100.0% (1024/1024) | 10/10 (19 launches) | 2.6 | 0/10 |
+| Jazz | ViT-H sample 2 | 60/60 | 10/10 | 20/20 | 30/30 | 3.3 / 1.8 | 0/60 | 100.0% (1024/1024) | 10/10 (18 launches) | 2.1 | 0/10 |
+| Jazz | ViT-H sample 3 | 59/60 | 10/10 | 20/20 | 29/30 | 2.9 / 1.9 | 0/60 | 100.0% (1024/1024) | 10/10 (11 launches) | 2.9 | 0/10 |
+| Jump kick | GVHMR+GMR | 0/30 | 0/10 | 0/20 | n/a | 8.4 / 7.7 | 0/30 | 0.0% (0/1024) | 0/10 (14 launches) | 9.9 | 3/10 |
+| Jump kick | GVHMR+GMR, grounded | 0/30 | 0/10 | 0/20 | n/a | 8.8 / 7.2 | 9/30 | 0.0% (0/1024) | – | – | – |
+| Jump kick | GVHMR+GMR, 18500 iterations | 0/30 | 0/10 | 0/20 | n/a | 9.8 / 7.2 | 0/30 | 0.0% (0/1024) | – | – | – |
+| Jump kick | ViT-H sample 1 | 30/30 | 10/10 | 20/20 | n/a | 18.8 / 3.4 | 0/30 | 93.4% (956/1024) | 9/10 (14 launches) | 6.2 | 1/10 |
+| Jump kick | ViT-H sample 1, 18500 iterations | 30/30 | 10/10 | 20/20 | n/a | 5.2 / 2.9 | 0/30 | 99.8% (1022/1024) | 10/10 (19 launches) | 4.5 | 0/10 |
+| Jump kick | ViT-H sample 2 | 30/30 | 10/10 | 20/20 | n/a | 7.2 / 5.1 | 0/30 | 98.7% (1011/1024) | 8/10 (11 launches) | 7.9 | 2/10 |
+| Jump kick | ViT-H sample 3 | 30/30 | 10/10 | 20/20 | n/a | 5.9 / 3.5 | 0/30 | 97.7% (1000/1024) | 9/10 (17 launches) | 5.7 | 0/10 |
+| LAFAN1 dance | motion capture | 50/60 | 10/10 | 10/20 | 30/30 | 7.6 / 3.5 | 0/60 | 93.1% (953/1024) | 10/10 (18 launches) | 3.5 | 0/10 |
 
 ### SONIC v1.1
 

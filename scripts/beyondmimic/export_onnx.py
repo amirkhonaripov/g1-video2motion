@@ -1,4 +1,4 @@
-"""Export a trained BeyondMimic policy (.pt) to ONNX, with its reference motion saved next to it."""
+"""Export a trained BeyondMimic policy (.pt) to runs/onnx/<name>/policy.onnx, with its reference motion next to it."""
 
 import argparse
 from dataclasses import asdict
@@ -11,18 +11,18 @@ import torch
 from mjlab.envs import ManagerBasedRlEnv
 from mjlab.rl import MjlabOnPolicyRunner, RslRlVecEnvWrapper
 from mjlab.rl.exporter_utils import attach_metadata_to_onnx
-from mjlab.tasks.registry import list_tasks, load_env_cfg, load_rl_cfg, load_runner_cls
+from mjlab.tasks.registry import load_env_cfg, load_rl_cfg, load_runner_cls
 from mjlab.tasks.tracking.mdp import MotionCommandCfg
 from onnx import numpy_helper
 
+from scripts.beyondmimic import train_run
+
 
 def parse_args():
-  parser = argparse.ArgumentParser(description="Export a tracking policy to ONNX")
-  parser.add_argument("task", choices=[t for t in list_tasks() if "Tracking" in t])
-  parser.add_argument("--motion-file", required=True, help="motion .npz baked into the ONNX file")
-  parser.add_argument("--checkpoint-file", required=True, help="trained policy checkpoint .pt")
-  parser.add_argument("--output-file", default="runs/onnx/policy.onnx")
-  return parser.parse_args()
+  parser = argparse.ArgumentParser(description="Export a tracking policy to runs/onnx/<name>/policy.onnx")
+  train_run.add_args(parser)
+  args = parser.parse_args()
+  return args, *train_run.resolve(parser, args)
 
 
 def save_reference(onnx_path):
@@ -70,8 +70,9 @@ def export(task, motion_file, checkpoint_file, output_file):
 
 
 def main():
-  args = parse_args()
-  export(args.task, args.motion_file, args.checkpoint_file, args.output_file)
+  args, checkpoint_file, motion_file, name = parse_args()
+  print(f"[INFO] checkpoint {checkpoint_file}, motion {motion_file}")
+  export(args.task, motion_file, checkpoint_file, f"runs/onnx/{name}/policy.onnx")
 
 
 if __name__ == "__main__":

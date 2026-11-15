@@ -1,6 +1,6 @@
 {
   "summary": {
-    "policy": "jazz_s1_vith",
+    "policy": "jazz_vith_s2",
     "runs": 10,
     "startup_drops": 0,
     "invalid_recordings": 0,
@@ -35,43 +35,7 @@
   },
   "runs": [
     {
-      "run": "runs/npz/ros2_routes/jazz_s1_vith_r10.npz",
-      "policy_start_s": 0.443,
-      "start_method": "sim_log",
-      "first_joint_sample_s": 0.402,
-      "start_lag_s": 0.041,
-      "motion_s": 12.0,
-      "covered_s": 12.0,
-      "complete": true,
-      "startup_drop": false,
-      "invalid_recording": false,
-      "tracking_failure": false,
-      "tracking_failure_time_s": null,
-      "tracking_failure_reason": "",
-      "success": true,
-      "success_strict": true,
-      "fell": false,
-      "fell_time_s": null,
-      "fell_after_motion": true,
-      "fell_after_motion_time_s": 16.03,
-      "mpkpe_m": 0.0534,
-      "max_mpkpe_m": 0.0881,
-      "r_mpkpe_m": 0.0176,
-      "max_r_mpkpe_m": 0.0571,
-      "joint_mae_rad": 0.0592,
-      "joint_max_frame_mae_rad": 0.3666,
-      "pre_failure_mpkpe_m": 0.0534,
-      "pre_failure_r_mpkpe_m": 0.0176,
-      "pre_failure_joint_mae_rad": 0.0592,
-      "drift_mean_m": 0.044,
-      "drift_max_m": 0.079,
-      "est_frame_drift_mean_m": 0.028,
-      "est_frame_drift_max_m": 0.058,
-      "estimator_gap_max_m": 0.057,
-      "min_head_height_m": 1.233
-    },
-    {
-      "run": "runs/npz/ros2_routes/jazz_s1_vith_r1.npz",
+      "run": "runs/bags/jazz_vith_s2_r1/",
       "policy_start_s": 0.158,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.13,
@@ -107,7 +71,43 @@
       "min_head_height_m": 1.245
     },
     {
-      "run": "runs/npz/ros2_routes/jazz_s1_vith_r2.npz",
+      "run": "runs/bags/jazz_vith_s2_r10/",
+      "policy_start_s": 0.443,
+      "start_method": "sim_log",
+      "first_joint_sample_s": 0.402,
+      "start_lag_s": 0.041,
+      "motion_s": 12.0,
+      "covered_s": 12.0,
+      "complete": true,
+      "startup_drop": false,
+      "invalid_recording": false,
+      "tracking_failure": false,
+      "tracking_failure_time_s": null,
+      "tracking_failure_reason": "",
+      "success": true,
+      "success_strict": true,
+      "fell": false,
+      "fell_time_s": null,
+      "fell_after_motion": true,
+      "fell_after_motion_time_s": 16.03,
+      "mpkpe_m": 0.0534,
+      "max_mpkpe_m": 0.0881,
+      "r_mpkpe_m": 0.0176,
+      "max_r_mpkpe_m": 0.0571,
+      "joint_mae_rad": 0.0592,
+      "joint_max_frame_mae_rad": 0.3666,
+      "pre_failure_mpkpe_m": 0.0534,
+      "pre_failure_r_mpkpe_m": 0.0176,
+      "pre_failure_joint_mae_rad": 0.0592,
+      "drift_mean_m": 0.044,
+      "drift_max_m": 0.079,
+      "est_frame_drift_mean_m": 0.028,
+      "est_frame_drift_max_m": 0.058,
+      "estimator_gap_max_m": 0.057,
+      "min_head_height_m": 1.233
+    },
+    {
+      "run": "runs/bags/jazz_vith_s2_r2/",
       "policy_start_s": 0.049,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.012,
@@ -143,7 +143,7 @@
       "min_head_height_m": 1.245
     },
     {
-      "run": "runs/npz/ros2_routes/jazz_s1_vith_r3.npz",
+      "run": "runs/bags/jazz_vith_s2_r3/",
       "policy_start_s": 0.271,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.208,
@@ -179,7 +179,7 @@
       "min_head_height_m": 1.233
     },
     {
-      "run": "runs/npz/ros2_routes/jazz_s1_vith_r4.npz",
+      "run": "runs/bags/jazz_vith_s2_r4/",
       "policy_start_s": 0.585,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.558,
@@ -215,7 +215,7 @@
       "min_head_height_m": 1.226
     },
     {
-      "run": "runs/npz/ros2_routes/jazz_s1_vith_r5.npz",
+      "run": "runs/bags/jazz_vith_s2_r5/",
       "policy_start_s": 0.411,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.374,
@@ -251,7 +251,7 @@
       "min_head_height_m": 1.233
     },
     {
-      "run": "runs/npz/ros2_routes/jazz_s1_vith_r6.npz",
+      "run": "runs/bags/jazz_vith_s2_r6/",
       "policy_start_s": 0.719,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.68,
@@ -287,7 +287,7 @@
       "min_head_height_m": 1.125
     },
     {
-      "run": "runs/npz/ros2_routes/jazz_s1_vith_r7.npz",
+      "run": "runs/bags/jazz_vith_s2_r7/",
       "policy_start_s": 0.236,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.196,
@@ -323,7 +323,7 @@
       "min_head_height_m": 1.231
     },
     {
-      "run": "runs/npz/ros2_routes/jazz_s1_vith_r8.npz",
+      "run": "runs/bags/jazz_vith_s2_r8/",
       "policy_start_s": 0.302,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.272,
@@ -359,7 +359,7 @@
       "min_head_height_m": 1.234
     },
     {
-      "run": "runs/npz/ros2_routes/jazz_s1_vith_r9.npz",
+      "run": "runs/bags/jazz_vith_s2_r9/",
       "policy_start_s": 0.6,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.568,

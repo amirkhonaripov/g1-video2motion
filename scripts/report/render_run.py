@@ -1,7 +1,8 @@
-"""Render a harness run or a ROS 2 run to an MP4, filmed from the same side as the person in the input video."""
+"""Render a harness run or a ROS 2 recording to an MP4, filmed from the same side as the person in the input video."""
 
 import argparse
 import subprocess
+from pathlib import Path
 
 import mujoco
 import numpy as np
@@ -9,11 +10,12 @@ import torch
 
 from scripts.g1 import G1_XML, yaw
 from scripts.ros2.analyze_ros2 import resample, set_pose
+from scripts.ros2.recording import read_recording
 
 
 def parse_args():
   parser = argparse.ArgumentParser(description="Render a harness run or a ROS 2 run")
-  parser.add_argument("run_file", help="harness logs/<scenario>_seed<n>.npz, or a ROS 2 run .npz from bag_to_npz")
+  parser.add_argument("run_file", help="ROS 2 recording folder (runs/bags/<stem>_r<k>/) or harness log .npz")
   parser.add_argument("--output-file", required=True)
   parser.add_argument("--gvhmr-file", help="hmr4d_results.pt of the same video, for the camera side")
   parser.add_argument("--follow", action="store_true", help="turn with the video's camera (for moving cameras)")
@@ -54,7 +56,7 @@ def harness_frames(log, model):
 
 
 def ros2_frames(run, model, start, duration, fps):
-  """Poses at a steady frame rate, the pelvis placed under the logged lidar pose."""
+  """Poses at a steady frame rate, the pelvis placed under the recorded lidar pose."""
   data = mujoco.MjData(model)
   adr = [model.joint(name).qposadr[0] for name in run["joint_names"]]
   start = run["joint_time"][0] if start is None else start
@@ -65,7 +67,7 @@ def ros2_frames(run, model, start, duration, fps):
   k = np.minimum(np.searchsorted(run["base_time"], times), len(run["base_time"]) - 1)
   qpos = []
   for i in range(len(times)):
-    set_pose(model, data, run, adr, base[i], run["base_quat"][k[i]], joints[i])
+    set_pose(model, data, adr, base[i], run["base_quat"][k[i]], joints[i])
     qpos.append(data.qpos.copy())
   return times - start, np.array(qpos)
 
@@ -86,13 +88,12 @@ def camera_azimuth(times, base_quat, args):
 
 def main():
   args = parse_args()
-  run = dict(np.load(args.run_file))
   model = mujoco.MjModel.from_xml_path(args.model_xml)
   data = mujoco.MjData(model)
-  if "joint_time" in run:
-    times, frames = ros2_frames(run, model, args.start, args.duration, args.fps)
+  if Path(args.run_file).is_dir():
+    times, frames = ros2_frames(read_recording(args.run_file), model, args.start, args.duration, args.fps)
   else:
-    times, frames = harness_frames(run, model)
+    times, frames = harness_frames(np.load(args.run_file), model)
   model.vis.global_.offwidth, model.vis.global_.offheight = args.width, args.height
   renderer = mujoco.Renderer(model, height=args.height, width=args.width)
   azimuth = camera_azimuth(times, frames[:, 3:7], args)

@@ -1,4 +1,4 @@
-"""Evaluate a trained BeyondMimic policy in mjlab and compute tracking metrics."""
+"""Evaluate a trained BeyondMimic policy in mjlab; tracking metrics to results/mjlab/<name>.json."""
 
 import argparse
 import json
@@ -11,7 +11,7 @@ import numpy as np
 import torch
 from mjlab.envs import ManagerBasedRlEnv
 from mjlab.rl import MjlabOnPolicyRunner, RslRlVecEnvWrapper
-from mjlab.tasks.registry import list_tasks, load_env_cfg, load_rl_cfg, load_runner_cls
+from mjlab.tasks.registry import load_env_cfg, load_rl_cfg, load_runner_cls
 from mjlab.tasks.tracking.mdp import MotionCommandCfg
 from mjlab.tasks.tracking.mdp.metrics import (
   compute_ee_orientation_error,
@@ -22,6 +22,7 @@ from mjlab.tasks.tracking.mdp.metrics import (
 )
 from mjlab.utils.torch import configure_torch_backends
 
+from scripts.beyondmimic import train_run
 from scripts.g1 import STRICT_MPKPE_M
 
 METRICS = ["mpkpe", "r_mpkpe", "joint_vel_error", "ee_pos_error", "ee_ori_error", "joint_mae_rad", "drift"]
@@ -29,12 +30,10 @@ METRICS = ["mpkpe", "r_mpkpe", "joint_vel_error", "ee_pos_error", "ee_ori_error"
 
 def parse_args():
   parser = argparse.ArgumentParser(description="Evaluate a tracking policy in mjlab")
-  parser.add_argument("task", choices=[t for t in list_tasks() if "Tracking" in t])
-  parser.add_argument("--motion-file", required=True, help="motion .npz to track")
-  parser.add_argument("--checkpoint-file", required=True, help="trained policy checkpoint .pt")
-  parser.add_argument("--output-file", help="write the metrics as JSON")
+  train_run.add_args(parser)
   parser.add_argument("--num-envs", type=int, default=1024, help="parallel environments = episodes")
-  return parser.parse_args()
+  args = parser.parse_args()
+  return args, *train_run.resolve(parser, args)
 
 
 def make_env(task, motion_file, num_envs, device):
@@ -167,27 +166,26 @@ def summarize(errors, active, success, num_envs):
 
 
 def main():
-  args = parse_args()
+  args, checkpoint_file, motion_file, name = parse_args()
   configure_torch_backends()
   device = "cuda:0" if torch.cuda.is_available() else "cpu"
-  env, env_cfg, agent_cfg = make_env(args.task, args.motion_file, args.num_envs, device)
-  policy = load_policy(args.task, env, agent_cfg, args.checkpoint_file, device)
+  env, env_cfg, agent_cfg = make_env(args.task, motion_file, args.num_envs, device)
+  policy = load_policy(args.task, env, agent_cfg, checkpoint_file, device)
   ee_body_names = env_cfg.terminations["ee_body_pos"].params["body_names"]
   print(f"[INFO] End effector bodies: {ee_body_names}")
 
   errors, active, success, failures = evaluate(env, policy, args.num_envs, ee_body_names, device)
   metrics = summarize(errors, active, success, args.num_envs)
   print("\n" + "=" * 50 + "\nEvaluation Results\n" + "=" * 50)
-  for name, value in metrics.items():
-    print(f"  {name}: {value:.4f}")
+  for key, value in metrics.items():
+    print(f"  {key}: {value:.4f}")
   print("=" * 50)
 
-  if args.output_file:
-    out = Path(args.output_file)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    with open(out, "w") as f:
-      json.dump({"metrics": metrics, "failures": failures}, f, indent=2)
-    print(f"[INFO] Metrics saved to {out}")
+  out = Path(f"results/mjlab/{name}.json")
+  out.parent.mkdir(parents=True, exist_ok=True)
+  with open(out, "w") as f:
+    json.dump({"metrics": metrics, "failures": failures}, f, indent=2)
+  print(f"[INFO] Metrics saved to {out}")
   env.close()
 
 

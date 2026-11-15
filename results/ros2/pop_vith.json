@@ -35,43 +35,7 @@
   },
   "runs": [
     {
-      "run": "runs/npz/ros2_routes/pop_vith_r10.npz",
-      "policy_start_s": 0.751,
-      "start_method": "sim_log",
-      "first_joint_sample_s": 0.714,
-      "start_lag_s": 0.037,
-      "motion_s": 12.0,
-      "covered_s": 12.0,
-      "complete": true,
-      "startup_drop": false,
-      "invalid_recording": false,
-      "tracking_failure": false,
-      "tracking_failure_time_s": null,
-      "tracking_failure_reason": "",
-      "success": true,
-      "success_strict": false,
-      "fell": false,
-      "fell_time_s": null,
-      "fell_after_motion": true,
-      "fell_after_motion_time_s": 13.91,
-      "mpkpe_m": 0.5602,
-      "max_mpkpe_m": 0.774,
-      "r_mpkpe_m": 0.0345,
-      "max_r_mpkpe_m": 0.1527,
-      "joint_mae_rad": 0.0792,
-      "joint_max_frame_mae_rad": 0.3404,
-      "pre_failure_mpkpe_m": 0.5602,
-      "pre_failure_r_mpkpe_m": 0.0345,
-      "pre_failure_joint_mae_rad": 0.0792,
-      "drift_mean_m": 0.539,
-      "drift_max_m": 0.771,
-      "est_frame_drift_mean_m": 0.213,
-      "est_frame_drift_max_m": 0.43,
-      "estimator_gap_max_m": 0.652,
-      "min_head_height_m": 1.037
-    },
-    {
-      "run": "runs/npz/ros2_routes/pop_vith_r1.npz",
+      "run": "runs/bags/pop_vith_r1/",
       "policy_start_s": 0.245,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.184,
@@ -107,7 +71,43 @@
       "min_head_height_m": 1.222
     },
     {
-      "run": "runs/npz/ros2_routes/pop_vith_r2.npz",
+      "run": "runs/bags/pop_vith_r10/",
+      "policy_start_s": 0.751,
+      "start_method": "sim_log",
+      "first_joint_sample_s": 0.714,
+      "start_lag_s": 0.037,
+      "motion_s": 12.0,
+      "covered_s": 12.0,
+      "complete": true,
+      "startup_drop": false,
+      "invalid_recording": false,
+      "tracking_failure": false,
+      "tracking_failure_time_s": null,
+      "tracking_failure_reason": "",
+      "success": true,
+      "success_strict": false,
+      "fell": false,
+      "fell_time_s": null,
+      "fell_after_motion": true,
+      "fell_after_motion_time_s": 13.91,
+      "mpkpe_m": 0.5602,
+      "max_mpkpe_m": 0.774,
+      "r_mpkpe_m": 0.0345,
+      "max_r_mpkpe_m": 0.1527,
+      "joint_mae_rad": 0.0792,
+      "joint_max_frame_mae_rad": 0.3404,
+      "pre_failure_mpkpe_m": 0.5602,
+      "pre_failure_r_mpkpe_m": 0.0345,
+      "pre_failure_joint_mae_rad": 0.0792,
+      "drift_mean_m": 0.539,
+      "drift_max_m": 0.771,
+      "est_frame_drift_mean_m": 0.213,
+      "est_frame_drift_max_m": 0.43,
+      "estimator_gap_max_m": 0.652,
+      "min_head_height_m": 1.037
+    },
+    {
+      "run": "runs/bags/pop_vith_r2/",
       "policy_start_s": 0.282,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.244,
@@ -143,7 +143,7 @@
       "min_head_height_m": 1.222
     },
     {
-      "run": "runs/npz/ros2_routes/pop_vith_r3.npz",
+      "run": "runs/bags/pop_vith_r3/",
       "policy_start_s": 0.07,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.042,
@@ -179,7 +179,7 @@
       "min_head_height_m": 1.221
     },
     {
-      "run": "runs/npz/ros2_routes/pop_vith_r4.npz",
+      "run": "runs/bags/pop_vith_r4/",
       "policy_start_s": 0.045,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.004,
@@ -215,7 +215,7 @@
       "min_head_height_m": 1.221
     },
     {
-      "run": "runs/npz/ros2_routes/pop_vith_r5.npz",
+      "run": "runs/bags/pop_vith_r5/",
       "policy_start_s": 0.13,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.102,
@@ -251,7 +251,7 @@
       "min_head_height_m": 1.221
     },
     {
-      "run": "runs/npz/ros2_routes/pop_vith_r6.npz",
+      "run": "runs/bags/pop_vith_r6/",
       "policy_start_s": 0.209,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.172,
@@ -287,7 +287,7 @@
       "min_head_height_m": 1.221
     },
     {
-      "run": "runs/npz/ros2_routes/pop_vith_r7.npz",
+      "run": "runs/bags/pop_vith_r7/",
       "policy_start_s": 0.038,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.004,
@@ -323,7 +323,7 @@
       "min_head_height_m": 1.221
     },
     {
-      "run": "runs/npz/ros2_routes/pop_vith_r8.npz",
+      "run": "runs/bags/pop_vith_r8/",
       "policy_start_s": 0.105,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.07,
@@ -359,7 +359,7 @@
       "min_head_height_m": 1.221
     },
     {
-      "run": "runs/npz/ros2_routes/pop_vith_r9.npz",
+      "run": "runs/bags/pop_vith_r9/",
       "policy_start_s": 0.498,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.466,

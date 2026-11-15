@@ -1,6 +1,6 @@
 {
   "summary": {
-    "policy": "tennis_s2_vith",
+    "policy": "tennis_vith_s3",
     "runs": 10,
     "startup_drops": 0,
     "invalid_recordings": 0,
@@ -35,43 +35,7 @@
   },
   "runs": [
     {
-      "run": "runs/npz/ros2_routes/tennis_s2_vith_r10.npz",
-      "policy_start_s": 0.167,
-      "start_method": "sim_log",
-      "first_joint_sample_s": 0.128,
-      "start_lag_s": 0.039,
-      "motion_s": 10.42,
-      "covered_s": 10.42,
-      "complete": true,
-      "startup_drop": false,
-      "invalid_recording": false,
-      "tracking_failure": false,
-      "tracking_failure_time_s": null,
-      "tracking_failure_reason": "",
-      "success": true,
-      "success_strict": false,
-      "fell": false,
-      "fell_time_s": null,
-      "fell_after_motion": true,
-      "fell_after_motion_time_s": 12.45,
-      "mpkpe_m": 0.2316,
-      "max_mpkpe_m": 0.7405,
-      "r_mpkpe_m": 0.0548,
-      "max_r_mpkpe_m": 0.126,
-      "joint_mae_rad": 0.1247,
-      "joint_max_frame_mae_rad": 0.3307,
-      "pre_failure_mpkpe_m": 0.2316,
-      "pre_failure_r_mpkpe_m": 0.0548,
-      "pre_failure_joint_mae_rad": 0.1247,
-      "drift_mean_m": 0.213,
-      "drift_max_m": 0.742,
-      "est_frame_drift_mean_m": 0.229,
-      "est_frame_drift_max_m": 0.769,
-      "estimator_gap_max_m": 0.439,
-      "min_head_height_m": 0.923
-    },
-    {
-      "run": "runs/npz/ros2_routes/tennis_s2_vith_r1.npz",
+      "run": "runs/bags/tennis_vith_s3_r1/",
       "policy_start_s": 0.273,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.238,
@@ -107,7 +71,43 @@
       "min_head_height_m": 0.933
     },
     {
-      "run": "runs/npz/ros2_routes/tennis_s2_vith_r2.npz",
+      "run": "runs/bags/tennis_vith_s3_r10/",
+      "policy_start_s": 0.167,
+      "start_method": "sim_log",
+      "first_joint_sample_s": 0.128,
+      "start_lag_s": 0.039,
+      "motion_s": 10.42,
+      "covered_s": 10.42,
+      "complete": true,
+      "startup_drop": false,
+      "invalid_recording": false,
+      "tracking_failure": false,
+      "tracking_failure_time_s": null,
+      "tracking_failure_reason": "",
+      "success": true,
+      "success_strict": false,
+      "fell": false,
+      "fell_time_s": null,
+      "fell_after_motion": true,
+      "fell_after_motion_time_s": 12.45,
+      "mpkpe_m": 0.2316,
+      "max_mpkpe_m": 0.7405,
+      "r_mpkpe_m": 0.0548,
+      "max_r_mpkpe_m": 0.126,
+      "joint_mae_rad": 0.1247,
+      "joint_max_frame_mae_rad": 0.3307,
+      "pre_failure_mpkpe_m": 0.2316,
+      "pre_failure_r_mpkpe_m": 0.0548,
+      "pre_failure_joint_mae_rad": 0.1247,
+      "drift_mean_m": 0.213,
+      "drift_max_m": 0.742,
+      "est_frame_drift_mean_m": 0.229,
+      "est_frame_drift_max_m": 0.769,
+      "estimator_gap_max_m": 0.439,
+      "min_head_height_m": 0.923
+    },
+    {
+      "run": "runs/bags/tennis_vith_s3_r2/",
       "policy_start_s": 0.147,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.11,
@@ -143,7 +143,7 @@
       "min_head_height_m": 0.922
     },
     {
-      "run": "runs/npz/ros2_routes/tennis_s2_vith_r3.npz",
+      "run": "runs/bags/tennis_vith_s3_r3/",
       "policy_start_s": 0.036,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.004,
@@ -179,7 +179,7 @@
       "min_head_height_m": 0.924
     },
     {
-      "run": "runs/npz/ros2_routes/tennis_s2_vith_r4.npz",
+      "run": "runs/bags/tennis_vith_s3_r4/",
       "policy_start_s": 0.048,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.004,
@@ -215,7 +215,7 @@
       "min_head_height_m": 0.922
     },
     {
-      "run": "runs/npz/ros2_routes/tennis_s2_vith_r5.npz",
+      "run": "runs/bags/tennis_vith_s3_r5/",
       "policy_start_s": 0.366,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.334,
@@ -251,7 +251,7 @@
       "min_head_height_m": 0.923
     },
     {
-      "run": "runs/npz/ros2_routes/tennis_s2_vith_r6.npz",
+      "run": "runs/bags/tennis_vith_s3_r6/",
       "policy_start_s": 0.261,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.228,
@@ -287,7 +287,7 @@
       "min_head_height_m": 0.921
     },
     {
-      "run": "runs/npz/ros2_routes/tennis_s2_vith_r7.npz",
+      "run": "runs/bags/tennis_vith_s3_r7/",
       "policy_start_s": 0.129,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.094,
@@ -323,7 +323,7 @@
       "min_head_height_m": 0.934
     },
     {
-      "run": "runs/npz/ros2_routes/tennis_s2_vith_r8.npz",
+      "run": "runs/bags/tennis_vith_s3_r8/",
       "policy_start_s": 0.16,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.134,
@@ -359,7 +359,7 @@
       "min_head_height_m": 0.923
     },
     {
-      "run": "runs/npz/ros2_routes/tennis_s2_vith_r9.npz",
+      "run": "runs/bags/tennis_vith_s3_r9/",
       "policy_start_s": 0.114,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.084,

@@ -94,8 +94,8 @@ VITH_JOINT_NAMES = [
 METHODS = [
   ("GVHMR + GMR", "gmr", ""),
   ("ViT-H sample 1", "vith", ""),
-  ("ViT-H sample 2", "vith", "_s1"),
-  ("ViT-H sample 3", "vith", "_s2"),
+  ("ViT-H sample 2", "vith", "_s2"),
+  ("ViT-H sample 3", "vith", "_s3"),
 ]
 
 

@@ -8,32 +8,6 @@ pop,vith,video_to_g1,43.3,RTX PRO 5000
 jazz,gvhmr_gmr,video_to_human,52.9,RTX PRO 5000
 jazz,gvhmr_gmr,human_to_g1,5.0,RTX PRO 5000
 jazz,vith,video_to_g1,43.8,RTX PRO 5000
-gmr_tennis,sonic,harness_7x10_4parallel,125.3,cpu
-vith_tennis_s2,sonic,harness_7x10_4parallel,141.6,cpu
-vith_tennis_s1,sonic,harness_7x10_4parallel,153.3,cpu
-vith_tennis,sonic,harness_7x10_4parallel,184.8,cpu
-demo_dance__ice,beyondmimic,harness_10seeds,27.9,cpu
-demo_dance__push_forward_hard,beyondmimic,harness_10seeds,88.8,cpu
-demo_dance__push_lateral_medium,beyondmimic,harness_10seeds,89.2,cpu
-gmr_pop,sonic,harness_7x10_4parallel,274.2,cpu
-demo_dance__flat_nominal,beyondmimic,harness_10seeds,111.3,cpu
-demo_dance__stand_still,beyondmimic,harness_10seeds,114.3,cpu
-demo_dance__low_friction,beyondmimic,harness_10seeds,120.1,cpu
-demo_dance__ice,sonic,harness_10seeds,154.7,cpu
-demo_dance__push_backward_medium,beyondmimic,harness_10seeds,70.0,cpu
-vith_pop_s1,sonic,harness_7x10_4parallel,317.4,cpu
-vith_pop,sonic,harness_7x10_4parallel,338.1,cpu
-vith_pop_s2,sonic,harness_7x10_4parallel,339.8,cpu
-demo_dance__low_friction,sonic,harness_10seeds,317.9,cpu
-demo_dance__flat_nominal,sonic,harness_10seeds,330.2,cpu
-demo_dance__push_forward_hard,sonic,harness_10seeds,360.9,cpu
-vith_jazz_s2,sonic,harness_10seeds,384.7,cpu
-vith_jazz_s1,sonic,harness_10seeds,421.6,cpu
-demo_dance__push_lateral_medium,sonic,harness_10seeds,440.3,cpu
-vith_jazz,sonic,harness_10seeds,440.6,cpu
-gmr_jazz,sonic,harness_10seeds,462.0,cpu
-demo_dance__push_backward_medium,sonic,harness_10seeds,445.8,cpu
-demo_dance__stand_still,sonic,harness_10seeds,481.9,cpu
 studio_dance,gvhmr_gmr,video_to_g1,97,RTX PRO 5000
 studio_dance,vith,video_to_g1,31.0,RTX PRO 5000
 hiphop_back,gvhmr_gmr,video_to_g1,51,RTX PRO 5000

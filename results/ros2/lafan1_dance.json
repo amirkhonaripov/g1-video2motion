@@ -1,6 +1,6 @@
 {
   "summary": {
-    "policy": "demo",
+    "policy": "lafan1_dance",
     "runs": 10,
     "startup_drops": 0,
     "invalid_recordings": 0,
@@ -35,43 +35,7 @@
   },
   "runs": [
     {
-      "run": "runs/npz/ros2_routes/demo_r10.npz",
-      "policy_start_s": 0.102,
-      "start_method": "sim_log",
-      "first_joint_sample_s": 0.062,
-      "start_lag_s": 0.04,
-      "motion_s": 131.46,
-      "covered_s": 131.46,
-      "complete": true,
-      "startup_drop": false,
-      "invalid_recording": false,
-      "tracking_failure": false,
-      "tracking_failure_time_s": null,
-      "tracking_failure_reason": "",
-      "success": true,
-      "success_strict": false,
-      "fell": false,
-      "fell_time_s": null,
-      "fell_after_motion": true,
-      "fell_after_motion_time_s": 140.96,
-      "mpkpe_m": 0.2688,
-      "max_mpkpe_m": 0.671,
-      "r_mpkpe_m": 0.0346,
-      "max_r_mpkpe_m": 0.1403,
-      "joint_mae_rad": 0.0864,
-      "joint_max_frame_mae_rad": 0.2928,
-      "pre_failure_mpkpe_m": 0.2688,
-      "pre_failure_r_mpkpe_m": 0.0346,
-      "pre_failure_joint_mae_rad": 0.0864,
-      "drift_mean_m": 0.266,
-      "drift_max_m": 0.659,
-      "est_frame_drift_mean_m": 0.082,
-      "est_frame_drift_max_m": 0.309,
-      "estimator_gap_max_m": 0.992,
-      "min_head_height_m": 0.382
-    },
-    {
-      "run": "runs/npz/ros2_routes/demo_r1.npz",
+      "run": "runs/bags/lafan1_dance_r1/",
       "policy_start_s": 0.499,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.468,
@@ -107,7 +71,43 @@
       "min_head_height_m": 0.382
     },
     {
-      "run": "runs/npz/ros2_routes/demo_r2.npz",
+      "run": "runs/bags/lafan1_dance_r10/",
+      "policy_start_s": 0.102,
+      "start_method": "sim_log",
+      "first_joint_sample_s": 0.062,
+      "start_lag_s": 0.04,
+      "motion_s": 131.46,
+      "covered_s": 131.46,
+      "complete": true,
+      "startup_drop": false,
+      "invalid_recording": false,
+      "tracking_failure": false,
+      "tracking_failure_time_s": null,
+      "tracking_failure_reason": "",
+      "success": true,
+      "success_strict": false,
+      "fell": false,
+      "fell_time_s": null,
+      "fell_after_motion": true,
+      "fell_after_motion_time_s": 140.96,
+      "mpkpe_m": 0.2688,
+      "max_mpkpe_m": 0.671,
+      "r_mpkpe_m": 0.0346,
+      "max_r_mpkpe_m": 0.1403,
+      "joint_mae_rad": 0.0864,
+      "joint_max_frame_mae_rad": 0.2928,
+      "pre_failure_mpkpe_m": 0.2688,
+      "pre_failure_r_mpkpe_m": 0.0346,
+      "pre_failure_joint_mae_rad": 0.0864,
+      "drift_mean_m": 0.266,
+      "drift_max_m": 0.659,
+      "est_frame_drift_mean_m": 0.082,
+      "est_frame_drift_max_m": 0.309,
+      "estimator_gap_max_m": 0.992,
+      "min_head_height_m": 0.382
+    },
+    {
+      "run": "runs/bags/lafan1_dance_r2/",
       "policy_start_s": 0.65,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.614,
@@ -143,7 +143,7 @@
       "min_head_height_m": 0.382
     },
     {
-      "run": "runs/npz/ros2_routes/demo_r3.npz",
+      "run": "runs/bags/lafan1_dance_r3/",
       "policy_start_s": 0.262,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.224,
@@ -179,7 +179,7 @@
       "min_head_height_m": 0.382
     },
     {
-      "run": "runs/npz/ros2_routes/demo_r4.npz",
+      "run": "runs/bags/lafan1_dance_r4/",
       "policy_start_s": 0.341,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.302,
@@ -215,7 +215,7 @@
       "min_head_height_m": 0.382
     },
     {
-      "run": "runs/npz/ros2_routes/demo_r5.npz",
+      "run": "runs/bags/lafan1_dance_r5/",
       "policy_start_s": 0.395,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.354,
@@ -251,7 +251,7 @@
       "min_head_height_m": 0.381
     },
     {
-      "run": "runs/npz/ros2_routes/demo_r6.npz",
+      "run": "runs/bags/lafan1_dance_r6/",
       "policy_start_s": 0.105,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.068,
@@ -287,7 +287,7 @@
       "min_head_height_m": 0.383
     },
     {
-      "run": "runs/npz/ros2_routes/demo_r7.npz",
+      "run": "runs/bags/lafan1_dance_r7/",
       "policy_start_s": 0.175,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.138,
@@ -323,7 +323,7 @@
       "min_head_height_m": 0.382
     },
     {
-      "run": "runs/npz/ros2_routes/demo_r8.npz",
+      "run": "runs/bags/lafan1_dance_r8/",
       "policy_start_s": 0.171,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.13,
@@ -359,7 +359,7 @@
       "min_head_height_m": 0.382
     },
     {
-      "run": "runs/npz/ros2_routes/demo_r9.npz",
+      "run": "runs/bags/lafan1_dance_r9/",
       "policy_start_s": 0.221,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.18,

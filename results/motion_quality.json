@@ -104,7 +104,7 @@
     ]
   },
   {
-    "motion": "../data/motions/vith/hiphop_back_s1.npz",
+    "motion": "../data/motions/vith/hiphop_back_s2.npz",
     "seconds": 6.84,
     "frames_outside_joint_limits": 0.006,
     "max_joint_speed_rad_s": 24.19,
@@ -117,7 +117,7 @@
     ]
   },
   {
-    "motion": "../data/motions/vith/hiphop_back_s2.npz",
+    "motion": "../data/motions/vith/hiphop_back_s3.npz",
     "seconds": 6.84,
     "frames_outside_joint_limits": 0.0,
     "max_joint_speed_rad_s": 18.75,
@@ -143,7 +143,7 @@
     ]
   },
   {
-    "motion": "../data/motions/vith/jazz_s1.npz",
+    "motion": "../data/motions/vith/jazz_s2.npz",
     "seconds": 12.02,
     "frames_outside_joint_limits": 0.0,
     "max_joint_speed_rad_s": 12.28,
@@ -156,7 +156,7 @@
     ]
   },
   {
-    "motion": "../data/motions/vith/jazz_s2.npz",
+    "motion": "../data/motions/vith/jazz_s3.npz",
     "seconds": 12.02,
     "frames_outside_joint_limits": 0.0,
     "max_joint_speed_rad_s": 16.0,
@@ -182,7 +182,7 @@
     ]
   },
   {
-    "motion": "../data/motions/vith/jump_kick_s1.npz",
+    "motion": "../data/motions/vith/jump_kick_s2.npz",
     "seconds": 2.22,
     "frames_outside_joint_limits": 0.063,
     "max_joint_speed_rad_s": 26.71,
@@ -195,7 +195,7 @@
     ]
   },
   {
-    "motion": "../data/motions/vith/jump_kick_s2.npz",
+    "motion": "../data/motions/vith/jump_kick_s3.npz",
     "seconds": 2.22,
     "frames_outside_joint_limits": 0.099,
     "max_joint_speed_rad_s": 25.22,
@@ -221,7 +221,7 @@
     ]
   },
   {
-    "motion": "../data/motions/vith/pop_s1.npz",
+    "motion": "../data/motions/vith/pop_s2.npz",
     "seconds": 12.02,
     "frames_outside_joint_limits": 0.11,
     "max_joint_speed_rad_s": 9.59,
@@ -234,7 +234,7 @@
     ]
   },
   {
-    "motion": "../data/motions/vith/pop_s2.npz",
+    "motion": "../data/motions/vith/pop_s3.npz",
     "seconds": 12.02,
     "frames_outside_joint_limits": 0.085,
     "max_joint_speed_rad_s": 83.85,
@@ -260,7 +260,7 @@
     ]
   },
   {
-    "motion": "../data/motions/vith/studio_dance_s1.npz",
+    "motion": "../data/motions/vith/studio_dance_s2.npz",
     "seconds": 15.74,
     "frames_outside_joint_limits": 0.102,
     "max_joint_speed_rad_s": 21.46,
@@ -273,7 +273,7 @@
     ]
   },
   {
-    "motion": "../data/motions/vith/studio_dance_s2.npz",
+    "motion": "../data/motions/vith/studio_dance_s3.npz",
     "seconds": 15.74,
     "frames_outside_joint_limits": 0.132,
     "max_joint_speed_rad_s": 15.51,
@@ -299,7 +299,7 @@
     ]
   },
   {
-    "motion": "../data/motions/vith/tennis_s1.npz",
+    "motion": "../data/motions/vith/tennis_s2.npz",
     "seconds": 10.44,
     "frames_outside_joint_limits": 0.044,
     "max_joint_speed_rad_s": 44.42,
@@ -312,7 +312,7 @@
     ]
   },
   {
-    "motion": "../data/motions/vith/tennis_s2.npz",
+    "motion": "../data/motions/vith/tennis_s3.npz",
     "seconds": 10.44,
     "frames_outside_joint_limits": 0.113,
     "max_joint_speed_rad_s": 50.13,

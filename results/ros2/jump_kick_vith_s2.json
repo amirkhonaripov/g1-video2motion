@@ -1,6 +1,6 @@
 {
   "summary": {
-    "policy": "jump_kick_s1_vith",
+    "policy": "jump_kick_vith_s2",
     "runs": 10,
     "startup_drops": 0,
     "invalid_recordings": 0,
@@ -35,43 +35,7 @@
   },
   "runs": [
     {
-      "run": "runs/npz/ros2_routes/jump_kick_s1_vith_r10.npz",
-      "policy_start_s": 0.222,
-      "start_method": "sim_log",
-      "first_joint_sample_s": 0.192,
-      "start_lag_s": 0.03,
-      "motion_s": 2.2,
-      "covered_s": 2.2,
-      "complete": true,
-      "startup_drop": false,
-      "invalid_recording": false,
-      "tracking_failure": false,
-      "tracking_failure_time_s": null,
-      "tracking_failure_reason": "",
-      "success": true,
-      "success_strict": false,
-      "fell": false,
-      "fell_time_s": null,
-      "fell_after_motion": true,
-      "fell_after_motion_time_s": 3.52,
-      "mpkpe_m": 0.1901,
-      "max_mpkpe_m": 0.3293,
-      "r_mpkpe_m": 0.0497,
-      "max_r_mpkpe_m": 0.0824,
-      "joint_mae_rad": 0.1103,
-      "joint_max_frame_mae_rad": 0.3101,
-      "pre_failure_mpkpe_m": 0.1901,
-      "pre_failure_r_mpkpe_m": 0.0497,
-      "pre_failure_joint_mae_rad": 0.1103,
-      "drift_mean_m": 0.172,
-      "drift_max_m": 0.311,
-      "est_frame_drift_mean_m": 0.224,
-      "est_frame_drift_max_m": 0.392,
-      "estimator_gap_max_m": 0.254,
-      "min_head_height_m": 0.966
-    },
-    {
-      "run": "runs/npz/ros2_routes/jump_kick_s1_vith_r1.npz",
+      "run": "runs/bags/jump_kick_vith_s2_r1/",
       "policy_start_s": 0.14,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.116,
@@ -107,7 +71,43 @@
       "min_head_height_m": 0.971
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_s1_vith_r2.npz",
+      "run": "runs/bags/jump_kick_vith_s2_r10/",
+      "policy_start_s": 0.222,
+      "start_method": "sim_log",
+      "first_joint_sample_s": 0.192,
+      "start_lag_s": 0.03,
+      "motion_s": 2.2,
+      "covered_s": 2.2,
+      "complete": true,
+      "startup_drop": false,
+      "invalid_recording": false,
+      "tracking_failure": false,
+      "tracking_failure_time_s": null,
+      "tracking_failure_reason": "",
+      "success": true,
+      "success_strict": false,
+      "fell": false,
+      "fell_time_s": null,
+      "fell_after_motion": true,
+      "fell_after_motion_time_s": 3.52,
+      "mpkpe_m": 0.1901,
+      "max_mpkpe_m": 0.3293,
+      "r_mpkpe_m": 0.0497,
+      "max_r_mpkpe_m": 0.0824,
+      "joint_mae_rad": 0.1103,
+      "joint_max_frame_mae_rad": 0.3101,
+      "pre_failure_mpkpe_m": 0.1901,
+      "pre_failure_r_mpkpe_m": 0.0497,
+      "pre_failure_joint_mae_rad": 0.1103,
+      "drift_mean_m": 0.172,
+      "drift_max_m": 0.311,
+      "est_frame_drift_mean_m": 0.224,
+      "est_frame_drift_max_m": 0.392,
+      "estimator_gap_max_m": 0.254,
+      "min_head_height_m": 0.966
+    },
+    {
+      "run": "runs/bags/jump_kick_vith_s2_r2/",
       "policy_start_s": 0.157,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.126,
@@ -143,7 +143,7 @@
       "min_head_height_m": 0.971
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_s1_vith_r3.npz",
+      "run": "runs/bags/jump_kick_vith_s2_r3/",
       "policy_start_s": 0.457,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.426,
@@ -179,7 +179,7 @@
       "min_head_height_m": 0.953
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_s1_vith_r4.npz",
+      "run": "runs/bags/jump_kick_vith_s2_r4/",
       "policy_start_s": 0.754,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.72,
@@ -215,7 +215,7 @@
       "min_head_height_m": 0.073
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_s1_vith_r5.npz",
+      "run": "runs/bags/jump_kick_vith_s2_r5/",
       "policy_start_s": 0.742,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.714,
@@ -251,7 +251,7 @@
       "min_head_height_m": 0.076
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_s1_vith_r6.npz",
+      "run": "runs/bags/jump_kick_vith_s2_r6/",
       "policy_start_s": 0.711,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.674,
@@ -287,7 +287,7 @@
       "min_head_height_m": 0.977
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_s1_vith_r7.npz",
+      "run": "runs/bags/jump_kick_vith_s2_r7/",
       "policy_start_s": 0.129,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.094,
@@ -323,7 +323,7 @@
       "min_head_height_m": 0.971
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_s1_vith_r8.npz",
+      "run": "runs/bags/jump_kick_vith_s2_r8/",
       "policy_start_s": 0.179,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.138,
@@ -359,7 +359,7 @@
       "min_head_height_m": 0.971
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_s1_vith_r9.npz",
+      "run": "runs/bags/jump_kick_vith_s2_r9/",
       "policy_start_s": 0.692,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.656,

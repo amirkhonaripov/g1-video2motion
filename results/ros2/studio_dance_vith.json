@@ -35,43 +35,7 @@
   },
   "runs": [
     {
-      "run": "runs/npz/ros2_routes/studio_dance_vith_r10.npz",
-      "policy_start_s": 0.256,
-      "start_method": "sim_log",
-      "first_joint_sample_s": 0.228,
-      "start_lag_s": 0.028,
-      "motion_s": 15.72,
-      "covered_s": 15.72,
-      "complete": true,
-      "startup_drop": false,
-      "invalid_recording": false,
-      "tracking_failure": false,
-      "tracking_failure_time_s": null,
-      "tracking_failure_reason": "",
-      "success": true,
-      "success_strict": false,
-      "fell": false,
-      "fell_time_s": null,
-      "fell_after_motion": true,
-      "fell_after_motion_time_s": 17.07,
-      "mpkpe_m": 0.1903,
-      "max_mpkpe_m": 0.2676,
-      "r_mpkpe_m": 0.0657,
-      "max_r_mpkpe_m": 0.1493,
-      "joint_mae_rad": 0.0958,
-      "joint_max_frame_mae_rad": 0.2649,
-      "pre_failure_mpkpe_m": 0.1903,
-      "pre_failure_r_mpkpe_m": 0.0657,
-      "pre_failure_joint_mae_rad": 0.0958,
-      "drift_mean_m": 0.173,
-      "drift_max_m": 0.217,
-      "est_frame_drift_mean_m": 0.194,
-      "est_frame_drift_max_m": 0.286,
-      "estimator_gap_max_m": 0.36,
-      "min_head_height_m": 1.006
-    },
-    {
-      "run": "runs/npz/ros2_routes/studio_dance_vith_r1.npz",
+      "run": "runs/bags/studio_dance_vith_r1/",
       "policy_start_s": 0.213,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.184,
@@ -107,7 +71,43 @@
       "min_head_height_m": 1.005
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_vith_r2.npz",
+      "run": "runs/bags/studio_dance_vith_r10/",
+      "policy_start_s": 0.256,
+      "start_method": "sim_log",
+      "first_joint_sample_s": 0.228,
+      "start_lag_s": 0.028,
+      "motion_s": 15.72,
+      "covered_s": 15.72,
+      "complete": true,
+      "startup_drop": false,
+      "invalid_recording": false,
+      "tracking_failure": false,
+      "tracking_failure_time_s": null,
+      "tracking_failure_reason": "",
+      "success": true,
+      "success_strict": false,
+      "fell": false,
+      "fell_time_s": null,
+      "fell_after_motion": true,
+      "fell_after_motion_time_s": 17.07,
+      "mpkpe_m": 0.1903,
+      "max_mpkpe_m": 0.2676,
+      "r_mpkpe_m": 0.0657,
+      "max_r_mpkpe_m": 0.1493,
+      "joint_mae_rad": 0.0958,
+      "joint_max_frame_mae_rad": 0.2649,
+      "pre_failure_mpkpe_m": 0.1903,
+      "pre_failure_r_mpkpe_m": 0.0657,
+      "pre_failure_joint_mae_rad": 0.0958,
+      "drift_mean_m": 0.173,
+      "drift_max_m": 0.217,
+      "est_frame_drift_mean_m": 0.194,
+      "est_frame_drift_max_m": 0.286,
+      "estimator_gap_max_m": 0.36,
+      "min_head_height_m": 1.006
+    },
+    {
+      "run": "runs/bags/studio_dance_vith_r2/",
       "policy_start_s": 0.109,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.06,
@@ -143,7 +143,7 @@
       "min_head_height_m": 1.005
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_vith_r3.npz",
+      "run": "runs/bags/studio_dance_vith_r3/",
       "policy_start_s": 0.696,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.572,
@@ -179,7 +179,7 @@
       "min_head_height_m": 1.005
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_vith_r4.npz",
+      "run": "runs/bags/studio_dance_vith_r4/",
       "policy_start_s": 0.133,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.08,
@@ -215,7 +215,7 @@
       "min_head_height_m": 1.005
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_vith_r5.npz",
+      "run": "runs/bags/studio_dance_vith_r5/",
       "policy_start_s": 0.175,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.13,
@@ -251,7 +251,7 @@
       "min_head_height_m": 1.005
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_vith_r6.npz",
+      "run": "runs/bags/studio_dance_vith_r6/",
       "policy_start_s": 0.242,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.206,
@@ -287,7 +287,7 @@
       "min_head_height_m": 1.006
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_vith_r7.npz",
+      "run": "runs/bags/studio_dance_vith_r7/",
       "policy_start_s": 0.134,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.094,
@@ -323,7 +323,7 @@
       "min_head_height_m": 1.005
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_vith_r8.npz",
+      "run": "runs/bags/studio_dance_vith_r8/",
       "policy_start_s": 0.342,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.298,
@@ -359,7 +359,7 @@
       "min_head_height_m": 1.006
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_vith_r9.npz",
+      "run": "runs/bags/studio_dance_vith_r9/",
       "policy_start_s": 0.612,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.58,

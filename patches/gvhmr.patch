@@ -1,0 +1,35 @@
+diff --git a/hmr4d/utils/body_model/body_model.py b/hmr4d/utils/body_model/body_model.py
+index 5f8ac47..112524e 100644
+--- a/hmr4d/utils/body_model/body_model.py
++++ b/hmr4d/utils/body_model/body_model.py
+@@ -1,4 +1,3 @@
+-from turtle import forward
+ import numpy as np
+ 
+ import torch
+diff --git a/hmr4d/utils/preproc/relpose/solver_two_view.py b/hmr4d/utils/preproc/relpose/solver_two_view.py
+index b11e7c6..fe1fc48 100644
+--- a/hmr4d/utils/preproc/relpose/solver_two_view.py
++++ b/hmr4d/utils/preproc/relpose/solver_two_view.py
+@@ -102,6 +102,8 @@ class PycolmapRansacTwoViewGeometrySolver:
+         )
+ 
+         # cam2_from_cam1 means T_0_to_1 in our language
++        if answer.cam2_from_cam1 is None:  # pycolmap>=3.12: no pose found -> no motion (old default)
++            return np.eye(4)
+         Rt = answer.cam2_from_cam1.matrix().astype(np.float32)  # shape (3, 4)
+         T = np.eye(4)
+         T[:3] = Rt
+diff --git a/tools/demo/demo.py b/tools/demo/demo.py
+index a10fb64..b5145ac 100644
+--- a/tools/demo/demo.py
++++ b/tools/demo/demo.py
+@@ -178,7 +178,7 @@ def load_data_dict(cfg):
+     if cfg.static_cam:
+         R_w2c = torch.eye(3).repeat(length, 1, 1)
+     else:
+-        traj = torch.load(cfg.paths.slam)
++        traj = torch.load(cfg.paths.slam, weights_only=False)  # own file, holds a numpy array
+         if cfg.use_dpvo:  # DPVO
+             traj_quat = torch.from_numpy(traj[:, [6, 3, 4, 5]])
+             R_w2c = quaternion_to_matrix(traj_quat).mT

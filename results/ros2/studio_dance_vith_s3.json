@@ -1,6 +1,6 @@
 {
   "summary": {
-    "policy": "studio_dance_s2_vith",
+    "policy": "studio_dance_vith_s3",
     "runs": 10,
     "startup_drops": 0,
     "invalid_recordings": 0,
@@ -35,43 +35,7 @@
   },
   "runs": [
     {
-      "run": "runs/npz/ros2_routes/studio_dance_s2_vith_r10.npz",
-      "policy_start_s": 0.547,
-      "start_method": "sim_log",
-      "first_joint_sample_s": 0.512,
-      "start_lag_s": 0.035,
-      "motion_s": 15.72,
-      "covered_s": 15.72,
-      "complete": true,
-      "startup_drop": false,
-      "invalid_recording": false,
-      "tracking_failure": false,
-      "tracking_failure_time_s": null,
-      "tracking_failure_reason": "",
-      "success": true,
-      "success_strict": false,
-      "fell": false,
-      "fell_time_s": null,
-      "fell_after_motion": true,
-      "fell_after_motion_time_s": 17.34,
-      "mpkpe_m": 0.1952,
-      "max_mpkpe_m": 0.3153,
-      "r_mpkpe_m": 0.0692,
-      "max_r_mpkpe_m": 0.1517,
-      "joint_mae_rad": 0.1029,
-      "joint_max_frame_mae_rad": 0.3111,
-      "pre_failure_mpkpe_m": 0.1952,
-      "pre_failure_r_mpkpe_m": 0.0692,
-      "pre_failure_joint_mae_rad": 0.1029,
-      "drift_mean_m": 0.179,
-      "drift_max_m": 0.293,
-      "est_frame_drift_mean_m": 0.172,
-      "est_frame_drift_max_m": 0.29,
-      "estimator_gap_max_m": 0.446,
-      "min_head_height_m": 1.005
-    },
-    {
-      "run": "runs/npz/ros2_routes/studio_dance_s2_vith_r1.npz",
+      "run": "runs/bags/studio_dance_vith_s3_r1/",
       "policy_start_s": 0.249,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.21,
@@ -107,7 +71,43 @@
       "min_head_height_m": 1.006
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_s2_vith_r2.npz",
+      "run": "runs/bags/studio_dance_vith_s3_r10/",
+      "policy_start_s": 0.547,
+      "start_method": "sim_log",
+      "first_joint_sample_s": 0.512,
+      "start_lag_s": 0.035,
+      "motion_s": 15.72,
+      "covered_s": 15.72,
+      "complete": true,
+      "startup_drop": false,
+      "invalid_recording": false,
+      "tracking_failure": false,
+      "tracking_failure_time_s": null,
+      "tracking_failure_reason": "",
+      "success": true,
+      "success_strict": false,
+      "fell": false,
+      "fell_time_s": null,
+      "fell_after_motion": true,
+      "fell_after_motion_time_s": 17.34,
+      "mpkpe_m": 0.1952,
+      "max_mpkpe_m": 0.3153,
+      "r_mpkpe_m": 0.0692,
+      "max_r_mpkpe_m": 0.1517,
+      "joint_mae_rad": 0.1029,
+      "joint_max_frame_mae_rad": 0.3111,
+      "pre_failure_mpkpe_m": 0.1952,
+      "pre_failure_r_mpkpe_m": 0.0692,
+      "pre_failure_joint_mae_rad": 0.1029,
+      "drift_mean_m": 0.179,
+      "drift_max_m": 0.293,
+      "est_frame_drift_mean_m": 0.172,
+      "est_frame_drift_max_m": 0.29,
+      "estimator_gap_max_m": 0.446,
+      "min_head_height_m": 1.005
+    },
+    {
+      "run": "runs/bags/studio_dance_vith_s3_r2/",
       "policy_start_s": 0.701,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.666,
@@ -143,7 +143,7 @@
       "min_head_height_m": 0.98
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_s2_vith_r3.npz",
+      "run": "runs/bags/studio_dance_vith_s3_r3/",
       "policy_start_s": 0.075,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.036,
@@ -179,7 +179,7 @@
       "min_head_height_m": 1.002
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_s2_vith_r4.npz",
+      "run": "runs/bags/studio_dance_vith_s3_r4/",
       "policy_start_s": 0.642,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.608,
@@ -215,7 +215,7 @@
       "min_head_height_m": 0.996
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_s2_vith_r5.npz",
+      "run": "runs/bags/studio_dance_vith_s3_r5/",
       "policy_start_s": 0.039,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.004,
@@ -251,7 +251,7 @@
       "min_head_height_m": 1.003
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_s2_vith_r6.npz",
+      "run": "runs/bags/studio_dance_vith_s3_r6/",
       "policy_start_s": 0.146,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.11,
@@ -287,7 +287,7 @@
       "min_head_height_m": 1.003
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_s2_vith_r7.npz",
+      "run": "runs/bags/studio_dance_vith_s3_r7/",
       "policy_start_s": 0.303,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.268,
@@ -323,7 +323,7 @@
       "min_head_height_m": 1.007
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_s2_vith_r8.npz",
+      "run": "runs/bags/studio_dance_vith_s3_r8/",
       "policy_start_s": 0.036,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.004,
@@ -359,7 +359,7 @@
       "min_head_height_m": 1.003
     },
     {
-      "run": "runs/npz/ros2_routes/studio_dance_s2_vith_r9.npz",
+      "run": "runs/bags/studio_dance_vith_s3_r9/",
       "policy_start_s": 0.179,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.146,

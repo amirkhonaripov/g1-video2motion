@@ -35,43 +35,7 @@
   },
   "runs": [
     {
-      "run": "runs/npz/ros2_routes/hiphop_back_gmr_r10.npz",
-      "policy_start_s": 0.259,
-      "start_method": "sim_log",
-      "first_joint_sample_s": 0.228,
-      "start_lag_s": 0.031,
-      "motion_s": 6.8,
-      "covered_s": 6.8,
-      "complete": true,
-      "startup_drop": false,
-      "invalid_recording": false,
-      "tracking_failure": false,
-      "tracking_failure_time_s": null,
-      "tracking_failure_reason": "",
-      "success": true,
-      "success_strict": false,
-      "fell": false,
-      "fell_time_s": null,
-      "fell_after_motion": true,
-      "fell_after_motion_time_s": 7.81,
-      "mpkpe_m": 0.1827,
-      "max_mpkpe_m": 0.315,
-      "r_mpkpe_m": 0.0921,
-      "max_r_mpkpe_m": 0.2588,
-      "joint_mae_rad": 0.0905,
-      "joint_max_frame_mae_rad": 0.3358,
-      "pre_failure_mpkpe_m": 0.1827,
-      "pre_failure_r_mpkpe_m": 0.0921,
-      "pre_failure_joint_mae_rad": 0.0905,
-      "drift_mean_m": 0.14,
-      "drift_max_m": 0.246,
-      "est_frame_drift_mean_m": 0.135,
-      "est_frame_drift_max_m": 0.233,
-      "estimator_gap_max_m": 0.129,
-      "min_head_height_m": 1.225
-    },
-    {
-      "run": "runs/npz/ros2_routes/hiphop_back_gmr_r1.npz",
+      "run": "runs/bags/hiphop_back_gmr_r1/",
       "policy_start_s": 0.101,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.046,
@@ -107,7 +71,43 @@
       "min_head_height_m": 1.187
     },
     {
-      "run": "runs/npz/ros2_routes/hiphop_back_gmr_r2.npz",
+      "run": "runs/bags/hiphop_back_gmr_r10/",
+      "policy_start_s": 0.259,
+      "start_method": "sim_log",
+      "first_joint_sample_s": 0.228,
+      "start_lag_s": 0.031,
+      "motion_s": 6.8,
+      "covered_s": 6.8,
+      "complete": true,
+      "startup_drop": false,
+      "invalid_recording": false,
+      "tracking_failure": false,
+      "tracking_failure_time_s": null,
+      "tracking_failure_reason": "",
+      "success": true,
+      "success_strict": false,
+      "fell": false,
+      "fell_time_s": null,
+      "fell_after_motion": true,
+      "fell_after_motion_time_s": 7.81,
+      "mpkpe_m": 0.1827,
+      "max_mpkpe_m": 0.315,
+      "r_mpkpe_m": 0.0921,
+      "max_r_mpkpe_m": 0.2588,
+      "joint_mae_rad": 0.0905,
+      "joint_max_frame_mae_rad": 0.3358,
+      "pre_failure_mpkpe_m": 0.1827,
+      "pre_failure_r_mpkpe_m": 0.0921,
+      "pre_failure_joint_mae_rad": 0.0905,
+      "drift_mean_m": 0.14,
+      "drift_max_m": 0.246,
+      "est_frame_drift_mean_m": 0.135,
+      "est_frame_drift_max_m": 0.233,
+      "estimator_gap_max_m": 0.129,
+      "min_head_height_m": 1.225
+    },
+    {
+      "run": "runs/bags/hiphop_back_gmr_r2/",
       "policy_start_s": 0.125,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.082,
@@ -143,7 +143,7 @@
       "min_head_height_m": 1.194
     },
     {
-      "run": "runs/npz/ros2_routes/hiphop_back_gmr_r3.npz",
+      "run": "runs/bags/hiphop_back_gmr_r3/",
       "policy_start_s": 0.435,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.382,
@@ -179,7 +179,7 @@
       "min_head_height_m": 1.222
     },
     {
-      "run": "runs/npz/ros2_routes/hiphop_back_gmr_r4.npz",
+      "run": "runs/bags/hiphop_back_gmr_r4/",
       "policy_start_s": 0.252,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.206,
@@ -215,7 +215,7 @@
       "min_head_height_m": 1.224
     },
     {
-      "run": "runs/npz/ros2_routes/hiphop_back_gmr_r5.npz",
+      "run": "runs/bags/hiphop_back_gmr_r5/",
       "policy_start_s": 0.359,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.316,
@@ -251,7 +251,7 @@
       "min_head_height_m": 1.223
     },
     {
-      "run": "runs/npz/ros2_routes/hiphop_back_gmr_r6.npz",
+      "run": "runs/bags/hiphop_back_gmr_r6/",
       "policy_start_s": 0.218,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.184,
@@ -287,7 +287,7 @@
       "min_head_height_m": 1.224
     },
     {
-      "run": "runs/npz/ros2_routes/hiphop_back_gmr_r7.npz",
+      "run": "runs/bags/hiphop_back_gmr_r7/",
       "policy_start_s": 0.239,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.2,
@@ -323,7 +323,7 @@
       "min_head_height_m": 1.224
     },
     {
-      "run": "runs/npz/ros2_routes/hiphop_back_gmr_r8.npz",
+      "run": "runs/bags/hiphop_back_gmr_r8/",
       "policy_start_s": 0.04,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.004,
@@ -359,7 +359,7 @@
       "min_head_height_m": 1.188
     },
     {
-      "run": "runs/npz/ros2_routes/hiphop_back_gmr_r9.npz",
+      "run": "runs/bags/hiphop_back_gmr_r9/",
       "policy_start_s": 0.13,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.092,

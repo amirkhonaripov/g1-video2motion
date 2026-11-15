@@ -35,43 +35,7 @@
   },
   "runs": [
     {
-      "run": "runs/npz/ros2_routes/jump_kick_vith_18500_r10.npz",
-      "policy_start_s": 0.257,
-      "start_method": "sim_log",
-      "first_joint_sample_s": 0.226,
-      "start_lag_s": 0.031,
-      "motion_s": 2.2,
-      "covered_s": 2.2,
-      "complete": true,
-      "startup_drop": false,
-      "invalid_recording": false,
-      "tracking_failure": false,
-      "tracking_failure_time_s": null,
-      "tracking_failure_reason": "",
-      "success": true,
-      "success_strict": false,
-      "fell": false,
-      "fell_time_s": null,
-      "fell_after_motion": true,
-      "fell_after_motion_time_s": 3.48,
-      "mpkpe_m": 0.0988,
-      "max_mpkpe_m": 0.1632,
-      "r_mpkpe_m": 0.0443,
-      "max_r_mpkpe_m": 0.0883,
-      "joint_mae_rad": 0.0889,
-      "joint_max_frame_mae_rad": 0.3033,
-      "pre_failure_mpkpe_m": 0.0988,
-      "pre_failure_r_mpkpe_m": 0.0443,
-      "pre_failure_joint_mae_rad": 0.0889,
-      "drift_mean_m": 0.082,
-      "drift_max_m": 0.171,
-      "est_frame_drift_mean_m": 0.049,
-      "est_frame_drift_max_m": 0.122,
-      "estimator_gap_max_m": 0.249,
-      "min_head_height_m": 0.955
-    },
-    {
-      "run": "runs/npz/ros2_routes/jump_kick_vith_18500_r1.npz",
+      "run": "runs/bags/jump_kick_vith_18500_r1/",
       "policy_start_s": 0.18,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.136,
@@ -107,7 +71,43 @@
       "min_head_height_m": 0.952
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_vith_18500_r2.npz",
+      "run": "runs/bags/jump_kick_vith_18500_r10/",
+      "policy_start_s": 0.257,
+      "start_method": "sim_log",
+      "first_joint_sample_s": 0.226,
+      "start_lag_s": 0.031,
+      "motion_s": 2.2,
+      "covered_s": 2.2,
+      "complete": true,
+      "startup_drop": false,
+      "invalid_recording": false,
+      "tracking_failure": false,
+      "tracking_failure_time_s": null,
+      "tracking_failure_reason": "",
+      "success": true,
+      "success_strict": false,
+      "fell": false,
+      "fell_time_s": null,
+      "fell_after_motion": true,
+      "fell_after_motion_time_s": 3.48,
+      "mpkpe_m": 0.0988,
+      "max_mpkpe_m": 0.1632,
+      "r_mpkpe_m": 0.0443,
+      "max_r_mpkpe_m": 0.0883,
+      "joint_mae_rad": 0.0889,
+      "joint_max_frame_mae_rad": 0.3033,
+      "pre_failure_mpkpe_m": 0.0988,
+      "pre_failure_r_mpkpe_m": 0.0443,
+      "pre_failure_joint_mae_rad": 0.0889,
+      "drift_mean_m": 0.082,
+      "drift_max_m": 0.171,
+      "est_frame_drift_mean_m": 0.049,
+      "est_frame_drift_max_m": 0.122,
+      "estimator_gap_max_m": 0.249,
+      "min_head_height_m": 0.955
+    },
+    {
+      "run": "runs/bags/jump_kick_vith_18500_r2/",
       "policy_start_s": 0.161,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.118,
@@ -143,7 +143,7 @@
       "min_head_height_m": 0.953
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_vith_18500_r3.npz",
+      "run": "runs/bags/jump_kick_vith_18500_r3/",
       "policy_start_s": 0.56,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.532,
@@ -179,7 +179,7 @@
       "min_head_height_m": 0.97
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_vith_18500_r4.npz",
+      "run": "runs/bags/jump_kick_vith_18500_r4/",
       "policy_start_s": 0.32,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.276,
@@ -215,7 +215,7 @@
       "min_head_height_m": 0.958
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_vith_18500_r5.npz",
+      "run": "runs/bags/jump_kick_vith_18500_r5/",
       "policy_start_s": 0.234,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.198,
@@ -251,7 +251,7 @@
       "min_head_height_m": 0.949
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_vith_18500_r6.npz",
+      "run": "runs/bags/jump_kick_vith_18500_r6/",
       "policy_start_s": 0.293,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.26,
@@ -287,7 +287,7 @@
       "min_head_height_m": 0.955
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_vith_18500_r7.npz",
+      "run": "runs/bags/jump_kick_vith_18500_r7/",
       "policy_start_s": 0.173,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.134,
@@ -323,7 +323,7 @@
       "min_head_height_m": 0.953
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_vith_18500_r8.npz",
+      "run": "runs/bags/jump_kick_vith_18500_r8/",
       "policy_start_s": 0.153,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.114,
@@ -359,7 +359,7 @@
       "min_head_height_m": 0.952
     },
     {
-      "run": "runs/npz/ros2_routes/jump_kick_vith_18500_r9.npz",
+      "run": "runs/bags/jump_kick_vith_18500_r9/",
       "policy_start_s": 0.175,
       "start_method": "sim_log",
       "first_joint_sample_s": 0.136,
